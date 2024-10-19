@@ -1,83 +1,95 @@
-# Cross-Platform Identity Authentication and End-to-End Encrypted Communication Technology Based on DID
+# Agent Connect
+[中文版本](README.cn.md)
+## What is Agent Connect
 
-**Author**: Chang Gaowei  
-**Email**: chgaowei@gmail.com  
-**Website**: [pi-unlimited.com](http://pi-unlimited.com)  
-**中文版本**: [中文版本readme](https://github.com/chgaowei/didall/blob/main/README.cn.md)  
+Our vision is to provide communication capabilities for intelligent agents, allowing them to connect with each other to form a collaborative network of intelligent agents. Intelligent agents are the next generation of platforms following personal computers and mobile devices, and most current intelligent agents are designed primarily for interaction with humans. We believe that in the future, there will be billions of intelligent agents, most of which will not interact directly with humans but will collaborate with other intelligent agents to complete tasks. 
 
-## Abstract
+To enable communication and collaboration between intelligent agents, two major issues need to be addressed: how to perform identity verification and how to achieve encrypted communication. This is the problem our project aims to solve.
 
-We are dedicated to providing communication capabilities for AI Agents, connecting all Agents into a collaborative network.
-This project is an open-source SDK implementation based on Decentralized Identifier (DID) and end-to-end encrypted communication technology. For technical details, please refer to the [Technical White Paper: A Cross-Platform Identity Authentication and End-to-End Encrypted Communication Technology Based on DID](https://egp0uc2jnx.feishu.cn/wiki/WMLswhdEUiXzB1kMk54cfFcan2f?from=from_copylink).
-With the didall open-source project, any intelligent agent can generate its own DID, locate others based on their DIDs, perform identity authentication, and engage in secure end-to-end encrypted communication.
+For intelligent agents, the mainstream identity authentication solutions on the current internet have two fatal flaws: they are not cross-platform and are costly. Some new technologies, such as those based on blockchain, perfectly solve the issues of centralization and cross-platform compatibility, but due to the scalability issues of blockchain technology, they are currently difficult to apply on a large scale.
 
-## Features
+We propose an intelligent agent protocol solution based on the latest W3C DID specifications, combined with blockchain technology and end-to-end encrypted communication technology, providing a brand new identity authentication and encrypted communication solution for intelligent agents. This solution allows intelligent agents to control their own identity identifiers and perform identity authentication and encrypted communication with any other intelligent agent.
 
-- **Cross-platform identity authentication**: Achieve identity interoperability across different platforms through DID.
-- **End-to-end encrypted communication**: Use ECDHE for ephemeral key exchange to ensure the security of communication.
-- **Efficient and secure**: Simplifies the identity verification process while ensuring the confidentiality and integrity of data.
+For more detailed information about our solution, please read: [AgentConnect Technical Documentation](https://egp0uc2jnx.feishu.cn/wiki/OBrswO6Umi1k5hkpSWfcsVJVnpd?from=from_copylink)
 
-### Installation
+Welcome to contact us to discuss the future of the intelligent agent collaborative network:
+- email: chgaowei@gmail.com
+- Discord: [https://discord.gg/CDYdTPXXMB](https://discord.gg/CDYdTPXXMB)  
+- Official Website: [https://pi-unlimited.com](https://pi-unlimited.com)  
 
-The latest version has been removed from PyPI, so you can install it directly:
+## Milestones
+
+- [x] Initial version development completed, supporting single-node and hosted modes
+- [ ] Support more message formats: files (images, videos, audio), live broadcasts, real-time communication (RTC), financial transactions, etc.
+- [ ] The core connection protocol uses binary instead of the current json format to improve transmission efficiency
+- [ ] Rewrite AgentConnect in Rust to improve performance and support more platforms: macOS, Linux, iOS, Android
+- [ ] Support more encryption algorithms
+- [ ] Explore fully blockchain-based solutions
+
+## Installation
+
+The latest version has been removed from pypi, so you can install it directly:
 
 ```bash
-pip install didall
+pip install agent-connect
 ```
 
-### Usage
+### Run
 
-After installing the didall library, you can run our demo to experience the powerful features of didall. We currently offer two modes: hosted mode and single node mode.
+After installing the agent-connect library, you can run our demo to experience the powerful functions of agent-connect. We currently provide two modes: single-node mode and hosted mode.
 
-#### Hosted Mode
-In hosted mode, we provide a DID server where all DID information is registered, and communication is conducted through the DID server.
+#### Single-node mode
 
-You can run the sample code in the examples directory to first generate Alice and Bob's DID files, save Alice's DID file to the DID server, and then Bob can connect to Alice's DID to establish end-to-end encrypted communication.
+In single-node mode, you do not need any other third-party services to complete DID identity verification and encrypted communication.
 
-1. Generate two DID documents, alice.json and bob.json, save them to the specified files, and register them with the DID server:
+You can run the simple_node code in the examples directory. First, start alice's node, then start bob's node. Bob's node will request alice's DID document from alice's node according to alice's DID, and establish an encrypted connection channel with alice based on the public key and message service address in the DID document. Then, bob sends an encrypted message to alice. After receiving the message, alice decrypts it and sends an encrypted message back to bob.
+
+1. Start alice's node
+```bash
+python simple_node_alice.py
+```
+
+2. Start bob's node
+```bash
+python simple_node_bob.py
+``` 
+
+#### Hosted mode
+
+In hosted mode, we provide a did server, which is used to host users' did documents and forward messages between different dids.
+
+You can run the sample code in the examples directory. First, generate the did documents for alice and bob, and save alice's did document to the did server. Then, bob can connect to alice's did and perform end-to-end encrypted communication.
+
+1. Generate two did documents alice.json and bob.json, save them to the specified files, and register them to the did server
 ```bash
 python sample_did.py alice.json
 python sample_did.py bob.json
 ```
 
-2. Start Alice's demo:
+2. Start alice's demo
 ```bash
 python sample_alice.py alice.json
 ```
 
-3. Start Bob's demo:
+3. Start bob's demo
 ```bash
 python sample_bob.py bob.json
 ```
 
-By checking the logs, you can see that Alice and Bob have successfully connected and engaged in end-to-end encrypted communication.
+You can see from the logs that alice and bob successfully connected and performed end-to-end encrypted communication.
 
-#### Single Node Mode
-In single node mode, you don't need any third-party services to complete DID-based identity verification and encrypted communication.
+## Contribution
 
-You can run the simple_node code in the examples directory, first start Alice's node, and then start Bob's node to complete identity verification and encrypted communication.
-
-1. Start Alice's node:
-```bash
-python simple_node_alice.py
-```
-
-2. Start Bob's node:
-```bash
-python simple_node_bob.py
-```
-
-## Contributing
-
-Contributions to this project are welcome. Please read the contribution guidelines before submitting a pull request.
+Welcome to contribute to this project, and welcome to contact us to discuss the future of the intelligent agent collaborative network. It is best to communicate with us in the discord group before contributing to avoid duplicate work.
 
 ## License
     
-This project is open-sourced under the MIT License. For more details, please refer to the LICENSE file.
+This project is open source under the MIT license. For more information, please see the LICENSE file.
 
-## Packaging and Uploading (update the version number in setup.py first)
+## Package upload (first change the version number in setup.py)
 
 ```bash
 python setup.py sdist bdist_wheel 
 twine upload dist/*        
 ```
+
