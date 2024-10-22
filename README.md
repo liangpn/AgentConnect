@@ -21,6 +21,7 @@ Welcome to contact us to discuss the future of the intelligent agent collaborati
 
 - [x] Initial version development completed, supporting single-node and hosted modes
 - [ ] Support more message formats: files (images, videos, audio), live broadcasts, real-time communication (RTC), financial transactions, etc.
+- [ ] Compatible with DID web methods
 - [ ] The core connection protocol uses binary instead of the current json format to improve transmission efficiency
 - [ ] Rewrite AgentConnect in Rust to improve performance and support more platforms: macOS, Linux, iOS, Android
 - [ ] Support more encryption algorithms
