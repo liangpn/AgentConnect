@@ -18,11 +18,11 @@ Welcome to contact us to discuss the future of the intelligent agent collaborati
 - Official Website: [https://pi-unlimited.com](https://pi-unlimited.com)  
 
 ## Milestones
-
 - [x] Initial version development completed, supporting single-node and hosted modes
-- [ ] Support more message formats: files (images, videos, audio), live broadcasts, real-time communication (RTC), financial transactions, etc.
-- [ ] Compatible with DID web methods
-- [ ] The core connection protocol uses binary instead of the current json format to improve transmission efficiency
+- [ ] Support more data formats: files (images, videos, audio), live broadcasts, real-time communication (RTC), etc.
+- [ ] Design and implement a meta-protocol for collaboration between intelligent agents based on the Agent Network Protocol, layer 0 protocol
+- [ ] Compatible with DID web methods, W3C Verifiable Credentials (VC), supporting financial transactions between DIDs
+- [ ] The core connection protocol uses binary instead of the current JSON format to improve transmission efficiency
 - [ ] Rewrite AgentConnect in Rust to improve performance and support more platforms: macOS, Linux, iOS, Android
 - [ ] Support more encryption algorithms
 - [ ] Explore fully blockchain-based solutions
