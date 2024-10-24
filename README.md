@@ -8,9 +8,9 @@ To enable communication and collaboration between intelligent agents, two major 
 
 For intelligent agents, the mainstream identity authentication solutions on the current internet have two fatal flaws: they are not cross-platform and are costly. Some new technologies, such as those based on blockchain, perfectly solve the issues of centralization and cross-platform compatibility, but due to the scalability issues of blockchain technology, they are currently difficult to apply on a large scale.
 
-We have designed a brand new protocol: the **Agent Network Protocol**, based on the latest W3C DID specifications, combined with blockchain technology and end-to-end encrypted communication technology. This provides a novel identity authentication and encrypted communication solution for intelligent agents, enabling them to control their own identity identifiers and perform identity authentication and encrypted communication with any other intelligent agent.
+We have designed a brand new **Agent Network Protocol**, based on the latest W3C DID specifications, combined with blockchain technology and end-to-end encrypted communication technology. This protocol provides a novel identity authentication and encrypted communication solution for intelligent agents, enabling them to control their own identity identifiers and perform identity authentication and encrypted communication with any other intelligent agent. Agent Connect is an open-source implementation based on the Agent Network Protocol.
 
-For more detailed information about our solution, please read: [AgentConnect Technical Documentation](https://egp0uc2jnx.feishu.cn/wiki/OBrswO6Umi1k5hkpSWfcsVJVnpd?from=from_copylink)
+For more detailed information about our solution, please visit the Agent Network Protocol GitHub page: [https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
 
 Welcome to contact us to discuss the future of the intelligent agent collaborative network:
 - email: chgaowei@gmail.com

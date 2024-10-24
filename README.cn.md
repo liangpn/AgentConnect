@@ -8,9 +8,9 @@
 
 对于智能体来说，当前互联网的主流身份认证方案存在两个致命的问题：无法跨平台、成本较高。新型的一些技术比如基于区块链的方案，虽然完美的解决了中心化和跨平台的问题，但是受限于区块链技术扩展性问题，当下难以大规模应用。
 
-对此，我们设计了一个全新的 **智能体网络协议（Agent Network Protocol）**，基于W3C最新发布的DID规范，结合区块链技术和端到端加密通信技术，为智能体提供了一种全新的身份认证和加密通信解决方案，它能够让智能体控制自己的身份标识，并且和任意其他智能体进行身份认证和加密通信。
+对此，我们设计了一个全新的 **智能体网络协议（Agent Network Protocol）**，基于W3C最新发布的DID规范，结合区块链技术和端到端加密通信技术，为智能体提供了一种全新的身份认证和加密通信解决方案，它能够让智能体控制自己的身份标识，并且和任意其他智能体进行身份认证和加密通信。Agent Connect就是基于Agent Network Protocol的开源实现。
 
-关于我们方案更详细的资料，请阅读：[AgentConnect技术文档](https://egp0uc2jnx.feishu.cn/wiki/BqYiwiblRiu81FkQNUfcfaIwniK?from=from_copylink)
+关于我们方案更详细的资料，请访问Agent Network Protocol 的GitHub主页：[https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
 
 欢迎和我们联系，一起探讨智能体协作网络的未来：
 - email: chgaowei@gmail.com
