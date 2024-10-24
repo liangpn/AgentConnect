@@ -14,7 +14,7 @@ For more detailed information about our solution, please visit the Agent Network
 
 Welcome to contact us to discuss the future of the intelligent agent collaborative network:
 - email: chgaowei@gmail.com
-- Discord: [https://discord.gg/CDYdTPXXMB](https://discord.gg/CDYdTPXXMB)  
+- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
 - Official Website: [https://www.agent-network-protocol.com/](https://www.agent-network-protocol.com/)  
 
 ## Milestones

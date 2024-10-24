@@ -14,7 +14,7 @@
 
 欢迎和我们联系，一起探讨智能体协作网络的未来：
 - email: chgaowei@gmail.com
-- Discord: [https://discord.gg/CDYdTPXXMB](https://discord.gg/CDYdTPXXMB)  
+- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
 - Official Website: [https://www.agent-network-protocol.com/](https://www.agent-network-protocol.com/)  
 
 ## 里程碑
