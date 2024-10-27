@@ -39,7 +39,7 @@ class SimpleNode:
     def __init__(self, 
                  host_domain: str, 
                  host_port: str = "", 
-                 communication_wss_endpoint: str = "", 
+                 host_ws_path: str = "/ws",  # 默认WebSocket路径为/ws
                  private_key_pem: Optional[str] = None, 
                  did: Optional[str] = None, 
                  did_document_json: Optional[str] = None,
@@ -47,14 +47,15 @@ class SimpleNode:
                  ssl_key_path: Optional[str] = None):
         self.host_domain = host_domain
         self.host_port = host_port
+        self.host_ws_path = host_ws_path.strip()
+        if not self.host_ws_path.startswith('/'):
+            self.host_ws_path = '/' + self.host_ws_path
 
-        if communication_wss_endpoint:
-            self.communication_wss_endpoint = communication_wss_endpoint
-        else:
-            base_url = f"wss://{host_domain}"
-            if host_port:
-                base_url += f":{host_port}"
-            self.communication_wss_endpoint = f"{base_url}/ws"
+        # 构建完整的WebSocket URL
+        base_url = f"wss://{host_domain}"
+        if host_port:
+            base_url += f":{host_port}"
+        self.communication_wss_endpoint = f"{base_url}{self.host_ws_path}"
 
         self.private_key_pem = private_key_pem
         self.did = did
@@ -80,12 +81,8 @@ class SimpleNode:
         self.app.get("/v1/did/{did}")(self._get_did_document_by_did)
 
         # Set up WebSocket route
-        parsed_url = self.communication_wss_endpoint.split("://")[-1]
-        wss_host = parsed_url.split("/")[0]
-        wss_path = "/" + "/".join(parsed_url.split("/")[1:])
-        logging.info(f"WebSocket host: {wss_host}, path: {wss_path}")
-        
-        self.app.websocket(wss_path)(self._new_wss_server_session)
+        logging.info(f"Setting up WebSocket endpoint at path: {self.host_ws_path}")
+        self.app.websocket(self.host_ws_path)(self._new_wss_server_session)
 
     def run(self):
         """
@@ -403,3 +400,4 @@ class SimpleNode:
 # node = SimpleNode("localhost", 8000, "wss://example.com/ws")
 # node.generate_did_document()
 # node.run()
+

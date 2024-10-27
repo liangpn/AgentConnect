@@ -7,7 +7,6 @@ from agent_connect.simple_node import SimpleNode
 from agent_connect.utils.log_base import set_log_color_level
 
 def generate_did_info(bob_node: SimpleNode):
-
     # Check if bob.json exists
     if os.path.exists("bob.json"):
         print("Loading existing Bob DID information")
@@ -28,7 +27,12 @@ def generate_did_info(bob_node: SimpleNode):
             }, f)
 
 async def main():
-    bob_node = SimpleNode("localhost", "8001", "ws://localhost:8001/ws")
+    # 使用新的接口创建节点，只指定ws路径
+    bob_node = SimpleNode(
+        host_domain="localhost", 
+        host_port="8001",
+        host_ws_path="/ws"
+    )
     
     generate_did_info(bob_node)
 

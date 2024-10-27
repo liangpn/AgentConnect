@@ -28,7 +28,12 @@ def generate_did_info(alice_node: SimpleNode):
             }, f)
 
 async def main():
-    alice_node = SimpleNode("localhost", "8000", "ws://localhost:8000/ws")
+    # 使用新的接口创建节点，只指定ws路径
+    alice_node = SimpleNode(
+        host_domain="localhost", 
+        host_port="8000",
+        host_ws_path="/ws"
+    )
     generate_did_info(alice_node)
 
     print(f"Alice's DID: {alice_node.did}")
