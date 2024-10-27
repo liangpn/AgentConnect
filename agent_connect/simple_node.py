@@ -344,7 +344,7 @@ class SimpleNode:
             logging.error(f"Failed to establish session with target DID {destination_did}")
             return False
 
-    async def recv_message(self) -> Tuple[str, str]:
+    async def receive_message(self) -> Tuple[str, str]:
         """
         Receive messages from other DIDs.
 

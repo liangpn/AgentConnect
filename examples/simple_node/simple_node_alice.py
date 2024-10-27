@@ -44,7 +44,7 @@ async def main():
     try:
         while True:
             # Receive message
-            sender_did, message = await alice_node.recv_message()
+            sender_did, message = await alice_node.receive_message()
             print(f"Received message from {sender_did}: {message}")
             
             # Send reply

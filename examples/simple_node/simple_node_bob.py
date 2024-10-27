@@ -57,7 +57,7 @@ async def main():
         
         # Wait for Alice's reply
         while True:
-            sender_did, reply = await bob_node.recv_message()
+            sender_did, reply = await bob_node.receive_message()
             print(f"Received reply from {sender_did}: {reply}")
 
     except asyncio.CancelledError:
