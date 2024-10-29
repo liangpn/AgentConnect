@@ -1,96 +1,142 @@
 # Agent Connect
-[中文版本](README.cn.md)
+
+[Chinese Version](README.cn.md)
+
 ## What is Agent Connect
 
-Our vision is to provide communication capabilities for intelligent agents, allowing them to connect with each other to form a collaborative network of intelligent agents. Intelligent agents are the next generation of platforms following personal computers and mobile devices, and most current intelligent agents are designed primarily for interaction with humans. We believe that in the future, there will be billions of intelligent agents, most of which will not interact directly with humans but will collaborate with other intelligent agents to complete tasks. 
+Agent Connect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol).
 
-To enable communication and collaboration between intelligent agents, two major issues need to be addressed: how to perform identity verification and how to achieve encrypted communication. This is the problem our project aims to solve.
+## Vision
 
-For intelligent agents, the mainstream identity authentication solutions on the current internet have two fatal flaws: they are not cross-platform and are costly. Some new technologies, such as those based on blockchain, perfectly solve the issues of centralization and cross-platform compatibility, but due to the scalability issues of blockchain technology, they are currently difficult to apply on a large scale.
+In the new era of rapid AI development, we are entering a new epoch of agent networks. The Agent Network Protocol (ANP) will become the core technology of this era, building an open, secure, and efficient collaborative network for billions of agents.
 
-We have designed a brand new **Agent Network Protocol**, based on the latest W3C DID specifications, combined with blockchain technology and end-to-end encrypted communication technology. This protocol provides a novel identity authentication and encrypted communication solution for intelligent agents, enabling them to control their own identity identifiers and perform identity authentication and encrypted communication with any other intelligent agent. Agent Connect is an open-source implementation based on the Agent Network Protocol.
+The vision of the Agent Network Protocol (ANP) is to **define the way of connection in the era of agent networks**, just as the Internet Protocol has achieved in the information age. We believe that in the near future, billions of agents will build an unprecedented collaborative network through ANP, creating greater value than the existing Internet. With the support of ANP, the agent network will eventually evolve into a **self-organizing, self-negotiating** efficient collaborative network, which is an exciting future.
 
-For more detailed information about our solution, please visit the Agent Network Protocol GitHub page: [https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
+## Protocol Architecture
 
-Welcome to contact us to discuss the future of the intelligent agent collaborative network:
+The Agent Network Protocol (ANP) is designed as a three-layer architecture, from bottom to top: Identity and Encrypted Communication Layer, Meta-Protocol Layer, and Application Protocol Layer, as shown in the figure below:
+
+<p align="center">
+  <img src="/images/protocol-layer-design.png" width="50%" alt="Protocol Layer Design"/>
+</p>
+
+## AgentConnect Architecture
+
+The technical architecture of AgentConnect (https://github.com/chgaowei/AgentConnect) is shown in the figure below:
+
+<p align="center">
+  <img src="/images/agent-connect-architecture.png" width="50%" alt="Project Architecture"/>
+</p>
+
+Corresponding to the three-layer architecture of the Agent Network Protocol, AgentConnect mainly includes the following parts:
+
+1. **Identity Authentication Module and End-to-End Encryption Module**
+   Mainly implements identity authentication and end-to-end encrypted communication based on W3C DID, including the generation, verification, and retrieval of DID documents, as well as the implementation of end-to-end encrypted communication schemes based on DID and ECDHE (Elliptic Curve Diffie-Hellman Ephemeral).
+
+2. **Meta-Protocol Module**
+   The meta-protocol module needs to be implemented based on LLM (Large Language Model) and meta-protocol, mainly including application protocol negotiation, protocol code implementation, protocol debugging, and protocol processing based on the meta-protocol.
+
+3. **Application Layer Protocol Integration Framework**
+   The main purpose is to manage the protocol specification documents and protocol codes for communication with other agents, including application protocol loading, application protocol unloading, application protocol configuration, and application protocol processing. Using this framework, agents can easily and on-demand load the required ready-made protocols, speeding up the agent protocol negotiation process.
+
+In addition to the above functions, AgentConnect will also focus on performance and multi-platform support in the future:
+
+- **Performance**: As a basic code library, we hope to provide extreme performance, and the core part of the code will be rewritten in Rust in the future.
+- **Multi-Platform**: Currently supports mac, Linux, and Windows, and will support mobile and browser platforms in the future.
+
+## Contact Us
+
 - email: chgaowei@gmail.com
 - Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
 - Official Website: [https://www.agent-network-protocol.com/](https://www.agent-network-protocol.com/)  
 
 ## Milestones
-- [x] Initial version development completed, supporting single-node and hosted modes
-- [ ] Support more data formats: files (images, videos, audio), live broadcasts, real-time communication (RTC), etc.
-- [ ] Design and implement a meta-protocol for collaboration between intelligent agents based on the Agent Network Protocol, layer 0 protocol
-- [ ] Compatible with DID web methods, W3C Verifiable Credentials (VC), supporting financial transactions between DIDs
-- [ ] The core connection protocol uses binary instead of the current JSON format to improve transmission efficiency
+
+Whether it is the protocol or the open-source code implementation, we are advancing step by step in the following order:
+
+- Build the identity authentication and end-to-end encrypted communication protocol and implementation. This is the foundation and core of our entire project, and the current protocol design and code are basically complete.
+- Design and implement the meta-protocol and meta-protocol code. This will help the agent network evolve into a self-organizing, self-negotiating efficient collaborative network, which is what we are currently working on. This will be an exciting feature, and we expect to release the first version soon.
+- Develop the application layer protocol integration framework. This will help the Agent Network Protocol (ANP) provide services for agents in various scenarios.
+
+In addition, we will follow the principle of overall first, then details. In the early stages, we will focus on building the overall architecture, constructing an overall outline for each major module, and getting it up and running quickly, rather than building individual exquisite but non-functional modules.
+
+To promote the Agent Network Protocol (ANP) as an industry standard, we will form the ANP Standardization Committee at an appropriate time, dedicated to promoting ANP as an industry standard recognized by international standardization organizations such as W3C.
+
+Below are the current development features and progress of AgentConnect:
+
+- [x] Initial version development completed, supporting single-node mode and hosted mode
+- [ ] Replace the core connection protocol with a binary format instead of the current JSON format to improve transmission efficiency
+- [ ] Support more data formats: files (images, videos, audio), live streaming, real-time communication (RTC), etc.
+- [ ] Design and implement the meta-protocol and layer0 protocol for collaboration between agents based on the Agent Network Protocol
+- [ ] Compatible with DID web methods, W3C Verifiable Credentials (VC), and support transactions between DIDs
 - [ ] Rewrite AgentConnect in Rust to improve performance and support more platforms: macOS, Linux, iOS, Android
 - [ ] Support more encryption algorithms
-- [ ] Explore fully blockchain-based solutions
+- [ ] Explore a fully blockchain-based solution
 
 ## Installation
-
-The latest version has been removed from pypi, so you can install it directly:
 
 ```bash
 pip install agent-connect
 ```
 
-### Run
+### Running
 
-After installing the agent-connect library, you can run our demo to experience the powerful functions of agent-connect. We currently provide two modes: single-node mode and hosted mode.
+After installing the agent-connect library, you can run our demo to experience the powerful features of agent-connect. We currently provide two modes: single-node mode and hosted mode.
 
-#### Single-node mode
+#### Single-Node Mode
 
-In single-node mode, you do not need any other third-party services to complete DID identity verification and encrypted communication.
+In single-node mode, you can complete DID identity verification and encrypted communication without any third-party services.
 
-You can run the simple_node code in the examples directory. First, start alice's node, then start bob's node. Bob's node will request alice's DID document from alice's node according to alice's DID, and establish an encrypted connection channel with alice based on the public key and message service address in the DID document. Then, bob sends an encrypted message to alice. After receiving the message, alice decrypts it and sends an encrypted message back to bob.
+You can run the simple_node code in the examples directory. First start Alice's node, then start Bob's node. Bob's node will request Alice's DID document based on Alice's DID, and establish an encrypted connection channel with Alice based on the public key and message service address in the DID document, sending an encrypted message. When Alice's node receives the message, it will decrypt the message and send an encrypted message back to Bob.
 
-1. Start alice's node
+1. Start Alice's node
 ```bash
 python simple_node_alice.py
 ```
 
-2. Start bob's node
+2. Start Bob's node
 ```bash
 python simple_node_bob.py
 ``` 
 
-#### Hosted mode
+#### Hosted Mode
 
-In hosted mode, we provide a did server, which is used to host users' did documents and forward messages between different dids.
+In hosted mode, we provide a DID server to host user's DID documents and forward messages between different DIDs.
 
-You can run the sample code in the examples directory. First, generate the did documents for alice and bob, and save alice's did document to the did server. Then, bob can connect to alice's did and perform end-to-end encrypted communication.
+You can run the sample code in the examples directory. First generate the alice and bob's DID documents, and save alice's DID document to the DID server, then bob can connect to alice's DID for end-to-end encrypted communication.
 
-1. Generate two did documents alice.json and bob.json, save them to the specified files, and register them to the did server
+1. Generate two DID documents alice.json and bob.json, save them to the specified files, and register them to the DID server
 ```bash
 python sample_did.py alice.json
 python sample_did.py bob.json
 ```
 
-2. Start alice's demo
+2. Start Alice's demo
 ```bash
 python sample_alice.py alice.json
 ```
 
-3. Start bob's demo
+3. Start Bob's demo
 ```bash
 python sample_bob.py bob.json
 ```
 
-You can see from the logs that alice and bob successfully connected and performed end-to-end encrypted communication.
+You can see from the logs that Alice and Bob successfully connected and performed end-to-end encrypted communication.
 
-## Contribution
 
-Welcome to contribute to this project, and welcome to contact us to discuss the future of the intelligent agent collaborative network. It is best to communicate with us in the discord group before contributing to avoid duplicate work.
-
-## License
-    
-This project is open source under the MIT license. For more information, please see the LICENSE file.
-
-## Package upload (first change the version number in setup.py)
+## Package Upload (Change the version number in setup.py first)
 
 ```bash
 python setup.py sdist bdist_wheel 
 twine upload dist/*        
 ```
+
+## Contribution
+
+Welcome to contribute to this project, detailed information please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+    
+This project is open-sourced under the MIT license. For more information, please see the [LICENSE](LICENSE) file.
+
 
