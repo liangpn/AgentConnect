@@ -10,6 +10,8 @@ Agent Connect is an open-source implementation of the [Agent Network Protocol (A
 
 In the new era of rapid AI development, we are entering a new epoch of agent networks. The Agent Network Protocol (ANP) will become the core technology of this era, building an open, secure, and efficient collaborative network for billions of agents.
 
+Imagine the future: Your personal assistant AI seamlessly communicates with the restaurant's smart system when ordering food for you; Your smart home system collaborates with the energy management AI to optimize electricity usage; Your investment advisor AI exchanges information in real-time with global market analysis agents... This is the era of agent networks coming soon.
+
 The vision of the Agent Network Protocol (ANP) is to **define the way of connection in the era of agent networks**, just as the Internet Protocol has achieved in the information age. We believe that in the near future, billions of agents will build an unprecedented collaborative network through ANP, creating greater value than the existing Internet. With the support of ANP, the agent network will eventually evolve into a **self-organizing, self-negotiating** efficient collaborative network, which is an exciting future.
 
 ## Protocol Architecture
