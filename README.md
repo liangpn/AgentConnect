@@ -24,7 +24,7 @@ The Agent Network Protocol (ANP) is designed as a three-layer architecture, from
 
 ## AgentConnect Architecture
 
-The technical architecture of AgentConnect (https://github.com/chgaowei/AgentConnect) is shown in the figure below:
+The technical architecture of AgentConnect is shown in the figure below:
 
 <p align="center">
   <img src="/images/agent-connect-architecture.png" width="50%" alt="Project Architecture"/>

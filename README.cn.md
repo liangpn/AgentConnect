@@ -24,7 +24,7 @@ Agent Network Protocol(ANP)整体上设计为三层架构，从下到上依次�
 
 ## AgentConnect架构
 
-AgentConnect（https://github.com/chgaowei/AgentConnect）的技术架构如下图：
+AgentConnect的技术架构如下图：
 
 <p align="center">
   <img src="/images/agent-connect-architecture.png" width="50%" alt="项目架构图"/>
