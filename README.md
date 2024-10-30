@@ -1,10 +1,10 @@
-# Agent Connect
+# AgentConnect
 
-[Chinese Version](README.cn.md)
+[中文版](README.cn.md)
 
-## What is Agent Connect
+## What is AgentConnect
 
-Agent Connect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol).
+AgentConnect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol).
 
 ## Vision
 
