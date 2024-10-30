@@ -1,10 +1,10 @@
-# Agent Connect
+# AgentConnect
 
 [中文版](README.md)
 
-## Agent Connect是什么
+## AgentConnect是什么
 
-Agent Connect是[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)的开源实现。
+AgentConnect是[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)的开源实现。
 
 ## 愿景
 
