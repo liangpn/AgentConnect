@@ -16,9 +16,7 @@ current_directory = os.path.dirname(current_script_path)
 sys.path.append(current_directory)
 sys.path.append(current_directory + "/../")
 
-from agent_connect.didallclient import DIDAllClient
-from agent_connect.wss_message_sdk import WssMessageSDK
-from agent_connect.utils.log_base import set_log_color_level
+from agent_connect.e2e_encryption import WssMessageSDK
 
 
 MESSAGE_WSS_URL = "wss://message.pi-unlimited.com/ws"

@@ -29,8 +29,8 @@ import json
 import logging
 import traceback
 
-from agent_connect.simple_node_session import SimpleNodeSession
-from agent_connect.simple_wss_wraper import SimpleClientWssWraper, SimpleServerWssWraper, HeartbeatTimeoutError
+from agent_connect.simple_node.simple_node_session import SimpleNodeSession
+from agent_connect.simple_node.simple_wss_wraper import SimpleClientWssWraper, SimpleServerWssWraper, HeartbeatTimeoutError
 from agent_connect.utils.crypto_tool import  get_pem_from_private_key
 from agent_connect.utils.did_generate import did_generate
 

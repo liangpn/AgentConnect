@@ -8,14 +8,14 @@
 import datetime
 import logging
 from typing import Optional, Tuple
-from agent_connect.message_generation import generate_encrypted_message
-from agent_connect.simple_wss_wraper import SimpleClientWssWraper, SimpleWssWraper, HeartbeatTimeoutError
+from agent_connect.e2e_encryption.message_generation import generate_encrypted_message
+from agent_connect.simple_node.simple_wss_wraper import SimpleClientWssWraper, SimpleWssWraper, HeartbeatTimeoutError
 from agent_connect.utils.crypto_tool import generate_random_hex, decrypt_aes_gcm_sha256
 import asyncio
 import json
 import logging
 from typing import Tuple
-from agent_connect.short_term_key_generater import ShortTermKeyGenerater
+from agent_connect.e2e_encryption.short_term_key_generater import ShortTermKeyGenerater
 
 class SimpleNodeSession:
     def __init__(self, local_did: str, 
