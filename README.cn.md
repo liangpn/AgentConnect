@@ -1,6 +1,6 @@
 # Agent Connect
 
-[English Version](README.md)
+[中文版](README.md)
 
 ## Agent Connect是什么
 
