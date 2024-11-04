@@ -16,11 +16,11 @@ The vision of the Agent Network Protocol (ANP) is to **define how agents connect
 
 ## Challenges
 
-The Agent Network Protocol (ANP) aims to address three major challenges in connectivity:
+Agent Network Protocol (ANP) aims to address three major challenges in connectivity:
 
-- How agents authenticate and establish end-to-end encrypted communication
-- How agents negotiate protocols to evolve into a self-organizing, self-negotiating network  
-- How to uniformly manage consensus protocols reached in the agent network to accelerate protocol negotiation between agents
+- How agents authenticate each other to allow any two agents to connect
+- How agents establish end-to-end encrypted communication to ensure communication security
+- How agents efficiently exchange data to enhance collaboration efficiencynegotiation between agents
 
 ## Protocol Architecture
 
