@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "agent-connect"
+version = "0.1.7"
+description = "An SDK that enables agents to connect with each other, allowing them to perform identity authentication, end-to-end encrypted communication, automatic protocol negotiation based on LLMs, and efficient data exchange."
+authors = ["changshan <chgaowei@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "agent_connect"}]
+repository = "https://github.com/chgaowei/AgentConnect"
+homepage = "https://agent-network-protocol.com/"
+documentation = "https://github.com/chgaowei/AgentNetworkProtocol"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+ecdsa = "^0.19.0"
+cryptography = "^43.0.3"
+asn1crypto = "^1.5.1"
+base58 = "^2.1.1"
+aiohttp = "^3.10.10"
+requests = "^2.32.3"
+websockets = "^13.1"
+openai = "^1.54.3"
+pydantic = "^2.9.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[virtualenvs]
+in-project = true
