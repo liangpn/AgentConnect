@@ -1,30 +1,23 @@
-import pkg_resources
+from pydantic import BaseModel, Field
+from typing import Optional
+from enum import Enum
+import json
 
-# 要查找版本的包列表
-packages = [
-    "ecdsa",
-    "cryptography",
-    "asn1crypto",
-    "base58",
-    "pymysql",
-    "aiohttp",
-    "requests",
-    "websockets"
-]
+# 定义 DegreeEnum 枚举
+class DegreeEnum(str, Enum):
+    bachelor = "Bachelor"
+    master = "Master"
+    doctorate = "Doctorate"
 
-# 获取包的版本
-def get_package_version(package_name):
-    try:
-        return pkg_resources.get_distribution(package_name).version
-    except pkg_resources.DistributionNotFound:
-        return None
+# 定义 EducationExperience 模型并添加字段说明
+class EducationExperience(BaseModel):
+    institution: Optional[str] = Field(None, description="The name of the educational institution")
+    major: Optional[str] = Field(None, description="The major or field of study")
+    degree: Optional[DegreeEnum] = Field(None, description="The degree obtained (e.g., Bachelor, Master, Doctorate)")
+    achievements: Optional[str] = Field(None, description="Notable achievements during the education")
+    start_date: Optional[str] = Field(None, description="The start date of the education in YYYY-MM-DD format")
+    end_date: Optional[str] = Field(None, description="The end date of the education in YYYY-MM-DD format")
 
-# 生成 install_requires 列表
-install_requires = []
-for package in packages:
-    version = get_package_version(package)
-    if version:
-        install_requires.append(f"{package}=={version}")
-
-print(install_requires)
-
+# 生成 JSON Schema
+schema = EducationExperience.schema()
+print(json.dumps(schema, indent=4))

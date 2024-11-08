@@ -6,35 +6,41 @@ from openai import AsyncAzureOpenAI, AzureOpenAI
 from abc import ABC, abstractmethod
 import openai
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class BaseLLM(ABC):
-    """LLM的基类"""
+    """Base class for LLM"""
+    
+    def __init__(self):
+        """Initialize base class with client"""
+        # TODO: This is not a good approach, needs optimization later
+        self.client = None
 
     @abstractmethod
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
-        """异步生成响应的抽象方法，子类需要实现"""
+        """Abstract method for async response generation, to be implemented by subclasses"""
         pass
 
     @abstractmethod
     async def async_generate_vision_response(self, system_prompt: str, user_prompt: str, image_path: str) -> str:
-        """异步生成视觉响应的抽象方法，子类需要实现"""
+        """Abstract method for async vision response generation, to be implemented by subclasses"""
         pass
 
     @abstractmethod
     async def async_openai_generate_parse(self, system_prompt: str, user_prompt: str, response_format) -> BaseModel:
-        """异步生成解析响应的抽象方法，子类需要实现"""
+        """Abstract method for async parse response generation, to be implemented by subclasses"""
         pass
 
     @abstractmethod
     async def async_generate_vision_parse_response(self, system_prompt: str, user_prompt: str, image_path: str, response_format) -> BaseModel:
-        """异步生成视觉解析响应的抽象方法，子类需要实现"""
+        """Abstract method for async vision parse response generation, to be implemented by subclasses"""
         pass
 
 class AzureLLM(BaseLLM):
-    """使用Azure的OpenAI的LLM子类"""
+    """LLM subclass using Azure OpenAI"""
 
     def __init__(self, deployment_name: str, model_name: str):
+        super().__init__()
         self.model_name = model_name
         self.deployment_name = deployment_name
 
@@ -46,7 +52,7 @@ class AzureLLM(BaseLLM):
         )
 
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
-        """异步生成响应的方法"""
+        """Method for async response generation"""
         try:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
@@ -61,7 +67,7 @@ class AzureLLM(BaseLLM):
             return ""
 
     async def async_generate_vision_response(self, system_prompt: str, user_prompt: str, image_path: str) -> str:
-        """异步生成视觉响应的方法"""
+        """Method for async vision response generation"""
         try:
             with open(image_path, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode('utf-8')
@@ -93,7 +99,7 @@ class AzureLLM(BaseLLM):
             return ""
         
     async def async_openai_generate_parse(self, system_prompt: str, user_prompt: str, response_format):
-        """异步生成解析响应的方法"""
+        """Method for async parse response generation"""
         try:
             messages = [
                 {"role": "system", "content": system_prompt},
@@ -114,8 +120,9 @@ class AzureLLM(BaseLLM):
                 # Handle other exceptions
                 logging.error(f"Failed to generate parse response: {str(e)}")
             return None
+
     async def async_generate_vision_parse_response(self, system_prompt: str, user_prompt: str, image_path: str, response_format) -> BaseModel:
-        """异步生成视觉解析响应的方法"""
+        """Method for async vision parse response generation"""
         try:
             messages = [
                 {"role": "system", "content": system_prompt},
@@ -153,7 +160,7 @@ class AzureLLM(BaseLLM):
             return None
 
 def get_llm_instance(llm_type: str) -> BaseLLM:
-    """根据输入的llm类型返回特定的子类实例"""
+    """Return specific subclass instance based on input llm type"""
     if llm_type == "azure gpt4o":
         return AzureLLM(deployment_name="gpt4o", model_name="gpt-4o")
     elif llm_type == "azure gpt4o-mini":
@@ -162,7 +169,7 @@ def get_llm_instance(llm_type: str) -> BaseLLM:
         raise ValueError(f"Unsupported LLM type: {llm_type}")
     
     
-############################测试代码#################################
+############################Test Code#################################
 import asyncio
 from pydantic import BaseModel
 
@@ -187,19 +194,19 @@ async def test_async_openai_generate_parse():
 
 async def test_async_generate_vision_response():
     llm_instance = get_llm_instance("azure gpt4o-mini")
-    system_prompt = "你是一个有帮助的助手。"
-    user_prompt = "请描述这张图片的内容。"
+    system_prompt = "You are a helpful assistant."
+    user_prompt = "Please describe the content of this image."
     image_path = "/Users/eidanlinpersonal/Desktop/personal/pic/WechatIMG27.jpeg"
     response = await llm_instance.async_generate_vision_response(system_prompt, user_prompt, image_path)
-    print(f"OpenAI对图片的理解:\n{response}\n")
+    print(f"OpenAI's understanding of the image:\n{response}\n")
 
 async def test_async_generate_vision_parse_response():
     llm_instance = get_llm_instance("azure gpt4o-mini")
-    system_prompt = "你是一个有帮助的助手。"
-    user_prompt = "请描述这张图片的内容，并解析其中的结构化信息。"
+    system_prompt = "You are a helpful assistant."
+    user_prompt = "Please describe the content of this image and parse its structured information."
     image_path = "/Users/eidanlinpersonal/Desktop/personal/pic/WechatIMG27.jpeg"
     response = await llm_instance.async_generate_vision_parse_response(system_prompt, user_prompt, image_path, MathReasoning)
-    print(f"OpenAI对图片的结构化理解:\n{response}\n")
+    print(f"OpenAI's structured understanding of the image:\n{response}\n")
 
 async def main():
     await test_async_openai_generate_parse()
