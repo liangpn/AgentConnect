@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, Callable, Awaitable
 import json
 from textwrap import dedent
 
@@ -157,17 +157,93 @@ class NegotiatorRole(Enum):
     REQUESTER = "requester"
 
 class ProtocolNegotiator:
-    """Protocol negotiator that uses LLM to assist in protocol negotiation"""
-    def __init__(self, llm: BaseLLM):
+    """Protocol negotiator that uses LLM to assist in protocol negotiation.
+    
+    This class handles the negotiation process between service providers and requesters
+    to establish a mutually acceptable communication protocol.
+    
+    Attributes:
+        llm: LLM instance used for protocol generation and evaluation
+        requirement: Protocol requirements in natural language
+        input_description: Expected input format description
+        output_description: Expected output format description
+        negotiation_round: Current round number in the negotiation process
+        negotiation_history: List of previous protocol proposals and modifications
+        role: Role in negotiation (PROVIDER or REQUESTER)
+        capability_info_history: History of capability information responses
+        get_capability_info_callback: Callback function for checking provider capabilities
+    """
+    def __init__(
+        self, 
+        llm: BaseLLM, 
+        get_capability_info_callback: Optional[Callable[
+            [str, str, str],  # requirement, input_description, output_description
+            Awaitable[str]    # return type
+        ]] = None
+    ):
+        """Initialize the protocol negotiator.
+        
+        Args:
+            llm: Base LLM instance for generating and evaluating protocols
+            get_capability_info_callback: Optional async callback function that checks
+                provider's capability to implement a protocol. The callback takes three
+                string parameters:
+                - requirement: Protocol requirements description
+                - input_description: Expected input format description
+                - output_description: Expected output format description
+                
+                The callback should return a string containing capability assessment,
+                including:
+                - Whether the provider can meet the requirements
+                - Whether the input format is processable
+                - Whether the output format can be generated
+                - Any limitations or constraints
+                
+                This callback is only used when acting as a provider.
+        """
         self.llm: BaseLLM = llm
         self.requirement: str = ""
         self.input_description: str = ""
         self.output_description: str = ""
         self.negotiation_round: int = 0
         self.negotiation_history: list[dict] = []
-        self.role: NegotiatorRole = NegotiatorRole.PROVIDER  # Default as provider
-        self.capability_info_history: list[str] = []  # Store capability info history
+        self.role: NegotiatorRole = NegotiatorRole.PROVIDER
+        self.capability_info_history: list[str] = []
+        self.get_capability_info_callback = get_capability_info_callback
+
+
+    async def get_capability_info(self, requirement: str, 
+                                 input_description: str, 
+                                 output_description: str) -> str:
+        """Get capability information from external callback function
         
+        Args:
+            requirement: Natural language description of protocol requirements
+            input_description: Natural language description of expected input format
+            output_description: Natural language description of expected output format
+            
+        Returns:
+            Capability information as string, including:
+            - Whether requirements can be met
+            - Whether input data is correct, including field completeness, comprehensiveness, and type correctness
+            - Whether output data is correct, including having expected field data, field type correctness, and presence of important fields
+            
+        Note:
+            The callback function should return a string containing the capability assessment.
+            If no callback is registered, returns empty string.
+        """
+        if self.get_capability_info_callback:
+            try:
+                return await self.get_capability_info_callback(
+                    requirement, 
+                    input_description, 
+                    output_description
+                )
+            except Exception as e:
+                logging.error(f"Get capability info callback failed: {str(e)}")
+                return f"Error getting capability info: {str(e)}"
+        return ""
+
     async def generate_initial_protocol(
         self,
         requirement: str,
@@ -196,19 +272,23 @@ class ProtocolNegotiator:
         
         system_prompt = NEGOTIATION_INITIAL_SYSTEM_PROMPT
         
-        user_prompt = f"""
-        Please design a protocol with:
-        =========Requirements=========
-        {requirement}
+        user_prompt = dedent(f'''
+            Please design a protocol with:
 
-        =========Expected Input=========
-        {input_description}
+            --[ requirement ]--
+            {requirement}
+            --[END]--
 
-        =========Expected Output=========
-        {output_description}
+            --[ input_description ]--
+            {input_description}
+            --[END]--
 
-        The protocol should be practical and implementable.
-        """ 
+            --[ output_description ]--
+            {output_description}
+            --[END]--
+
+            The protocol should be practical and implementable.
+        ''').strip()
 
         try:
             protocol = await self.llm.async_generate_response(
@@ -229,27 +309,6 @@ class ProtocolNegotiator:
             logging.error(f"Failed to generate initial protocol: {str(e)}")
             return "", NegotiationStatus.REJECTED, self.negotiation_round
         
-    async def get_capability_info(self, requirement: str, 
-                                 input_description: str, 
-                                 output_description: str) -> str:
-        """Get capability information from external LLM
-        
-        Args:
-            requirement: Natural language description of protocol requirements
-            input_description: Natural language description of expected input format
-            output_description: Natural language description of expected output format
-            
-        Returns:
-            Capability information as string, including:
-            - Whether requirements can be met
-            - Whether input data is correct, including field completeness, comprehensiveness, and type correctness
-            - Whether output data is correct, including having expected field data, field type correctness, and presence of important fields
-        """
-
-        return ""
-
-
-
     # TODO: Need to callback externally to check if it meets the other party's requirements
     async def evaluate_protocol_proposal(
         self,
