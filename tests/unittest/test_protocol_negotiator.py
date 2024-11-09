@@ -15,7 +15,8 @@ from agent_connect.meta_protocol.protocol_negotiator import (
     ProtocolNegotiator,
     NegotiationStatus,
     NegotiationResult,
-    NegotiatorRole
+    NegotiatorRole,
+    NegotiationHistoryEntry
 )
 from agent_connect.utils.llm.base_llm import BaseLLM
 
@@ -99,6 +100,15 @@ Standard HTTP status codes
         self.negotiator.role = NegotiatorRole.PROVIDER
         self.negotiator.negotiation_round = 1
         
+        # Add initial history entry
+        self.negotiator.negotiation_history.append(
+            NegotiationHistoryEntry(
+                round=1,
+                candidate_protocols="Initial protocol",
+                modification_summary=None
+            )
+        )
+        
         # Mock LLM response
         mock_response = MagicMock()
         mock_response.choices = [
@@ -108,7 +118,8 @@ Standard HTTP status codes
                         "status": "negotiating",
                         "candidate_protocol": self.sample_protocol,
                         "modification_summary": "Added error handling details"
-                    })
+                    }),
+                    tool_calls=None
                 )
             )
         ]
@@ -117,20 +128,18 @@ Standard HTTP status codes
         )
         
         # Evaluate protocol
-        result = await self.negotiator.evaluate_protocol_proposal(
-            NegotiationResult(
-                status=NegotiationStatus.NEGOTIATING,
-                candidate_protocol="",
-                modification_summary=""
-            ),
-            self.sample_protocol
+        result, round_num = await self.negotiator.evaluate_protocol_proposal(
+            NegotiationStatus.NEGOTIATING,
+            2,  # counterparty_round
+            self.sample_protocol,
+            "Previous modifications"
         )
         
         # Verify results
         self.assertEqual(result.status, NegotiationStatus.NEGOTIATING)
         self.assertEqual(result.candidate_protocol, self.sample_protocol)
         self.assertEqual(result.modification_summary, "Added error handling details")
-        self.assertEqual(self.negotiator.negotiation_round, 2)
+        self.assertEqual(round_num, 2)  # round should be incremented
 
     async def test_evaluate_as_requester(self):
         """Test protocol evaluation as requester"""
@@ -140,6 +149,15 @@ Standard HTTP status codes
         self.negotiator.input_description = self.test_input
         self.negotiator.output_description = self.test_output
         self.negotiator.negotiation_round = 1
+        
+        # Add initial history entry
+        self.negotiator.negotiation_history.append(
+            NegotiationHistoryEntry(
+                round=1,
+                candidate_protocols="Initial protocol",
+                modification_summary=None
+            )
+        )
         
         # Mock LLM response
         mock_response = MagicMock()
@@ -159,19 +177,32 @@ Standard HTTP status codes
         )
         
         # Evaluate protocol
-        result = await self.negotiator.evaluate_protocol_proposal(
-            NegotiationResult(
-                status=NegotiationStatus.NEGOTIATING,
-                candidate_protocol="",
-                modification_summary=""
-            ),
-            self.sample_protocol
+        result, round_num = await self.negotiator.evaluate_protocol_proposal(
+            NegotiationStatus.NEGOTIATING,
+            2,  # counterparty_round
+            self.sample_protocol,
+            "Previous modifications"
         )
         
         # Verify results
         self.assertEqual(result.status, NegotiationStatus.ACCEPTED)
         self.assertEqual(result.modification_summary, "Protocol accepted")
-        self.assertEqual(self.negotiator.negotiation_round, 2)
+        self.assertEqual(round_num, 2)  # round should be incremented
+
+    async def test_invalid_round_number(self):
+        """Test protocol evaluation with invalid round number"""
+        self.negotiator.negotiation_round = 1
+        
+        result, round_num = await self.negotiator.evaluate_protocol_proposal(
+            NegotiationStatus.NEGOTIATING,
+            4,  # invalid round number (should be 2)
+            self.sample_protocol,
+            None
+        )
+        
+        self.assertEqual(result.status, NegotiationStatus.REJECTED)
+        self.assertIn("Invalid round number", result.modification_summary)
+        self.assertEqual(round_num, 1)  # round should not be incremented
 
     async def test_get_capability_info(self):
         """Test capability info retrieval"""

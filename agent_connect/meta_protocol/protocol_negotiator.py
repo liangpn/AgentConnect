@@ -331,23 +331,33 @@ class ProtocolNegotiator:
     async def evaluate_protocol_proposal(
         self,
         negotiation_status: NegotiationStatus,
+        counterparty_round: int,
         candidate_protocols: Optional[str] = None,
-        modification_summary: Optional[str] = None
-    ) -> NegotiationResult:
+        modification_summary: Optional[str] = None,
+    ) -> Tuple[NegotiationResult, int]:
         """Evaluate protocol proposal based on role.
         
-        This method evaluates a protocol proposal by delegating to role-specific evaluation methods.
-        For provider role, it calls _evaluate_as_provider() to check capability and requirements.
-        For requester role, it calls _evaluate_as_requester() to verify protocol meets needs.
-
         Args:
-            negotiation_result: Current negotiation result containing status and details
-            candidate_protocols: Protocol proposal to evaluate as string
-            modification_summary: Optional summary of modifications made to previous proposal
-
+            negotiation_status: Current negotiation status
+            candidate_protocols: Protocol proposal to evaluate
+            modification_summary: Optional summary of modifications
+            counterparty_round: Round number from counterparty
+            
         Returns:
-            NegotiationResult containing updated status (ACCEPTED/REJECTED/NEGOTIATING) and details
+            Tuple containing:
+                - NegotiationResult: Updated status and details
+                - int: Current negotiation round number
         """
+        # Validate round number
+        if counterparty_round is not None:
+            expected_round = self.negotiation_round + 1
+            if counterparty_round != expected_round:
+                return NegotiationResult(
+                    status=NegotiationStatus.REJECTED,
+                    candidate_protocol="",
+                    modification_summary=f"Invalid round number. Expected {expected_round}, got {counterparty_round}"
+                ), self.negotiation_round
+        
         # Handle terminal states
         if negotiation_status == NegotiationStatus.ACCEPTED:
             # Return the latest protocol from history if available
@@ -355,21 +365,24 @@ class ProtocolNegotiator:
                 status=NegotiationStatus.ACCEPTED,
                 candidate_protocol=self.negotiation_history[-1].candidate_protocols if self.negotiation_history else "",
                 modification_summary=None
-            )
+            ), self.negotiation_round
             
         if negotiation_status == NegotiationStatus.REJECTED:
             return NegotiationResult(
                 status=NegotiationStatus.REJECTED,
                 candidate_protocol="",
                 modification_summary=None
-            )
+            ), self.negotiation_round
         
+        result : NegotiationResult = None
         if self.role == NegotiatorRole.PROVIDER:
-            return await self._evaluate_as_provider(
+            result = await self._evaluate_as_provider(
                 candidate_protocols, modification_summary)
         else:
-            return await self._evaluate_as_requester(
+            result = await self._evaluate_as_requester(
                 candidate_protocols, modification_summary)
+        
+        return result, self.negotiation_round
 
     async def _evaluate_as_provider(
         self,

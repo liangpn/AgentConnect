@@ -109,12 +109,11 @@ async def test_protocol_negotiation():
         
         # 2. Provider评估协议
         logging.info("=== Provider评估协议 ===")
-        provider_result = await provider.evaluate_protocol_proposal(
-            NegotiationResult(
-                status=NegotiationStatus.NEGOTIATING,
-                candidate_protocol=protocol
-            ),
-            protocol
+        provider_result, provider_round = await provider.evaluate_protocol_proposal(
+            NegotiationStatus.NEGOTIATING,
+            round_num,
+            protocol,
+            None  # modification_summary for first round is None
         )
         
         logging.info(f"Provider评估状态: {provider_result.status}")
@@ -125,11 +124,9 @@ async def test_protocol_negotiation():
             
         # 3. Requester评估Provider的修改建议
         logging.info("=== Requester评估修改建议 ===")
-        requester_result = await requester.evaluate_protocol_proposal(
-            NegotiationResult(
-                status=NegotiationStatus.NEGOTIATING,
-                candidate_protocol=provider_result.candidate_protocol
-            ),
+        requester_result, requester_round = await requester.evaluate_protocol_proposal(
+            NegotiationStatus.NEGOTIATING,
+            provider_round,
             provider_result.candidate_protocol,
             provider_result.modification_summary
         )
