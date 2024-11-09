@@ -7,14 +7,18 @@ from abc import ABC, abstractmethod
 import openai
 from pydantic import BaseModel
 from typing import List, Optional
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class BaseLLM(ABC):
     """Base class for LLM"""
     
-    def __init__(self):
+    def __init__(self, client):
         """Initialize base class with client"""
         # TODO: This is not a good approach, needs optimization later
-        self.client = None
+        self.client = client
 
     @abstractmethod
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
@@ -39,17 +43,15 @@ class BaseLLM(ABC):
 class AzureLLM(BaseLLM):
     """LLM subclass using Azure OpenAI"""
 
-    def __init__(self, deployment_name: str, model_name: str):
-        super().__init__()
+    def __init__(self, client, model_name: str):
+        """Initialize AzureLLM
+        
+        Args:
+            client: The Azure OpenAI client instance
+            model_name: Model name to use
+        """
+        super().__init__(client)
         self.model_name = model_name
-        self.deployment_name = deployment_name
-
-        self.client = AsyncAzureOpenAI(
-            api_key=os.environ["AZURE_OPENAI_API_KEY"],
-            api_version="2024-02-01",
-            azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-            azure_deployment=self.deployment_name,
-        )
 
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
         """Method for async response generation"""
@@ -159,59 +161,4 @@ class AzureLLM(BaseLLM):
             logging.error(f"Failed to generate vision parse response: {str(e)}")
             return None
 
-def get_llm_instance(llm_type: str) -> BaseLLM:
-    """Return specific subclass instance based on input llm type"""
-    if llm_type == "azure gpt4o":
-        return AzureLLM(deployment_name="gpt4o", model_name="gpt-4o")
-    elif llm_type == "azure gpt4o-mini":
-        return AzureLLM(deployment_name="gpt4o-mini", model_name="gpt-4o-mini")
-    else:
-        raise ValueError(f"Unsupported LLM type: {llm_type}")
     
-    
-############################Test Code#################################
-import asyncio
-from pydantic import BaseModel
-
-class Step(BaseModel):
-    explanation: str
-    output: str
-
-class MathReasoning(BaseModel):
-    steps: List[Step]
-    final_answer: str
-
-async def test_async_openai_generate_parse():
-    azure_llm = AzureLLM(deployment_name="gpt4o", model_name="gpt-4o")
-    response = await azure_llm.async_openai_generate_parse(
-        "You are a helpful math tutor. Guide the user through the solution step by step.",
-        "how can I solve 8x + 7 = -23",
-        MathReasoning
-    )
-    print(f"Response: {response}")
-    assert response is not None
-    assert isinstance(response, MathReasoning)
-
-async def test_async_generate_vision_response():
-    llm_instance = get_llm_instance("azure gpt4o-mini")
-    system_prompt = "You are a helpful assistant."
-    user_prompt = "Please describe the content of this image."
-    image_path = "/Users/eidanlinpersonal/Desktop/personal/pic/WechatIMG27.jpeg"
-    response = await llm_instance.async_generate_vision_response(system_prompt, user_prompt, image_path)
-    print(f"OpenAI's understanding of the image:\n{response}\n")
-
-async def test_async_generate_vision_parse_response():
-    llm_instance = get_llm_instance("azure gpt4o-mini")
-    system_prompt = "You are a helpful assistant."
-    user_prompt = "Please describe the content of this image and parse its structured information."
-    image_path = "/Users/eidanlinpersonal/Desktop/personal/pic/WechatIMG27.jpeg"
-    response = await llm_instance.async_generate_vision_parse_response(system_prompt, user_prompt, image_path, MathReasoning)
-    print(f"OpenAI's structured understanding of the image:\n{response}\n")
-
-async def main():
-    await test_async_openai_generate_parse()
-    await test_async_generate_vision_response()
-    await test_async_generate_vision_parse_response()
-
-if __name__ == "__main__":
-    asyncio.run(main())

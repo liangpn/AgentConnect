@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Dict, Any, Optional, Tuple, Callable, Awaitable
 import json
 from textwrap import dedent
+import traceback
 
 from pydantic import BaseModel, Field
 from agent_connect.utils.llm.base_llm import BaseLLM
@@ -135,7 +136,6 @@ class NegotiationStatus(Enum):
     NEGOTIATING = "negotiating"
     REJECTED = "rejected" 
     ACCEPTED = "accepted"
-    TIMEOUT = "timeout"
 
 class NegotiationResult(BaseModel):
     """Protocol negotiation result model"""
@@ -155,6 +155,24 @@ class NegotiatorRole(Enum):
     """Negotiator role enum"""
     PROVIDER = "provider"
     REQUESTER = "requester"
+
+class NegotiationHistoryEntry:
+    """Represents a single entry in the negotiation history.
+    
+    Attributes:
+        round: The negotiation round number
+        candidate_protocols: The protocol proposal for this round
+        modification_summary: Summary of modifications made to previous proposal
+    """
+    def __init__(
+        self,
+        round: int,
+        candidate_protocols: str,
+        modification_summary: Optional[str] = None
+    ):
+        self.round = round
+        self.candidate_protocols = candidate_protocols
+        self.modification_summary = modification_summary
 
 class ProtocolNegotiator:
     """Protocol negotiator that uses LLM to assist in protocol negotiation.
@@ -206,7 +224,7 @@ class ProtocolNegotiator:
         self.input_description: str = ""
         self.output_description: str = ""
         self.negotiation_round: int = 0
-        self.negotiation_history: list[dict] = []
+        self.negotiation_history: list[NegotiationHistoryEntry] = []
         self.role: NegotiatorRole = NegotiatorRole.PROVIDER
         self.capability_info_history: list[str] = []
         self.get_capability_info_callback = get_capability_info_callback
@@ -240,7 +258,7 @@ class ProtocolNegotiator:
                     output_description
                 )
             except Exception as e:
-                logging.error(f"Get capability info callback failed: {str(e)}")
+                logging.error(f"Get capability info callback failed: {str(e)}\nStack trace:\n{traceback.format_exc()}")
                 return f"Error getting capability info: {str(e)}"
         return ""
 
@@ -297,23 +315,23 @@ class ProtocolNegotiator:
             )
             
             # Record negotiation history
-            self.negotiation_history.append({
-                "round": self.negotiation_round,
-                "candidate_protocols": protocol,
-                "modification_summary": None
-            })
+            self.negotiation_history.append(NegotiationHistoryEntry(
+                round=self.negotiation_round,
+                candidate_protocols=protocol,
+                modification_summary=None
+            ))
             
             return protocol, NegotiationStatus.NEGOTIATING, self.negotiation_round
             
         except Exception as e:
-            logging.error(f"Failed to generate initial protocol: {str(e)}")
+            logging.error(f"Failed to generate initial protocol: {str(e)}\nStack trace:\n{traceback.format_exc()}")
             return "", NegotiationStatus.REJECTED, self.negotiation_round
         
     # TODO: Need to callback externally to check if it meets the other party's requirements
     async def evaluate_protocol_proposal(
         self,
-        negotiation_result: NegotiationResult,
-        candidate_protocols: str,
+        negotiation_status: NegotiationStatus,
+        candidate_protocols: Optional[str] = None,
         modification_summary: Optional[str] = None
     ) -> NegotiationResult:
         """Evaluate protocol proposal based on role.
@@ -330,16 +348,31 @@ class ProtocolNegotiator:
         Returns:
             NegotiationResult containing updated status (ACCEPTED/REJECTED/NEGOTIATING) and details
         """
+        # Handle terminal states
+        if negotiation_status == NegotiationStatus.ACCEPTED:
+            # Return the latest protocol from history if available
+            return NegotiationResult(
+                status=NegotiationStatus.ACCEPTED,
+                candidate_protocol=self.negotiation_history[-1].candidate_protocols if self.negotiation_history else "",
+                modification_summary=None
+            )
+            
+        if negotiation_status == NegotiationStatus.REJECTED:
+            return NegotiationResult(
+                status=NegotiationStatus.REJECTED,
+                candidate_protocol="",
+                modification_summary=None
+            )
+        
         if self.role == NegotiatorRole.PROVIDER:
             return await self._evaluate_as_provider(
-                negotiation_result, candidate_protocols, modification_summary)
+                candidate_protocols, modification_summary)
         else:
             return await self._evaluate_as_requester(
-                negotiation_result, candidate_protocols, modification_summary)
+                candidate_protocols, modification_summary)
 
     async def _evaluate_as_provider(
         self,
-        negotiation_result: NegotiationResult,
         candidate_protocols: str,
         modification_summary: Optional[str] = None
     ) -> NegotiationResult:
@@ -371,7 +404,7 @@ class ProtocolNegotiator:
             --[END]--
 
             --[ your_previous_protocol ]--
-            {self.negotiation_history[-1]["candidate_protocols"] if self.negotiation_history else ""}
+            {self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
             --[END]--
 
             --[ counterparty_modification_summary ]--
@@ -384,27 +417,35 @@ class ProtocolNegotiator:
         ''').strip()
 
         try:
+            # Initialize base messages
             messages = [
                 {"role": "system", "content": NEGOTIATION_EVALUATION_SYSTEM_PROMPT_FOR_PROVIDER},
                 {"role": "user", "content": user_prompt}
             ]
-
+            
             while True:
-                response = await self.llm.client.chat.completions.create(
-                    model="gpt-4-turbo-preview",
+                completion = await self.llm.client.chat.completions.create(
+                    model=self.llm.model_name,
                     messages=messages,
                     tools=tools,
                     tool_choice="auto",
-                    response_format=NegotiationResult
+                    response_format={"type": "json_object"}
                 )
                 
-                assistant_message = response.choices[0].message
-                messages.append({"role": "assistant", "content": assistant_message.content})
-
+                assistant_message = completion.choices[0].message
+                
+                # Add assistant message to conversation history
+                messages.append({
+                    "role": "assistant",
+                    "content": assistant_message.content,
+                    "tool_calls": assistant_message.tool_calls
+                })
+                
+                # If no tool calls, process the final response
                 if not assistant_message.tool_calls:
-                    result_json = json.loads(assistant_message.content)
                     break
-
+                
+                # Handle tool calls
                 for tool_call in assistant_message.tool_calls:
                     if tool_call.function.name == "get_capability_info":
                         args = json.loads(tool_call.function.arguments)
@@ -413,45 +454,46 @@ class ProtocolNegotiator:
                             args["input_description"],
                             args["output_description"]
                         )
-                        # Store capability info in history
                         self.capability_info_history.append(capability_info)
                         # Add tool response to messages
                         messages.append({
                             "role": "tool",
-                            "content": capability_info,
+                            "content": str(capability_info),
                             "tool_call_id": tool_call.id
                         })
 
-            # Increment negotiation round
             self.negotiation_round += 1
             
-            # Create NegotiationResult from response
+            # Parse JSON response from assistant message
+            if not assistant_message.content:
+                raise ValueError("Received empty response from LLM")
+            
+            result_json = json.loads(assistant_message.content)
             result = NegotiationResult(
                 status=NegotiationStatus(result_json["status"]),
                 candidate_protocol=result_json["candidate_protocol"],
                 modification_summary=result_json["modification_summary"]
             )
 
-            # Update negotiation history if we're still negotiating
             if result.status == NegotiationStatus.NEGOTIATING:
-                self.negotiation_history.append({
-                    "round": self.negotiation_round,
-                    "candidate_protocols": result.candidate_protocol,
-                    "modification_summary": result.modification_summary
-                })
+                self.negotiation_history.append(NegotiationHistoryEntry(
+                    round=self.negotiation_round,
+                    candidate_protocols=result.candidate_protocol,
+                    modification_summary=result.modification_summary
+                ))
                 
             return result
                 
         except Exception as e:
-            logging.error(f"Failed to evaluate protocol: {str(e)}")
+            logging.error(f"Failed to evaluate protocol: {str(e)}\nStack trace:\n{traceback.format_exc()}")
             return NegotiationResult(
                 status=NegotiationStatus.REJECTED,
                 candidate_protocol="",
                 modification_summary=f"Error during evaluation: {str(e)}"
             )
+        
     async def _evaluate_as_requester(
         self,
-        negotiation_result: NegotiationResult,
         candidate_protocols: str,
         modification_summary: Optional[str] = None
     ) -> NegotiationResult:
@@ -476,7 +518,7 @@ class ProtocolNegotiator:
             --[END]--
 
             --[ your_previous_protocol ]--
-            {self.negotiation_history[-1]["candidate_protocols"] if self.negotiation_history else ""}
+            {self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
             --[END]--
 
             --[ counterparty_modification_summary ]--
@@ -491,7 +533,8 @@ class ProtocolNegotiator:
                 messages=[
                     {"role": "system", "content": NEGOTIATION_EVALUATION_SYSTEM_PROMPT_FOR_REQUESTER},
                     {"role": "user", "content": user_prompt}
-                ]
+                ],
+                response_format={"type": "json_object"}
             )
             
             result_json = json.loads(response.choices[0].message.content)
@@ -504,21 +547,20 @@ class ProtocolNegotiator:
             )
 
             if result.status == NegotiationStatus.NEGOTIATING:
-                self.negotiation_history.append({
-                    "round": self.negotiation_round,
-                    "candidate_protocols": result.candidate_protocol,
-                    "modification_summary": result.modification_summary
-                })
+                self.negotiation_history.append(NegotiationHistoryEntry(
+                    round=self.negotiation_round,
+                    candidate_protocols=result.candidate_protocol,
+                    modification_summary=result.modification_summary
+                ))
                 
             return result
 
         except Exception as e:
-            logging.error(f"Failed to evaluate protocol as requester: {str(e)}")
+            logging.error(f"Failed to evaluate protocol as requester: {str(e)}\nStack trace:\n{traceback.format_exc()}")
             return NegotiationResult(
                 status=NegotiationStatus.REJECTED,
                 candidate_protocol="",
                 modification_summary=f"Error during evaluation: {str(e)}"
             )
-
 
 
