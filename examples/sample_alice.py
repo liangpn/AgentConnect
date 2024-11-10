@@ -89,10 +89,14 @@ async def main(file_name="alice.json"):
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) > 1:
-        file_name = sys.argv[1]
-    else:       
-        file_name = "alice.json"
-
-    asyncio.run(main(file_name))
+    try:
+        # 从命令行参数获取配置文件路径,如果没有则使用默认路径
+        file_name = sys.argv[1] if len(sys.argv) > 1 else "simple_node/alice.json"
+        
+        # 运行主程序
+        asyncio.run(main(file_name))
+    except KeyboardInterrupt:
+        print("\n程序被用户中断")
+    except Exception as e:
+        print(f"运行出错: {e}")
+        traceback.print_exc()
