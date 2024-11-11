@@ -226,8 +226,8 @@ Standard HTTP status codes
 
 def run_async_test(coro):
     """Helper function to run async tests"""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(coro)
+    # Run the asynchronous coroutine using asyncio.run() (Python 3.7+)
+    return asyncio.run(coro)
 
 if __name__ == '__main__':
     # Configure logging
