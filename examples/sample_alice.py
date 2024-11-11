@@ -10,6 +10,7 @@ import sys
 import os
 import asyncio
 import json
+import traceback
 
 current_script_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_script_path)
