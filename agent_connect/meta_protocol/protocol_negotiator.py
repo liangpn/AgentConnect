@@ -308,6 +308,8 @@ class ProtocolNegotiator:
             - status: Negotiation status
             - round: Current negotiation round number
         """
+
+        logging.info("Starting to generate initial protocol...")
         
         # Set role to REQUESTER when generating initial protocol
         self.role = NegotiatorRole.REQUESTER
@@ -346,7 +348,8 @@ class ProtocolNegotiator:
                 user_prompt=user_prompt
             )
             
-            # Record negotiation history
+            logging.info(f"Successfully generated initial protocol, current round: {self.negotiation_round}, protocol: {protocol}")
+            
             self.negotiation_history.append(NegotiationHistoryEntry(
                 round=self.negotiation_round,
                 candidate_protocols=protocol,
@@ -367,7 +370,7 @@ class ProtocolNegotiator:
         candidate_protocols: Optional[str] = None,
         modification_summary: Optional[str] = None,
     ) -> Tuple[NegotiationResult, int]:
-        """Evaluate protocol proposal based on role.
+        """Evaluate protocol proposal
         
         Args:
             negotiation_status: Current negotiation status
@@ -380,10 +383,12 @@ class ProtocolNegotiator:
                 - NegotiationResult: Updated status and details
                 - int: Current negotiation round number
         """
+        logging.info(f"Starting protocol proposal evaluation: status={negotiation_status.name}, round={counterparty_round}")
         # Validate round number
         if counterparty_round is not None:
             expected_round = self.negotiation_round + 1
             if counterparty_round != expected_round:
+                logging.error(f"Invalid round number. Expected {expected_round}, got {counterparty_round}")
                 return NegotiationResult(
                     status=NegotiationStatus.REJECTED,
                     candidate_protocol="",
@@ -422,6 +427,8 @@ class ProtocolNegotiator:
         modification_summary: Optional[str] = None
     ) -> NegotiationResult:
         """Provider-specific protocol evaluation"""
+        logging.info("Starting provider-side protocol evaluation...")
+        
         tools = [
             {
                 "type": "function",
@@ -497,11 +504,13 @@ class ProtocolNegotiator:
                 
                 # If no tool calls, process the final response
                 if not assistant_message.tool_calls:
+                    logging.info("LLM evaluation completed, no tool calls needed")
                     break
                 
                 # Handle tool calls
                 for tool_call in assistant_message.tool_calls:
                     if tool_call.function.name == "get_capability_info":
+                        logging.info("Calling capability info check tool...")
                         args = json.loads(tool_call.function.arguments)
                         capability_info = await self.get_capability_info(
                             args["requirement"],
@@ -529,6 +538,8 @@ class ProtocolNegotiator:
                 modification_summary=result_json["modification_summary"]
             )
 
+            logging.info(f"Provider evaluation result: status={result.status.name}, round={self.negotiation_round}")
+
             if result.status == NegotiationStatus.NEGOTIATING:
                 self.negotiation_history.append(NegotiationHistoryEntry(
                     round=self.negotiation_round,
@@ -552,6 +563,8 @@ class ProtocolNegotiator:
         modification_summary: Optional[str] = None
     ) -> NegotiationResult:
         """Requester-specific protocol evaluation"""
+        logging.info("Starting requester-side protocol evaluation...")
+        
         user_prompt = dedent(f'''
             Please evaluate this protocol proposal:
 
@@ -599,6 +612,8 @@ class ProtocolNegotiator:
                 candidate_protocol=result_json["candidate_protocol"],
                 modification_summary=result_json["modification_summary"]
             )
+
+            logging.info(f"Requester evaluation result: status={result.status.name}, round={self.negotiation_round}")
 
             if result.status == NegotiationStatus.NEGOTIATING:
                 self.negotiation_history.append(NegotiationHistoryEntry(

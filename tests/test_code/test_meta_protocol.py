@@ -29,6 +29,9 @@ async def mock_capability_info(requirement: str,
                              input_description: str, 
                              output_description: str) -> str:
     """模拟获取能力信息的回调函数"""
+    logging.info(f"Requirement: {requirement}")
+    logging.info(f"Input description: {input_description}")
+    logging.info(f"Output description: {output_description}")
     return """
     Capability Assessment:
     - Requirements: Can fully meet the specified requirements
@@ -64,28 +67,30 @@ async def test_negotiate_protocol():
         )
 
         # 定义测试用的协议需求
+            
+        # 测试场景：API 接口协议设计
         requirement = """
         设计一个用于获取用户教育经历的 API 接口。
         - API 应该支持获取单个用户的教育经历信息
         - 教育经历信息应包含：学校名称、专业、学位、成就、开始时间、结束时间
         - 需要支持错误处理和参数验证
         """
-
+        
         input_description = """
         输入参数应包含：
         - user_id: 用户ID (字符串)
         - include_details: 是否包含详细信息 (布尔值，可选)
         """
-
+        
         output_description = """
         输出应包含：
         - 教育经历列表，每个教育经历包含：
-          * institution: 学校名称
-          * major: 专业
-          * degree: 学位 (Bachelor/Master/Doctorate)
-          * achievements: 成就
-          * start_date: 开始时间 (YYYY-MM-DD)
-          * end_date: 结束时间 (YYYY-MM-DD)
+        * institution: 学校名称
+        * major: 专业
+        * degree: 学位 (Bachelor/Master/Doctorate)
+        * achievements: 成就
+        * start_date: 开始时间 (YYYY-MM-DD)
+        * end_date: 结束时间 (YYYY-MM-DD)
         - 支持分页和错误信息返回
         """
 
@@ -106,32 +111,8 @@ async def test_negotiate_protocol():
             # 修改消息1的格式 - 简化协议定义并避免转义字符问题
             message1 = {
                 "action": "protocolNegotiation",
-                "sequenceId": 1,
-                "candidateProtocols": {  # 直接使用字典而不是 JSON 字符串
-                    "endpoints": [
-                        {
-                            "path": "/api/v1/education",
-                            "method": "GET",
-                            "parameters": {
-                                "user_id": {"type": "string", "required": True},
-                                "include_details": {"type": "boolean", "required": False}
-                            }
-                        }
-                    ],
-                    "schemas": {
-                        "EducationExperience": {
-                            "type": "object",
-                            "properties": {
-                                "institution": {"type": "string"},
-                                "major": {"type": "string"},
-                                "degree": {"type": "string", "enum": ["Bachelor", "Master", "Doctorate"]},
-                                "achievements": {"type": "string"},
-                                "start_date": {"type": "string", "format": "date"},
-                                "end_date": {"type": "string", "format": "date"}
-                            }
-                        }
-                    }
-                },
+                "sequenceId": 2,
+                "candidateProtocols": "",
                 "status": NegotiationStatus.ACCEPTED.value
             }
 

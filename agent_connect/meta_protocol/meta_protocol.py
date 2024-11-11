@@ -202,8 +202,10 @@ class MetaProtocol:
                     logging.error(f"Protocol negotiation timeout\nStack trace:\n{stack_trace}")
                     return False, ""
             
+            logging.info("Start processing negotiation messages")
             while self.negotiation_messages:
                 data = self.negotiation_messages.pop(0)
+                logging.info(f"Processing negotiation message: {data}")
                 
                 if not self.negotiator:
                     logging.error("Protocol negotiator not initialized")
@@ -290,7 +292,11 @@ class MetaProtocol:
         if not success:
             return False, ""
         
-        # 成功后，开始协商代码生成
+        # code generation
+
+
+
+        return True, protocol
 
 
     async def _send_message(self, message: Dict[str, Any], protocol_type: ProtocolType = ProtocolType.META) -> None:
