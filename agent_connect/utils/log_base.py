@@ -1,8 +1,8 @@
 import logging
-# Cross-Platform Identity Authentication and End-to-End Encrypted Communication Technology Based on DID
+# AgentConnect: https://github.com/chgaowei/AgentConnect
 # Author: GaoWei Chang
 # Email: chgaowei@gmail.com
-# Website: http://pi-unlimited.com
+# Website: https://agent-network-protocol.com/
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
