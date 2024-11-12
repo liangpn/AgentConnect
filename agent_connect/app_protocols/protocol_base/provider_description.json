@@ -1,0 +1,53 @@
+{
+    "version": "1.0",
+    "definitions": [
+        {
+            "type": "class",
+            "class": {
+                "name": "RequesterBase",
+                "description": "Base requester class",
+                "interfaces": [
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "set_send_callback",
+                            "description": "Set callback function for sending messages",
+                            "parameters": {
+                                "type": "object", 
+                                "properties": {
+                                    "callback": {
+                                        "type": "function",
+                                        "description": "Async function that receives and sends bytes data"
+                                    }
+                                },
+                                "required": ["callback"]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "send_message",
+                "description": "Function to send messages",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "bytes",
+                            "description": "Binary data to be sent"
+                        }
+                    },
+                    "required": ["data"]
+                }
+            }
+        }
+    ]
+}
+
+
+
+
+
