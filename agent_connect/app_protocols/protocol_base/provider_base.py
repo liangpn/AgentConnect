@@ -16,6 +16,9 @@
 # 一类是直接回调获取数据，一类是回调事件与数据。回调有输入输出
 # 如果说不能实现用AI生成代码处理全流程，那么协议协商就没有意义了。
 # demo上，实现一个简单的provider，使用回调函数直接获取数据。协议处理部分代码，数据获取部分代码，使用AI生成。
+# 也实现一个requester，通过生成的逻辑代码，直接调用获取provider的数据。
+# 要为demo想一个好的、有用的场景，两端都使用AI生成协议代码、业务逻辑代码。
+# 自己生成自己的代码，是否可以作为一个新的项目。
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, Awaitable
