@@ -23,10 +23,11 @@ load_dotenv()
 class BaseLLM(ABC):
     """Base class for LLM"""
     
-    def __init__(self, client):
+    def __init__(self, client, model_name: str):
         """Initialize base class with client"""
         # TODO: This is not a good approach, needs optimization later
         self.client = client
+        self.model_name = model_name
 
     @abstractmethod
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
@@ -58,8 +59,7 @@ class AzureLLM(BaseLLM):
             client: The Azure OpenAI client instance
             model_name: Model name to use
         """
-        super().__init__(client)
-        self.model_name = model_name
+        super().__init__(client, model_name)
 
     async def async_generate_response(self, system_prompt: str, user_prompt: str) -> str:
         """Method for async response generation"""

@@ -13,12 +13,15 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional, Awaitable
+import asyncio
 
 class RequesterBase(ABC):
     """Base class for protocol requesters"""
     
     def __init__(self):
         self._send_callback: Optional[Callable[[bytes], Awaitable[None]]] = None
+        self.received_messages: list[bytes] = []
+        self.messages_event = asyncio.Event()
         
     def set_send_callback(self, callback: Callable[[bytes], Awaitable[None]]) -> None:
         """Set async callback function for sending binary messages
@@ -31,14 +34,14 @@ class RequesterBase(ABC):
         """
         self._send_callback = callback
     
-    @abstractmethod
-    async def handle_message(self, message: bytes) -> None:
-        """Handle received message
+    def handle_message(self, message: bytes) -> None:
+        """Handle received message, called by the class user
         
         Args:
             message: Received binary message data
         """
-        pass
+        self.received_messages.append(message)
+        self.messages_event.set()
 
 
 
