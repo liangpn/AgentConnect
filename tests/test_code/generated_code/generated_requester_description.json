@@ -1,0 +1,128 @@
+{
+  "version": "1.0",
+  "definitions": [
+    {
+      "type": "class", 
+      "class": {
+        "name": "EducationProtocolRequester",
+        "description": "Class for sending requests to retrieve educational background information for a single user.",
+        "interfaces": [
+          {
+            "type": "function",
+            "function": {
+              "name": "send_request",
+              "description": "Send request to get user educational background information.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "description": "Unique user identifier."
+                  },
+                  "include_details": {
+                    "type": "boolean",
+                    "description": "Flag to include detailed information.",
+                    "default": false
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "Page number for paginated results.",
+                    "default": 1,
+                    "minimum": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "Number of items per page.",
+                    "default": 10,
+                    "minimum": 1
+                  }
+                },
+                "required": ["user_id"]
+              },
+              "returns": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "description": "HTTP status code indicating the result of the request."
+                  },
+                  "data": {
+                    "type": "array", 
+                    "description": "List of educational records retrieved for the user.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "institution": {
+                          "type": "string",
+                          "description": "Name of the educational institution."
+                        },
+                        "major": {
+                          "type": "string",
+                          "description": "Major field of study."
+                        },
+                        "degree": {
+                          "type": "string",
+                          "description": "Type of degree obtained.",
+                          "enum": ["Bachelor", "Master", "Doctorate"]
+                        },
+                        "achievements": {
+                          "type": "string",
+                          "description": "Achievements during this period of education."
+                        },
+                        "start_date": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "Start date of the educational period."
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "End date of the educational period."
+                        }
+                      },
+                      "required": ["institution", "major", "degree", "start_date", "end_date"]
+                    }
+                  },
+                  "pagination": {
+                    "type": "object",
+                    "description": "Details about the pagination of the results.",
+                    "properties": {
+                      "current_page": {
+                        "type": "integer",
+                        "description": "Current page number."
+                      },
+                      "total_pages": {
+                        "type": "integer",
+                        "description": "Total number of pages available."
+                      },
+                      "total_items": {
+                        "type": "integer",
+                        "description": "Total number of items available."
+                      }
+                    }
+                  },
+                  "error": {
+                    "type": "object",
+                    "description": "Details of the error if the request was not successful.",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "Error message."
+                      },
+                      "details": {
+                        "type": "string",
+                        "description": "Additional error details."
+                      }
+                    },
+                    "required": ["message"]
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

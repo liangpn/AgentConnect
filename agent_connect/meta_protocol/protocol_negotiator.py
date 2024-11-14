@@ -10,7 +10,6 @@ import logging
 from enum import Enum
 from typing import Dict, Any, Optional, Tuple, Callable, Awaitable
 import json
-from textwrap import dedent
 import traceback
 
 from pydantic import BaseModel, Field
@@ -332,23 +331,22 @@ class ProtocolNegotiator:
         
         system_prompt = NEGOTIATION_INITIAL_SYSTEM_PROMPT
         
-        user_prompt = dedent(f'''
-            Please design a protocol with:
+        user_prompt = f'''
+Please design a protocol with:
 
-            --[ requirement ]--
-            {requirement}
-            --[END]--
+--[ requirement ]--
+{requirement}
+--[END]--
 
-            --[ input_description ]--
-            {input_description}
-            --[END]--
+--[ input_description ]--
+{input_description}
+--[END]--
 
-            --[ output_description ]--
-            {output_description}
-            --[END]--
+--[ output_description ]--
+{output_description}
+--[END]--
 
-            The protocol should be practical and implementable.
-        ''').strip()
+The protocol should be practical and implementable.'''
 
         try:
             protocol = await self.llm.async_generate_response(
@@ -465,25 +463,24 @@ class ProtocolNegotiator:
             }
         ]
 
-        user_prompt = dedent(f'''
-            Please evaluate this protocol proposal:
+        user_prompt = f'''
+Please evaluate this protocol proposal:
 
-            --[ counterparty_latest_protocol ]--
-            {candidate_protocols}
-            --[END]--
+--[ counterparty_latest_protocol ]--
+{candidate_protocols}
+--[END]--
 
-            --[ your_previous_protocol ]--
-            {self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
-            --[END]--
+--[ your_previous_protocol ]--
+{self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
+--[END]--
 
-            --[ counterparty_modification_summary ]--
-            {modification_summary if modification_summary else 'None'}
-            --[END]--
+--[ counterparty_modification_summary ]--
+{modification_summary if modification_summary else 'None'}
+--[END]--
 
-            --[ capability_info_history ]--
-            {json.dumps(self.capability_info_history, indent=2)}
-            --[END]--
-        ''').strip()
+--[ capability_info_history ]--
+{json.dumps(self.capability_info_history, indent=2)}
+--[END]--'''
 
         try:
             # Initialize base messages
@@ -573,33 +570,32 @@ class ProtocolNegotiator:
         """Requester-specific protocol evaluation"""
         logging.info("Starting requester-side protocol evaluation...")
         
-        user_prompt = dedent(f'''
-            Please evaluate this protocol proposal:
+        user_prompt = f'''
+Please evaluate this protocol proposal:
 
-            --[ requirement ]--
-            {self.requirement}
-            --[END]--
+--[ requirement ]--
+{self.requirement}
+--[END]--
 
-            --[ input_description ]--
-            {self.input_description}
-            --[END]--
+--[ input_description ]--
+{self.input_description}
+--[END]--
 
-            --[ output_description ]--
-            {self.output_description}
-            --[END]--
+--[ output_description ]--
+{self.output_description}
+--[END]--
 
-            --[ counterparty_latest_protocol ]--
-            {candidate_protocols}
-            --[END]--
+--[ counterparty_latest_protocol ]--
+{candidate_protocols}
+--[END]--
 
-            --[ your_previous_protocol ]--
-            {self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
-            --[END]--
+--[ your_previous_protocol ]--
+{self.negotiation_history[-1].candidate_protocols if self.negotiation_history else ""}
+--[END]--
 
-            --[ counterparty_modification_summary ]--
-            {modification_summary if modification_summary else 'None'}
-            --[END]--
-        ''').strip()
+--[ counterparty_modification_summary ]--
+{modification_summary if modification_summary else 'None'}
+--[END]--'''
 
         try:
             # Call LLM client directly

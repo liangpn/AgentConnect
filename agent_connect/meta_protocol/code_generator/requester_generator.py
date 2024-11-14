@@ -5,7 +5,6 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
-from textwrap import dedent
 from typing import Dict, Tuple, Any, Optional
 import logging
 import traceback
@@ -13,12 +12,122 @@ import traceback
 from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
 from agent_connect.utils.llm.base_llm import BaseLLM
 
+REQUESTER_DESCRIPTION_PROMPT = """
+As an experienced protocol architect and system developer, please help us analyze the protocol documentation thoroughly to build accurate and comprehensive API description files.
+
+# Our Goals:
+Through your professional perspective, extract core interface information from protocol documentation and convert it into structured JSON descriptions.
+
+# Please pay special attention to the following points:
+1. Interface Requirements
+  - Define a class with a name designed by you
+  - Include a send_request method in the class for sending requests and returning data
+  - Deeply analyze protocol documentation to design send_request method parameters, typically including all parameters from request protocol
+  - Design send_request method return value, which typically includes request success status and result data
+    - Return value must use dict type
+    - Must include code field, code value depends on protocol documentation, typically using HTTP status codes
+    - Additional fields can be added after code field to return request result data or error information
+    - Carefully analyze response message data, some are only used internally in protocol and should not be returned, like messageType, messageId etc.
+  - Interface design should be concise, clear and easy to use
+
+2. Protocol Semantics Understanding
+  - Deeply understand business rules in protocol documentation
+  - Focus on request/response data structure design
+  - Capture exception handling and edge cases
+
+3. Interface Description Generation
+  - Use JSON Schema specification to describe interfaces
+  - Ensure description completeness and accuracy
+  - Add clear comments and usage instructions
+
+# Output Requirements:
+1. Maintain standardization and readability of JSON structure
+2. Ensure description contains all necessary fields
+3. Provide comprehensive comments and explanations
+4. Validate correctness of description file
+
+**Note:** Output JSON structure only, do not output any other content
+
+# Output Example:
+{
+  "version": "1.0",
+  "definitions": [
+    {
+      "type": "class", 
+      "class": {
+        "name": "ProtocolRequester",
+        "description": "requester class",
+        "interfaces": [
+          {
+            "type": "function",
+            "function": {
+              "name": "send_request",
+              "description": "Send request to get user educational background",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "description": "Unique user identifier"
+                  },
+                  "page": {
+                    "type": "integer", 
+                    "description": "Page number",
+                    "default": 1,
+                    "minimum": 1
+                  }
+                },
+                "required": ["user_id"]
+              },
+              "returns": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "integer",
+                    "description": "HTTP status code"
+                  },
+                  "data": {
+                    "type": "object", 
+                    "properties": {
+                      "institution": {
+                        "type": "string",
+                        "description": "Name of the educational institution"
+                      },
+                      "major": {
+                        "type": "string",
+                        "description": "Major field of study"
+                      },
+                      "degree": {
+                        "type": "string",
+                        "enum": ["Bachelor", "Master", "Doctorate"],
+                        "description": "Type of degree obtained"
+                      }
+                    },
+                    "required": ["institution", "major", "degree"]
+                  },
+                  "error_message": {
+                    "type": "string",
+                    "description": "Error message, only if code is not 200"
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+"""
+
 # Prompts for code generation
 REQUESTER_CLASS_PROMPT = '''
-You are a senior Python developer. Based on the protocol documentation and code requirements, please help me generate a protocol requester class.
+You are a senior Python developer. Please help me generate a protocol requester class based on the protocol documentation and API documentation.
 
 # Protocol Requester Class Description
-According to the protocol documentation, implement a protocol requester class that can construct request messages, send requests, process response messages, and return results based on the response messages.
+The protocol documentation describes the request and response message formats, while the API documentation describes the requester class and core interface definitions.
+Based on the above information, implement a protocol requester class that can construct request messages, send requests, process response messages, and return results based on the response messages.
 
 # The base class for the protocol requester is defined as follows:
 ```
@@ -56,25 +165,40 @@ class RequesterBase(ABC):
 ```
 
 # Please generate the requester class according to the following requirements:
-
 1. The class must inherit from RequesterBase, import RequesterBase class using:
 ```
 from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
 ```
-2. The class needs to implement a method to initiate a request protocol, with the following requirements:
-  - Must be an async method
-  - Parameters should include all data required by the requester according to the protocol documentation
-  - This method will construct the request protocol, call self._send_callback to send the request protocol, then wait for the asyncio.Event until a response is received
-  - After receiving the response message, process it according to the protocol documentation and return the processing result
-  - Return value: [bool, Any], where bool indicates if the request was successful, Any is the data or result returned on success, recommended to use dict type
-  - Add detailed docstrings for the method, including functionality, parameters, and return values. Each parameter and return value must be described in detail, including every field in the parameters and every field in the return value. If the return value is a dictionary or JSON, the fields or key-value pairs in the JSON must be described in detail to allow the caller to understand.
-  - Must handle the following error cases:
-    * Network timeout (set according to protocol documentation, default 15 seconds)
-    * Message format errors
-    * Parameter validation failures
-  - Method example (pseudocode) as follows:
+
+2. The class name should use the class name defined in the API documentation
+
+3. Code requirements:
+  - Follow Google Python Style Guide
+  - Use type annotations
+  - Include complete class and method documentation
+  - Use logging module to record logs (in English)
+  - Handle exceptions and edge cases properly
+  - Ensure code testability and robustness
+  - Internal method names should start with underscore (_)
+
+4. Please implement all abstract methods
+
+5. If needed, you can add necessary internal methods and internal attributes
+
+## Class Core Method: send_request
+The class needs to implement a method named send_request to initiate request protocol, with the following requirements:
+1. The send_request definition must strictly follow the detailed description in the API documentation, including parameter names, types, and return values
+2. send_request must be an async method
+3. This method will construct the request protocol, call self._send_callback to send the request protocol, then wait for asyncio.Event until response is received
+4. After receiving the response message, process and return results according to the protocol documentation
+5. Must handle the following error cases:
+  - Network timeout (set according to protocol doc, default 15 seconds)
+  - Message format error
+  - Parameter validation failure
+  - If the protocol response does not contain a code field, generate an appropriate HTTP status code based on the response content and business logic
+6. Method example (pseudocode) as follows:
 ```
-async def send_request(self, user_id: str, user_name: str) -> Tuple[bool, dict[str, Any]]:
+async def send_request(self, user_id: str, user_name: str) -> dict[str, Any]:
     # Construct request protocol
     request_message = self._construct_request_message(user_id, user_name)
 
@@ -90,22 +214,12 @@ async def send_request(self, user_id: str, user_name: str) -> Tuple[bool, dict[s
             self.messages_event.clear()
         except asyncio.TimeoutError:
             logging.error(f"Protocol negotiation timeout\nStack trace:\n{traceback.format_exc()}")
-            return False, {}
+            return {"code": 504, "error_message": "Protocol negotiation timeout"}
         
     # Process response and return result
+
 ```
-  - For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
-
-3. Must implement the handle_message abstract method
-
-4. Code requirements:
-  - Follow Google Python Style Guide
-  - Use type annotations
-  - Include complete class and method documentation
-  - Use logging module to record logs (in English)
-  - Handle exceptions and edge cases properly
-  - Ensure code testability and robustness
-  - Internal method names should start with underscore (_)
+7. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
 
 # Output format
 Output in the following format, code part should be directly runnable in Python file:
@@ -118,30 +232,26 @@ XXXX
 --[END]--
 '''
 
-REQUESTER_DESCRIPTION_PROMPT = """
-Generate a JSON description for the requester class that:
-1. Follows the format in requester_description.json
-2. Describes all methods and their parameters
-3. Includes version information
-Protocol Documentation:
-{protocol_doc}
-"""
-
 async def _generate_requester_class(
     protocol_doc: str,
+    api_doc: str,
     llm: BaseLLM
 ) -> str:
     # Use REQUESTER_CLASS_PROMPT as system prompt
     system_prompt = REQUESTER_CLASS_PROMPT
     
     # Simple user prompt with protocol documentation
-    user_prompt = dedent(f'''
-        Please generate a requester class based on the following protocol documentation:
+    user_prompt = f'''
+Please generate a requester class based on the following protocol documentation:
 
-        --[ protocol_doc ]--
-        {protocol_doc}
-        --[END]--
-    ''').strip()
+--[ protocol documentation ]--
+{protocol_doc}
+--[END]--
+
+--[ API documentation ]--
+{api_doc}
+--[END]--
+'''
     
     # Call OpenAI API
     content = await llm.async_generate_response(system_prompt, user_prompt)
@@ -183,12 +293,35 @@ async def _generate_requester_description(
     protocol_doc: Dict[str, Any],
     llm: BaseLLM
 ) -> str:
-   
-    description_prompt = REQUESTER_DESCRIPTION_PROMPT.format(
-        protocol_doc=protocol_doc
+    """Generate requester description JSON based on protocol documentation and generated requester code
+
+    Args:
+        protocol_doc: Protocol documentation dictionary
+        llm: LLM instance
+
+    Returns:
+        str: Requester description JSON string
+    """
+
+    system_prompt = REQUESTER_DESCRIPTION_PROMPT
+
+    user_prompt = f'''
+Please generate a requester description JSON based on the following protocol documentation and requester code:
+
+--[ protocol documentation ]--
+{protocol_doc}
+--[END]--'''
+
+    response = await llm.client.chat.completions.create(
+        model=llm.model_name,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        response_format={"type": "json_object"}
     )
-    description_json = await llm.generate_code(description_prompt)
-    return description_json
+    
+    return response.choices[0].message.content
 
 async def generate_requester_code(
     protocol_doc: Dict[str, Any],
@@ -200,7 +333,7 @@ async def generate_requester_code(
     module_name = f"{protocol_name.lower()}_requester"
     
     # Generate requester class code and description
-    requester_code = await _generate_requester_class(protocol_doc, llm)
     description_json = await _generate_requester_description(protocol_doc, llm)
-    
+    requester_code = await _generate_requester_class(protocol_doc, description_json, llm)
+
     return module_name, requester_code, description_json

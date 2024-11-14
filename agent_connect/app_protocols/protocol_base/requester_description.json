@@ -1,52 +1,72 @@
 {
-    "version": "1.0",
-    "definitions": [
-        {
-            "type": "class",
-            "class": {
-                "name": "RequesterBase",
-                "description": "Base requester class",
-                "interfaces": [
-                    {
-                        "type": "function",
-                        "function": {
-                            "name": "set_send_callback",
-                            "description": "Set callback function for sending messages",
-                            "parameters": {
-                                "type": "object", 
-                                "properties": {
-                                    "callback": {
-                                        "type": "function",
-                                        "description": "Async function that receives and sends bytes data"
-                                    }
-                                },
-                                "required": ["callback"]
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
+  "version": "1.0",
+  "definitions": [
+    {
+      "type": "class", 
+      "class": {
+        "name": "ProtocolRequester",
+        "description": "requester class",
+        "interfaces": [
+          {
             "type": "function",
             "function": {
-                "name": "send_message",
-                "description": "Function to send messages",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "data": {
-                            "type": "bytes",
-                            "description": "Binary data to be sent"
+              "name": "send_request",
+              "description": "Send request to get user educational background",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "description": "Unique user identifier"
+                  },
+                  "page": {
+                    "type": "integer", 
+                    "description": "Page number",
+                    "default": 1,
+                    "minimum": 1
+                  }
+                },
+                "required": ["user_id"]
+              },
+              "returns": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "description": "Whether the request was successful"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object", 
+                      "properties": {
+                        "institution": {
+                          "type": "string",
+                          "description": "Name of the educational institution"
+                        },
+                        "major": {
+                          "type": "string",
+                          "description": "Major field of study"
+                        },
+                        "degree": {
+                          "type": "string",
+                          "enum": ["Bachelor", "Master", "Doctorate"],
+                          "description": "Type of degree obtained"
                         }
-                    },
-                    "required": ["data"]
-                }
+                      },
+                      "required": ["institution", "major", "degree"]
+                    }
+                  }
+                },
+                "required": ["success"]
+              }
             }
-        }
-    ]
+          }
+        ]
+      }
+    }
+  ]
 }
-
 
 
 

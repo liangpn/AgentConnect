@@ -211,11 +211,34 @@ async def test_requester_generator():
     
     # 创建 LLM 实例
     llm = get_llm_instance()
-
     try:
-        # 1. 测试生成requester类
+        # 1. 测试生成requester描述
+        logging.info("\n=== 测试生成requester描述 ===")
+        description_json = await _generate_requester_description(protocol_doc, llm)
+        
+        logging.info("生成的Requester描述:")
+        logging.info("-" * 50)
+        logging.info(description_json)
+        logging.info("-" * 50)
+
+        # 将生成的描述写入文件
+        logging.info("将生成的描述写入文件...")
+        try:
+            # 获取当前文件的路径
+            current_dir = Path(__file__).parent
+            # 构建目标文件的完整路径
+            output_file = current_dir / "generated_code/generated_requester_description.json"
+            
+            # 写入描述到文件
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(description_json)
+            logging.info(f"描述已成功写入: {output_file}")
+        except Exception as e:
+            logging.error(f"写入描述文件时出错: {str(e)}")
+
+        # 2. 测试生成requester类
         logging.info("=== 测试生成requester类 ===")
-        module_name, requester_code = await _generate_requester_class(protocol_doc, llm)
+        module_name, requester_code = await _generate_requester_class(protocol_doc, description_json, llm)
         
         logging.info(f"生成的模块名: {module_name}")
         logging.info("生成的Requester代码:")
@@ -229,7 +252,7 @@ async def test_requester_generator():
             # 获取当前文件的路径
             current_dir = Path(__file__).parent
             # 构建目标文件的完整路径
-            output_file = current_dir / "generated_requester_code.py"
+            output_file = current_dir / "generated_code/generated_requester_code.py"
             
             # 写入代码到文件
             with open(output_file, "w", encoding="utf-8") as f:
@@ -237,15 +260,6 @@ async def test_requester_generator():
             logging.info(f"代码已成功写入: {output_file}")
         except Exception as e:
             logging.error(f"写入代码文件时出错: {str(e)}")
-
-        # # 2. 测试生成requester描述
-        # logging.info("\n=== 测试生成requester描述 ===")
-        # description_json = await _generate_requester_description(protocol_doc, llm)
-        
-        # logging.info("生成的Requester描述:")
-        # logging.info("-" * 50)
-        # logging.info(description_json)
-        # logging.info("-" * 50)
 
         # # 3. 测试完整的生成流程
         # logging.info("\n=== 测试完整的生成流程 ===")
