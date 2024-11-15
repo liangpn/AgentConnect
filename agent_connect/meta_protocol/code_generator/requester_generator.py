@@ -162,6 +162,17 @@ class RequesterBase(ABC):
         """
         self.received_messages.append(message)
         self.messages_event.set()
+
+    @abstractmethod
+    async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
+        """Send request message 
+        
+        Args:
+            input: Request input data
+        Returns:
+            dict: Request output data from response message
+        """
+        pass
 ```
 
 # Please generate the requester class according to the following requirements:
@@ -185,22 +196,21 @@ from agent_connect.app_protocols.protocol_base.requester_base import RequesterBa
 
 5. If needed, you can add necessary internal methods and internal attributes
 
-## Class Core Method: send_request
-The class needs to implement a method named send_request to initiate request protocol, with the following requirements:
-1. The send_request definition must strictly follow the detailed description in the API documentation, including parameter names, types, and return values
-2. send_request must be an async method
-3. This method will construct the request protocol, call self._send_callback to send the request protocol, then wait for asyncio.Event until response is received
-4. After receiving the response message, process and return results according to the protocol documentation
-5. Must handle the following error cases:
-  - Network timeout (set according to protocol doc, default 15 seconds)
+## Core method: send_request
+This class needs to implement the abstract method send_request from the parent class. This method is used to initiate protocol request messages with the following requirements:
+1. Strictly implement according to the send_request method definition in parent class and API documentation, including parameter names, types and return values
+2. This method will construct the request protocol, call self._send_callback to send the request protocol, then wait for asyncio.Event until response is received
+3. After receiving the response message, process and return results according to protocol documentation
+4. Must handle the following error cases:
+  - Network timeout (set according to protocol documentation, default 15 seconds)
   - Message format error
   - Parameter validation failure
-  - If the protocol response does not contain a code field, generate an appropriate HTTP status code based on the response content and business logic
-6. Method example (pseudocode) as follows:
+  - If protocol response does not contain code field, generate appropriate HTTP status code based on response content and business logic
+5. Method example (pseudocode) as follows:
 ```
-async def send_request(self, user_id: str, user_name: str) -> dict[str, Any]:
+async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
     # Construct request protocol
-    request_message = self._construct_request_message(user_id, user_name)
+    request_message = self._construct_request_message(input)
 
     # Send request protocol
     await self._send_callback(request_message)
@@ -219,7 +229,7 @@ async def send_request(self, user_id: str, user_name: str) -> dict[str, Any]:
     # Process response and return result
 
 ```
-7. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
+6. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
 
 # Output format
 Output in the following format, code part should be directly runnable in Python file:

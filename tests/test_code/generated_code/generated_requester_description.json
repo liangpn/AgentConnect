@@ -2,37 +2,37 @@
   "version": "1.0",
   "definitions": [
     {
-      "type": "class", 
+      "type": "class",
       "class": {
-        "name": "EducationProtocolRequester",
-        "description": "Class for sending requests to retrieve educational background information for a single user.",
+        "name": "EducationBackgroundRequester",
+        "description": "Requester class for retrieving user educational background information.",
         "interfaces": [
           {
             "type": "function",
             "function": {
               "name": "send_request",
-              "description": "Send request to get user educational background information.",
+              "description": "Send a request to retrieve educational background information for a specified user.",
               "parameters": {
                 "type": "object",
                 "properties": {
                   "user_id": {
                     "type": "string",
-                    "description": "Unique user identifier."
+                    "description": "Unique identifier for the user whose educational background is being requested."
                   },
                   "include_details": {
                     "type": "boolean",
-                    "description": "Flag to include detailed information.",
+                    "description": "Flag indicating whether to include detailed information in the response.",
                     "default": false
                   },
                   "page": {
                     "type": "integer",
-                    "description": "Page number for paginated results.",
+                    "description": "Page number for pagination.",
                     "default": 1,
                     "minimum": 1
                   },
                   "page_size": {
                     "type": "integer",
-                    "description": "Number of items per page.",
+                    "description": "Number of items per page for pagination.",
                     "default": 10,
                     "minimum": 1
                   }
@@ -44,11 +44,11 @@
                 "properties": {
                   "code": {
                     "type": "integer",
-                    "description": "HTTP status code indicating the result of the request."
+                    "description": "HTTP status code representing the result of the request."
                   },
                   "data": {
-                    "type": "array", 
-                    "description": "List of educational records retrieved for the user.",
+                    "type": "array",
+                    "description": "List of educational background entries, if the request was successful.",
                     "items": {
                       "type": "object",
                       "properties": {
@@ -62,22 +62,22 @@
                         },
                         "degree": {
                           "type": "string",
-                          "description": "Type of degree obtained.",
-                          "enum": ["Bachelor", "Master", "Doctorate"]
+                          "enum": ["Bachelor", "Master", "Doctorate"],
+                          "description": "Type of degree obtained."
                         },
                         "achievements": {
                           "type": "string",
-                          "description": "Achievements during this period of education."
+                          "description": "Achievements received during the course of study."
                         },
                         "start_date": {
                           "type": "string",
                           "format": "date",
-                          "description": "Start date of the educational period."
+                          "description": "Start date of the educational program."
                         },
                         "end_date": {
                           "type": "string",
                           "format": "date",
-                          "description": "End date of the educational period."
+                          "description": "End date of the educational program."
                         }
                       },
                       "required": ["institution", "major", "degree", "start_date", "end_date"]
@@ -85,11 +85,11 @@
                   },
                   "pagination": {
                     "type": "object",
-                    "description": "Details about the pagination of the results.",
+                    "description": "Pagination details for the list of educational background entries.",
                     "properties": {
                       "current_page": {
                         "type": "integer",
-                        "description": "Current page number."
+                        "description": "Current page of the result set."
                       },
                       "total_pages": {
                         "type": "integer",
@@ -97,21 +97,21 @@
                       },
                       "total_items": {
                         "type": "integer",
-                        "description": "Total number of items available."
+                        "description": "Total number of items across all pages."
                       }
                     }
                   },
                   "error": {
                     "type": "object",
-                    "description": "Details of the error if the request was not successful.",
+                    "description": "Error details, in case the request was not successful.",
                     "properties": {
                       "message": {
                         "type": "string",
-                        "description": "Error message."
+                        "description": "Error message providing more details about the failure."
                       },
                       "details": {
                         "type": "string",
-                        "description": "Additional error details."
+                        "description": "Further details about the error."
                       }
                     },
                     "required": ["message"]

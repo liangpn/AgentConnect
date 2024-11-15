@@ -31,34 +31,35 @@
               "returns": {
                 "type": "object",
                 "properties": {
-                  "success": {
-                    "type": "boolean",
-                    "description": "Whether the request was successful"
+                  "code": {
+                    "type": "integer",
+                    "description": "HTTP status code"
                   },
                   "data": {
-                    "type": "array",
-                    "items": {
-                      "type": "object", 
-                      "properties": {
-                        "institution": {
-                          "type": "string",
-                          "description": "Name of the educational institution"
-                        },
-                        "major": {
-                          "type": "string",
-                          "description": "Major field of study"
-                        },
-                        "degree": {
-                          "type": "string",
-                          "enum": ["Bachelor", "Master", "Doctorate"],
-                          "description": "Type of degree obtained"
-                        }
+                    "type": "object", 
+                    "properties": {
+                      "institution": {
+                        "type": "string",
+                        "description": "Name of the educational institution"
                       },
-                      "required": ["institution", "major", "degree"]
-                    }
+                      "major": {
+                        "type": "string",
+                        "description": "Major field of study"
+                      },
+                      "degree": {
+                        "type": "string",
+                        "enum": ["Bachelor", "Master", "Doctorate"],
+                        "description": "Type of degree obtained"
+                      }
+                    },
+                    "required": ["institution", "major", "degree"]
+                  },
+                  "error_message": {
+                    "type": "string",
+                    "description": "Error message, only if code is not 200"
                   }
                 },
-                "required": ["success"]
+                "required": ["code"]
               }
             }
           }
@@ -67,7 +68,3 @@
     }
   ]
 }
-
-
-
-

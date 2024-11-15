@@ -43,6 +43,17 @@ class RequesterBase(ABC):
         self.received_messages.append(message)
         self.messages_event.set()
 
+    @abstractmethod
+    async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
+        """Send request message 
+        
+        Args:
+            input: Request input data
+        Returns:
+            dict: Request output data from response message
+        """
+        pass
+
 
 
 

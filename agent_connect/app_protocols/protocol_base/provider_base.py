@@ -39,6 +39,9 @@ class ProviderBase(ABC):
                      Returns Awaitable.
         """
         self._send_callback = callback
+
+    def set_protocol_callback(self, callback: Callable[[dict], Awaitable[None]]) -> None:
+        pass
     
     @abstractmethod
     async def handle_message(self, message: bytes) -> None:

@@ -5,27 +5,27 @@
     "timestamp": "2024-05-13T12:00:00Z",
     "files": {
       "provider": {
-        "path": "provider_base.py",
+        "file": "provider_base.py",
         "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       "requester": {
-        "path": "requester_base.py", 
+        "file": "requester_base.py", 
         "hash": "sha256:d41d8cd98f00b204e9800998ecf8427e"
       },
       "negotiation_info": {
-        "path": "negotiation_info.json",
+        "file": "negotiation_info.json",
         "hash": "sha256:7d793037a0760186574b0282f2f435e7"
       },
       "provider_description": {
-        "path": "provider_description.json",
+        "file": "provider_description.json",
         "hash": "sha256:b1b3773a05c0ed0176787a4f1574ff0075f7521e"
       },
       "requester_description": {
-        "path": "requester_description.json",
+        "file": "requester_description.json",
         "hash": "sha256:3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1"
       },
       "protocol_document": {
-        "path": "protocol_document.md",
+        "file": "protocol_document.md",
         "hash": "sha256:8b1a9953c4611296a827abf8c47804d7"
       }
     },
@@ -38,3 +38,5 @@
         "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndSayn1PzZs6ZjWp1CktyGesjuTSwRdoWhAfGFCF5bppETSTojQCrfFPP2oumHKtz"
     }
 }
+
+

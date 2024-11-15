@@ -1,103 +1,102 @@
-import asyncio
-import logging
 import json
-import uuid
-from typing import Any, Dict, Optional
+import logging
+from uuid import uuid4
+from typing import Any, Dict
+import asyncio
 from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
 
 
-class EducationProtocolRequester(RequesterBase):
-    """Class for sending requests to retrieve educational background information for a single user."""
+class EducationBackgroundRequester(RequesterBase):
+    """Requester class for retrieving user educational background information."""
 
-    async def send_request(self, user_id: str, include_details: bool = False,
-                           page: int = 1, page_size: int = 10) -> Dict[str, Any]:
-        """Send request to get user educational background information.
+    def __init__(self) -> None:
+        """Initialize the EducationBackgroundRequester with default settings."""
+        super().__init__()
+        logging.basicConfig(level=logging.DEBUG)
+
+    async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
+        """Send a request to retrieve educational background information for a specified user.
 
         Args:
-            user_id: Unique user identifier.
-            include_details: Flag to include detailed information.
-            page: Page number for paginated results.
-            page_size: Number of items per page.
+            input: Request input data including 'user_id', 'include_details', 'page', and 'page_size'.
 
         Returns:
-            Dictionary containing the HTTP status code, data or error information.
-        
-        Raises:
-            ValueError: If the provided parameters are invalid.
+            dict: Request output data from the response message.
         """
-        
-        if not self._is_valid_uuid(user_id):
-            logging.error("Invalid user_id format: Must be a valid UUID.")
-            return {"code": 400, "error": {"message": "Invalid user_id format", "details": "The user_id must be a valid UUID."}}
-
-        if page < 1 or page_size < 1:
-            logging.error("Invalid pagination parameters.")
-            return {"code": 400, "error": {"message": "Invalid pagination parameters", "details": "Page and page_size must be greater than 0"}}
-
-        request_message = self._construct_request_message(user_id, include_details, page, page_size)
-
-        if not self._send_callback:
-            logging.error("Send callback is not set.")
-            return {"code": 500, "error": {"message": "Internal Server Error", "details": "Send callback not set."}}
-
-        try:
-            await self._send_callback(json.dumps(request_message).encode('utf-8'))
-        except Exception as e:
-            logging.error(f"Failed to send request message: {e}")
-            return {"code": 500, "error": {"message": "Internal Server Error", "details": str(e)}}
+        request_message = self._construct_request_message(input)
+        await self._send_callback(request_message)
 
         if not self.received_messages:
             try:
                 await asyncio.wait_for(self.messages_event.wait(), timeout=15)
                 self.messages_event.clear()
             except asyncio.TimeoutError:
-                logging.error("Protocol negotiation timeout")
-                return {"code": 504, "error": {"message": "Protocol negotiation timeout"}}
+                logging.error("Protocol negotiation timeout.")
+                return {"code": 504, "error_message": "Protocol negotiation timeout"}
 
-        response_message = self.received_messages.pop(0).decode('utf-8')
+        response = self._process_response()
+        return response
 
-        try:
-            response = json.loads(response_message)
-            return self._process_response(response)
-        except json.JSONDecodeError:
-            logging.error("Response message format error")
-            return {"code": 500, "error": {"message": "Response message format error"}}
+    def _construct_request_message(self, input: dict[str, Any]) -> bytes:
+        """Construct the request message format as per protocol documentation.
 
-    def _construct_request_message(self, user_id: str, include_details: bool, page: int, page_size: int) -> Dict[str, Any]:
-        """Constructs the request message according to the protocol documentation."""
+        Args:
+            input: A dictionary containing request parameters.
+
+        Returns:
+            bytes: JSON-encoded request message.
+        """
         message = {
             "messageType": "getUserEducation",
-            "messageId": str(uuid.uuid4()),
-            "userId": user_id,
-            "includeDetails": include_details,
-            "page": page,
-            "pageSize": page_size
+            "messageId": str(uuid4()),
+            "userId": input["user_id"],
+            "includeDetails": input.get("include_details", False),
+            "page": input.get("page", 1),
+            "pageSize": input.get("page_size", 10),
         }
-        return message
+        request_message = json.dumps(message).encode()
+        logging.debug(f"Constructed request message: {request_message}")
+        return request_message
 
-    @staticmethod
-    def _is_valid_uuid(value: str) -> bool:
-        """Validates whether the given string is a valid UUID."""
+    def _process_response(self) -> dict[str, Any]:
+        """Process the first received message as a response and return the result.
+
+        Returns:
+            dict: Parsed response data from the message.
+        """
+        message = self.received_messages.pop(0)
+        logging.debug(f"Processing response message: {message}")
+
         try:
-            uuid.UUID(value)
-            return True
-        except ValueError:
-            return False
-    
-    def _process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
-        """Processes the response message and extracts relevant data or errors."""
-        if "code" not in response:
-            logging.error("Response message missing 'code' field")
-            return {"code": 500, "error": {"message": "Response message missing 'code' field"}}
+            response = json.loads(message.decode())
+            if 'code' not in response:
+                raise ValueError("Response is missing 'code' field.")
+            return self._parse_response(response)
+        except (json.JSONDecodeError, ValueError) as e:
+            logging.error(f"Failed to decode or validate response: {e}")
+            return {"code": 500, "error_message": "Internal response processing error"}
 
+    def _parse_response(self, response: dict) -> dict:
+        """Parse the response message to extract useful data or error messages.
+
+        Args:
+            response: The response message dictionary.
+
+        Returns:
+            dict: Parsed response including either data or error information.
+        """
         if response.get("code") == 200:
             return {
                 "code": 200,
                 "data": response.get("data", []),
-                "pagination": response.get("pagination", {})
+                "pagination": response.get("pagination", {}),
             }
         else:
+            error_info = response.get("error", {})
             return {
                 "code": response.get("code"),
-                "error": response.get("error", {"message": "Unknown error"})
+                "error": {
+                    "message": error_info.get("message", "Unknown error"),
+                    "details": error_info.get("details", ""),
+                }
             }
