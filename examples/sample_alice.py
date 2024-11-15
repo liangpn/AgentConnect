@@ -14,8 +14,6 @@ import traceback
 
 current_script_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_script_path)
-sys.path.append(current_directory)
-sys.path.append(current_directory + "/../")
 
 from agent_connect.e2e_encryption import WssMessageSDK
 
@@ -91,13 +89,13 @@ async def main(file_name="alice.json"):
 
 if __name__ == "__main__":
     try:
-        # 从命令行参数获取配置文件路径,如果没有则使用默认路径
+        # Retrieve the configuration file path from command-line parameters, if not available, use the default path
         file_name = sys.argv[1] if len(sys.argv) > 1 else "simple_node/alice.json"
         
-        # 运行主程序
+        # Run the main program
         asyncio.run(main(file_name))
     except KeyboardInterrupt:
-        print("\n程序被用户中断")
+        print("\nThe program was interrupted by the user.")
     except Exception as e:
-        print(f"运行出错: {e}")
+        print(f"run error: {e}")
         traceback.print_exc()
