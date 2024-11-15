@@ -187,7 +187,7 @@ from agent_connect.app_protocols.protocol_base.requester_base import RequesterBa
   - Follow Google Python Style Guide
   - Use type annotations
   - Include complete class and method documentation
-  - Use logging module to record logs (in English)
+  - Use logging module to record logs (in English), do not set logging configuration
   - Handle exceptions and edge cases properly
   - Ensure code testability and robustness
   - Internal method names should start with underscore (_)
@@ -232,7 +232,7 @@ async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
 6. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
 
 # Output format
-Output in the following format, code part should be directly runnable in Python file:
+Output in the following format, the code part should be directly runnable in Python files(do not include any other content, like backticks):
 --[ module_name ]--
 XXXX
 --[END]--
@@ -246,7 +246,7 @@ async def _generate_requester_class(
     protocol_doc: str,
     api_doc: str,
     llm: BaseLLM
-) -> str:
+) -> Tuple[str, str]:
     # Use REQUESTER_CLASS_PROMPT as system prompt
     system_prompt = REQUESTER_CLASS_PROMPT
     
@@ -337,13 +337,9 @@ async def generate_requester_code(
     protocol_doc: Dict[str, Any],
     llm: BaseLLM
 ) -> Tuple[str, str, str]:
-   
-    # Extract protocol name and create module name
-    protocol_name = protocol_doc.get("name", "unknown_protocol")
-    module_name = f"{protocol_name.lower()}_requester"
-    
+ 
     # Generate requester class code and description
     description_json = await _generate_requester_description(protocol_doc, llm)
-    requester_code = await _generate_requester_class(protocol_doc, description_json, llm)
+    module_name, requester_code = await _generate_requester_class(protocol_doc, description_json, llm)
 
     return module_name, requester_code, description_json

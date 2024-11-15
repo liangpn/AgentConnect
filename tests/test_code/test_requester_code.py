@@ -12,7 +12,7 @@ import unittest
 from typing import Optional, Awaitable, Callable
 from datetime import datetime, timedelta
 
-from tests.test_code.generated_requester_code import UserEducationRequester
+from tests.test_code.generated_code.generated_requester_code import UserEducationRequester
 
 class TestUserEducationRequester(unittest.TestCase):
     """Test cases for UserEducationRequester class"""
