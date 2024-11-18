@@ -232,6 +232,7 @@ async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
 6. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
 
 # Output format
+Output should include module name and code. The module name is generated based on protocol content, without distinguishing between requester or provider.
 Output in the following format, the code part should be directly runnable in Python files(do not include any other content, like backticks):
 --[ module_name ]--
 XXXX

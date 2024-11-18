@@ -5,7 +5,6 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
-
 import json
 import random
 import string
@@ -16,8 +15,7 @@ import asyncio
 import traceback 
 
 from agent_connect.meta_protocol.protocol_negotiator import NegotiationStatus, ProtocolNegotiator
-
-# 接口全部设计为异步
+from agent_connect.meta_protocol.code_generator.code_generator import ProtocolCodeGenerator
 
 class ProtocolType(Enum):
     """Protocol type enum"""
@@ -33,11 +31,9 @@ class MetaProtocol:
     def __init__(
         self, 
         send_callback: Optional[Callable[[bytes], Awaitable[None]]] = None,
-        get_capability_info_callback: Optional[Callable[
-            [str, str, str],  # requirement, input_description, output_description
-            Awaitable[str]    # return type
-        ]] = None,
-        llm: Optional[Any] = None  # Add llm parameter
+        get_capability_info_callback: Optional[Callable[[str, str, str], Awaitable[str]]] = None,
+        llm: Optional[Any] = None,
+        protocol_code_path: Optional[str] = None  # Path for generated code
     ):
         """Initialize MetaProtocol
         
@@ -64,10 +60,10 @@ class MetaProtocol:
         self.timeout_seconds = 30
         self.send_callback = send_callback
         self.get_capability_info_callback = get_capability_info_callback
-        self.llm = llm  # Store llm instance
+        self.llm = llm
+        self.protocol_code_path = protocol_code_path  # Store code generation path
         self.negotiator: Optional[ProtocolNegotiator] = None
         self.negotiation_messages = []
-        # Add event for message notification
         self.negotiation_messages_event = asyncio.Event()
 
     async def send_data(self, data: bytes) -> None:
@@ -250,33 +246,33 @@ class MetaProtocol:
         return False, ""
 
     async def negotiate_protocol(self, requirement: str, 
-                                 input_description: str, 
-                                 output_description: str) -> Tuple[bool, str]:
-        """Negotiate protocol based on requirements and I/O descriptions
+                               input_description: str, 
+                               output_description: str) -> Tuple[bool, str, str]:
+        """Negotiate protocol and generate code implementation
         
         Args:
             requirement: Natural language description of protocol requirements
-            input_description: Natural language description of expected input format
-            output_description: Natural language description of expected output format
+            input_description: Description of expected input format
+            output_description: Description of expected output format
             
         Returns:
             Tuple containing:
-            - is_success: Whether the negotiation is successful
-            - protocols: Protocol proposal content
+            - is_success: Whether negotiation was successful
+            - protocol: Protocol content
+            - code_path: Path to generated code (if successful)
         """
-
-        logging.info("Start protocol negotiation")
+        logging.info("Starting protocol negotiation")
         logging.info(f"Requirement: {requirement}")
         logging.info(f"Input description: {input_description}")
         logging.info(f"Output description: {output_description}")
 
-        # Initialize protocol negotiator with LLM and capability info callback
+        # Initialize protocol negotiator
         self.negotiator = ProtocolNegotiator(
             llm=self.llm,
             get_capability_info_callback=self.get_capability_info_callback
         )
         
-        # Clear message queue and reset event before starting new negotiation
+        # Clear message queue
         self.negotiation_messages.clear()
         self.negotiation_messages_event.clear()
         
@@ -298,14 +294,23 @@ class MetaProtocol:
         
         success, protocol = await self._process_negotiation_messages()
         if not success:
-            return False, ""
+            return False, "", None
+
+        # Generate code implementation
+        if self.protocol_code_path and self.llm:
+            try:
+                code_generator = ProtocolCodeGenerator(
+                    llm=self.llm,
+                    protocol_doc=protocol,
+                    output_path=self.protocol_code_path
+                )
+                await code_generator.generate()
+                return True, protocol, self.protocol_code_path
+            except Exception as e:
+                logging.error(f"Failed to generate code: {str(e)}\n{traceback.format_exc()}")
+                return True, protocol, None
         
-        # code generation
-
-
-
-        return True, protocol
-
+        return True, protocol, None
 
     async def _send_message(self, message: Dict[str, Any], protocol_type: ProtocolType = ProtocolType.META) -> None:
         """Send encoded message with protocol header

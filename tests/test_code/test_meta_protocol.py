@@ -6,6 +6,7 @@
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
 
+import os
 import sys
 import json
 import asyncio
@@ -27,16 +28,16 @@ from tests.test_code.config import (
     validate_config
 )
 
-# 模拟发送数据的回调函数
+# Mock callback function for sending data
 async def mock_send_callback(data: bytes) -> None:
-    """模拟发送数据的回调函数"""
+    """Mock callback function for sending data"""
     logging.info(f"Mock sending data: {data}")
 
-# 模拟获取能力信息的回调函数
+# Mock callback function for getting capability information
 async def mock_capability_info(requirement: str, 
                              input_description: str, 
                              output_description: str) -> str:
-    """模拟获取能力信息的回调函数"""
+    """Mock callback function for getting capability information"""
     logging.info(f"Requirement: {requirement}")
     logging.info(f"Input description: {input_description}")
     logging.info(f"Output description: {output_description}")
@@ -62,47 +63,49 @@ def get_llm_instance() -> AzureLLM:
     return AzureLLM(client=client, model_name=AZURE_OPENAI_MODEL_NAME)
 
 async def test_negotiate_protocol():
-    """测试协议协商功能"""
+    """Test protocol negotiation functionality"""
     try:
-        # 获取LLM实例
+        # Get LLM instance
         llm = get_llm_instance()
         
-        # 创建MetaProtocol实例
+        # Get current file directory path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Create MetaProtocol instance with protocol_code_path
         meta_protocol = MetaProtocol(
             send_callback=mock_send_callback,
             get_capability_info_callback=mock_capability_info,
-            llm=llm
+            llm=llm,
+            protocol_code_path=os.path.join(current_dir, "generated_code_test")  # Use path relative to current file
         )
 
-        # 定义测试用的协议需求
-            
-        # 测试场景：API 接口协议设计
+        # Define test protocol requirements
         requirement = """
-        设计一个用于获取用户教育经历的 API 接口。
-        - API 应该支持获取单个用户的教育经历信息
-        - 教育经历信息应包含：学校名称、专业、学位、成就、开始时间、结束时间
-        - 需要支持错误处理和参数验证
+        Design an API interface for retrieving user education history.
+        - API should support retrieving education history for a single user
+        - Education history should include: school name, major, degree, achievements, start time, end time
+        - Must support error handling and parameter validation
         """
         
         input_description = """
-        输入参数应包含：
-        - user_id: 用户ID (字符串)
-        - include_details: 是否包含详细信息 (布尔值，可选)
+        Input parameters should include:
+        - user_id: User ID (string)
+        - include_details: Whether to include detailed information (boolean, optional)
         """
         
         output_description = """
-        输出应包含：
-        - 教育经历列表，每个教育经历包含：
-        * institution: 学校名称
-        * major: 专业
-        * degree: 学位 (Bachelor/Master/Doctorate)
-        * achievements: 成就
-        * start_date: 开始时间 (YYYY-MM-DD)
-        * end_date: 结束时间 (YYYY-MM-DD)
-        - 支持分页和错误信息返回
+        Output should include:
+        - List of education history, each containing:
+        * institution: School name
+        * major: Major
+        * degree: Degree (Bachelor/Master/Doctorate)
+        * achievements: Achievements
+        * start_date: Start time (YYYY-MM-DD)
+        * end_date: End time (YYYY-MM-DD)
+        - Support for pagination and error message return
         """
 
-        # 启动协议协商协程
+        # Start protocol negotiation coroutine
         negotiation_task = asyncio.create_task(
             meta_protocol.negotiate_protocol(
                 requirement=requirement,
@@ -111,48 +114,48 @@ async def test_negotiate_protocol():
             )
         )
 
-        # 模拟接收协议协商消息
+        # Simulate receiving protocol negotiation messages
         async def simulate_negotiation_messages():
-            # 等待一段时间，让negotiate_protocol先执行
             await asyncio.sleep(1)
             
-            # 修改消息1的格式 - 简化协议定义并避免转义字符问题
             message1 = {
                 "action": "protocolNegotiation",
                 "sequenceId": 2,
-                "candidateProtocols": "",
+                "candidateProtocols": "API Protocol Definition...",  # Add actual protocol content
                 "status": NegotiationStatus.ACCEPTED.value
             }
 
-            # 将消息编码为字节并添加协议类型头
             protocol_type_byte = bytes([ProtocolType.META.value << 6])
             message_bytes = protocol_type_byte + json.dumps(message1).encode('utf-8')
             
-            # 模拟接收消息
             await meta_protocol.handle_meta_data(message_bytes)
 
-        # 启动模拟消息接收协程
+        # Start simulated message receiving coroutine
         message_task = asyncio.create_task(simulate_negotiation_messages())
 
-        # 等待协议协商完成
-        success, protocol = await negotiation_task
+        # Wait for protocol negotiation to complete
+        success, protocol, code_path = await negotiation_task  # Updated to receive three return values
         await message_task
 
-        # 验证协商结果
+        # Verify negotiation results
         if success:
-            logging.info("协议协商成功!")
-            logging.info(f"协商的协议内容: {protocol}")
+            logging.info("Protocol negotiation successful!")
+            logging.info(f"Negotiated protocol content: {protocol}")
+            if code_path:
+                logging.info(f"Generated code path: {code_path}")
+            else:
+                logging.warning("Code generation not completed or not enabled")
         else:
-            logging.error("协议协商失败!")
+            logging.error("Protocol negotiation failed!")
 
     except Exception as e:
-        logging.error(f"测试过程中出现错误: {str(e)}", exc_info=True)
+        logging.error(f"Error occurred during testing: {str(e)}", exc_info=True)
         raise
 
 async def main():
-    """主测试函数"""
+    """Main test function"""
     set_log_color_level(logging.INFO)
     await test_negotiate_protocol()
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

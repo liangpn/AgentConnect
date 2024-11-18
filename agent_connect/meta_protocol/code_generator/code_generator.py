@@ -56,17 +56,30 @@ class ProtocolCodeGenerator:
         self.language = language
         self._module_name: Optional[str] = None
 
-    def _create_module_structure(self, module_name: str) -> None:
+    def _create_module_structure(self, module_name: str) -> str:
         """Create the basic module structure
         
         Args:
             module_name: Name of the module to create
+        
+        Returns:
+            str: The final module name (may include timestamp if original path existed)
         """
         module_path = self.output_path / module_name
+        
+        # If path exists, append timestamp to module_name
+        if module_path.exists():
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]  # Get milliseconds precision
+            module_name = f"{module_name}_{timestamp}"
+            module_path = self.output_path / module_name
+        
         module_path.mkdir(parents=True, exist_ok=True)
+        self._module_name = module_name  # Update the internal module name
         self._generate_init_file(module_name)
         self._generate_meta_data(module_name)
         self._update_protocol_document(self.protocol_doc)
+        
+        return module_name
 
     def _update_protocol_document(self, protocol_doc: str) -> None:
         """Update protocol document and its hash in meta_data.json
@@ -215,8 +228,7 @@ __version__ = '0.1.0'
                 return
             
             if not self._module_name:
-                self._module_name = module_name
-                self._create_module_structure(module_name)
+                self._module_name = self._create_module_structure(module_name)
             
             # Write files
             requester_path = f"{self._module_name}/requester.py"

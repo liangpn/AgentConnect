@@ -239,6 +239,7 @@ async def handle_message(self, message: bytes) -> None:
 ```
 
 # Output Format
+Output should include module name and code. The module name is generated based on protocol content, without distinguishing between requester or provider.
 Output in the following format, the code part should be directly runnable in Python files(do not include any other content, like backticks):
 --[ module_name ]--
 XXXX
