@@ -207,15 +207,26 @@ __version__ = '0.1.0'
             logging.error(f"Failed to update meta_data.json: {str(e)}\nStack trace:\n{traceback.format_exc()}")
 
 
-    async def generate(self) -> bool:
+    async def generate(self) -> tuple[bool, Optional[str]]:
         """Generate all protocol-related code, including requester and provider
         
         Returns:
-            bool: Whether generation was successful
+            tuple[bool, Optional[str]]: A tuple containing:
+                - bool: Whether generation was successful
+                - Optional[str]: Absolute path of the generated module if successful, None otherwise
         """
-
-        await self.generate_requester_code()
-        await self.generate_provider_code()
+        try:
+            await self.generate_requester_code()
+            await self.generate_provider_code()
+            
+            if self._module_name:
+                module_path = str(self.output_path / self._module_name)
+                return True, module_path
+            return False, None
+            
+        except Exception as e:
+            logging.error(f"Failed to generate code: {str(e)}\nStack trace:\n{traceback.format_exc()}")
+            return False, None
 
     async def generate_requester_code(self) -> None:
         try:

@@ -5,7 +5,6 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
-
 import os
 import sys
 import json
@@ -76,7 +75,7 @@ async def test_negotiate_protocol():
             send_callback=mock_send_callback,
             get_capability_info_callback=mock_capability_info,
             llm=llm,
-            protocol_code_path=os.path.join(current_dir, "generated_code_test")  # Use path relative to current file
+            protocol_code_path=os.path.join(current_dir, "generated_code_test")
         )
 
         # Define test protocol requirements
@@ -134,19 +133,16 @@ async def test_negotiate_protocol():
         message_task = asyncio.create_task(simulate_negotiation_messages())
 
         # Wait for protocol negotiation to complete
-        success, protocol, code_path = await negotiation_task  # Updated to receive three return values
+        success, module_path = await negotiation_task
         await message_task
 
         # Verify negotiation results
         if success:
-            logging.info("Protocol negotiation successful!")
-            logging.info(f"Negotiated protocol content: {protocol}")
-            if code_path:
-                logging.info(f"Generated code path: {code_path}")
-            else:
-                logging.warning("Code generation not completed or not enabled")
+            logging.info("Protocol negotiation and code generation successful!")
+            logging.info(f"Generated code path: {module_path}")
+            assert os.path.exists(module_path), "Generated code file does not exist"
         else:
-            logging.error("Protocol negotiation failed!")
+            logging.error("Protocol negotiation or code generation failed!")
 
     except Exception as e:
         logging.error(f"Error occurred during testing: {str(e)}", exc_info=True)

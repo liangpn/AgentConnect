@@ -247,7 +247,7 @@ class MetaProtocol:
 
     async def negotiate_protocol(self, requirement: str, 
                                input_description: str, 
-                               output_description: str) -> Tuple[bool, str, str]:
+                               output_description: str) -> Tuple[bool, str]:
         """Negotiate protocol and generate code implementation
         
         Args:
@@ -257,9 +257,8 @@ class MetaProtocol:
             
         Returns:
             Tuple containing:
-            - is_success: Whether negotiation was successful
-            - protocol: Protocol content
-            - code_path: Path to generated code (if successful)
+            - is_success: Whether negotiation and code generation succeeded
+            - module_path: Path to generated code (if successful)
         """
         logging.info("Starting protocol negotiation")
         logging.info(f"Requirement: {requirement}")
@@ -294,7 +293,7 @@ class MetaProtocol:
         
         success, protocol = await self._process_negotiation_messages()
         if not success:
-            return False, "", None
+            return False, ""
 
         # Generate code implementation
         if self.protocol_code_path and self.llm:
@@ -304,13 +303,17 @@ class MetaProtocol:
                     protocol_doc=protocol,
                     output_path=self.protocol_code_path
                 )
-                await code_generator.generate()
-                return True, protocol, self.protocol_code_path
+                success, module_path = await code_generator.generate()
+                if success:
+                    return True, module_path
+                else:
+                    logging.error("Code generation failed")
+                    return False, ""
             except Exception as e:
                 logging.error(f"Failed to generate code: {str(e)}\n{traceback.format_exc()}")
-                return True, protocol, None
+                return False, ""
         
-        return True, protocol, None
+        return False, ""
 
     async def _send_message(self, message: Dict[str, Any], protocol_type: ProtocolType = ProtocolType.META) -> None:
         """Send encoded message with protocol header
