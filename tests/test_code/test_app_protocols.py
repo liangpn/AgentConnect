@@ -16,40 +16,40 @@ from agent_connect.app_protocols.app_protocols import AppProtocols
 from agent_connect.utils.log_base import set_log_color_level
 
 async def test_app_protocols():
-    """测试 AppProtocols 功能"""
+    """Test AppProtocols functionality"""
     try:
-        # 获取测试协议目录的路径
+        # Get test protocol directory path
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_protocol_path = os.path.join(current_dir, 'generated_code_test')
         
-        # 初始化 AppProtocols 实例
+        # Initialize AppProtocols instance
         app_protocols = AppProtocols([test_protocol_path])
         
-        # 测试协议加载
+        # Test protocol loading
         education_protocol_hash = "sha256:2664c06c8ff8f26a56a3a7d8da81c32ab1365d4c8cc1501b887dde82e0067f40"
         
-        # 获取 Requester 和 Provider 类
+        # Get Requester and Provider classes
         requester_class = app_protocols.get_requester_by_hash(education_protocol_hash)
         provider_class = app_protocols.get_provider_by_hash(education_protocol_hash)
         
         if requester_class and provider_class:
-            logging.info("成功加载协议类")
+            logging.info("Successfully loaded protocol classes")
             logging.info(f"Requester class: {requester_class.__name__}")
             logging.info(f"Provider class: {provider_class.__name__}")
         else:
-            logging.error("协议类加载失败")
+            logging.error("Failed to load protocol classes")
             return
             
-        # 测试协议文件哈希计算
+        # Test protocol file hash calculation
         protocol_doc_path = os.path.join(
             test_protocol_path,
             'education_history_protocol',
             'protocol_document.md'
         )
         calculated_hash = app_protocols.calculate_file_hash(protocol_doc_path)
-        logging.info(f"协议文件哈希值: {calculated_hash}")
+        logging.info(f"Protocol file hash: {calculated_hash}")
         
-        # 测试协议文件完整性验证
+        # Test protocol file integrity verification
         protocol_dir = os.path.join(
             test_protocol_path,
             'education_history_protocol'
@@ -76,28 +76,28 @@ async def test_app_protocols():
         )
         
         if verification_result:
-            logging.info("协议文件完整性验证通过")
+            logging.info("Protocol file integrity verification passed")
         else:
-            logging.error("协议文件完整性验证失败")
+            logging.error("Protocol file integrity verification failed")
             
-        # 测试无效协议哈希
+        # Test invalid protocol hash
         invalid_hash = "sha256:invalid_hash_value"
         invalid_requester = app_protocols.get_requester_by_hash(invalid_hash)
         invalid_provider = app_protocols.get_provider_by_hash(invalid_hash)
         
         if invalid_requester is None and invalid_provider is None:
-            logging.info("无效协议哈希处理正确")
+            logging.info("Invalid protocol hash handled correctly")
         else:
-            logging.error("无效协议哈希处理异常")
+            logging.error("Invalid protocol hash handling error")
 
     except Exception as e:
-        logging.error(f"测试过程中发生错误: {str(e)}", exc_info=True)
+        logging.error(f"Error occurred during testing: {str(e)}", exc_info=True)
         raise
 
 async def main():
-    """主测试函数"""
+    """Main test function"""
     set_log_color_level(logging.INFO)
     await test_app_protocols()
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
