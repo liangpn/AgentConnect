@@ -16,6 +16,7 @@ import traceback
 
 from agent_connect.meta_protocol.protocol_negotiator import NegotiationStatus, ProtocolNegotiator
 from agent_connect.meta_protocol.code_generator.code_generator import ProtocolCodeGenerator
+from agent_connect.utils.llm.base_llm import BaseLLM
 
 class ProtocolType(Enum):
     """Protocol type enum"""
@@ -32,7 +33,7 @@ class MetaProtocol:
         self, 
         send_callback: Optional[Callable[[bytes], Awaitable[None]]] = None,
         get_capability_info_callback: Optional[Callable[[str, str, str], Awaitable[str]]] = None,
-        llm: Optional[Any] = None,
+        llm: Optional[BaseLLM] = None,
         protocol_code_path: Optional[str] = None  # Path for generated code
     ):
         """Initialize MetaProtocol
@@ -57,7 +58,8 @@ class MetaProtocol:
             llm: Optional LLM instance for protocol negotiation
         """
         self.max_negotiation_rounds = 10
-        self.timeout_seconds = 30
+        self.negotiation_timeout_seconds = 60
+        self.code_generation_timeout_seconds = 60
         self.send_callback = send_callback
         self.get_capability_info_callback = get_capability_info_callback
         self.llm = llm
@@ -65,6 +67,8 @@ class MetaProtocol:
         self.negotiator: Optional[ProtocolNegotiator] = None
         self.negotiation_messages = []
         self.negotiation_messages_event = asyncio.Event()
+        self.code_generation_messages = []
+        self.code_generation_messages_event = asyncio.Event()
 
     async def send_data(self, data: bytes) -> None:
         """Send data using the callback function
@@ -79,7 +83,7 @@ class MetaProtocol:
             raise RuntimeError("Send callback not set")
         await self.send_callback(data)
 
-    async def handle_meta_data(self, data: bytes) -> None:
+    def handle_meta_data(self, data: bytes) -> None:
         """Handle received meta protocol data
         
         Args:
@@ -112,15 +116,15 @@ class MetaProtocol:
             action = json_data.get("action")
 
             if action == "protocolNegotiation":
-                await self._handle_protocol_negotiation(json_data)
+                self._handle_protocol_negotiation(json_data)
             elif action == "codeGeneration":
-                await self._handle_code_generation(json_data)
+                self._handle_code_generation(json_data)
             elif action == "testCasesNegotiation":
-                await self._handle_test_cases_negotiation(json_data)
+                self._handle_test_cases_negotiation(json_data)
             elif action == "fixErrorNegotiation":
-                await self._handle_fix_error_negotiation(json_data)
+                self._handle_fix_error_negotiation(json_data)
             elif action == "naturalLanguageNegotiation":
-                await self._handle_natural_language_negotiation(json_data)
+                self._handle_natural_language_negotiation(json_data)
             else:
                 logging.error(f"Unknown action type: {action}")
 
@@ -130,120 +134,6 @@ class MetaProtocol:
         except Exception as e:
             stack_trace = traceback.format_exc()
             logging.error(f"Error handling meta data: {str(e)}\nStack trace:\n{stack_trace}")
-
-    async def _handle_protocol_negotiation(self, data: Dict[str, Any]) -> None:
-        """Handle protocol negotiation messages by adding to queue
-        
-        Args:
-            data: Protocol negotiation message data
-        """
-        self.negotiation_messages.append(data)
-        # Set event to notify waiting coroutines
-        self.negotiation_messages_event.set()
-
-    async def _handle_code_generation(self, data: Dict[str, Any]) -> None:
-        """Handle code generation status messages
-        
-        Args:
-            data: Code generation message data containing:
-                - status: Generation status (generated/error)
-        """
-        # TODO: Implement code generation handling
-        pass
-
-    async def _handle_test_cases_negotiation(self, data: Dict[str, Any]) -> None:
-        """Handle test cases negotiation messages
-        
-        Args:
-            data: Test cases message data containing:
-                - testCases: Test cases description
-                - modificationSummary: Optional modification summary
-                - status: Negotiation status
-        """
-        # TODO: Implement test cases negotiation handling
-        pass
-
-    async def _handle_fix_error_negotiation(self, data: Dict[str, Any]) -> None:
-        """Handle error fixing negotiation messages
-        
-        Args:
-            data: Error fixing message data containing:
-                - errorDescription: Error description
-                - status: Negotiation status
-        """
-        # TODO: Implement error fixing negotiation handling
-        pass
-
-    async def _handle_natural_language_negotiation(self, data: Dict[str, Any]) -> None:
-        """Handle natural language communication messages
-        
-        Args:
-            data: Natural language message data containing:
-                - type: Message type (REQUEST/RESPONSE)
-                - messageId: Unique message identifier
-                - message: Natural language message content
-        """
-        # TODO: Implement natural language communication handling
-        pass
-
-    async def _process_negotiation_messages(self) -> Tuple[bool, str]:
-        """Process protocol negotiation messages and handle the negotiation flow
-        
-        Returns:
-            Tuple containing:
-            - is_success: Whether the negotiation was successful
-            - protocol: Agreed protocol content if successful, empty string if failed
-        """
-        while True:
-            if not self.negotiation_messages:
-                try:
-                    # Wait for new message with timeout
-                    await asyncio.wait_for(self.negotiation_messages_event.wait(), timeout=self.timeout_seconds)
-                    # Clear event for next wait
-                    self.negotiation_messages_event.clear()
-                except asyncio.TimeoutError:
-                    stack_trace = traceback.format_exc()
-                    logging.error(f"Protocol negotiation timeout\nStack trace:\n{stack_trace}")
-                    return False, ""
-            
-            logging.info("Start processing negotiation messages")
-            while self.negotiation_messages:
-                data = self.negotiation_messages.pop(0)
-                logging.info(f"Processing negotiation message: {data}")
-                
-                if not self.negotiator:
-                    logging.error("Protocol negotiator not initialized")
-                    return False, ""
-                
-                # Extract message fields
-                sequence_id = data.get("sequenceId")
-                candidate_protocols = data.get("candidateProtocols", "")
-                modification_summary = data.get("modificationSummary", "")
-                status = NegotiationStatus(data.get("status", NegotiationStatus.NEGOTIATING.value))
-                
-                # Evaluate protocol proposal
-                result, current_round = await self.negotiator.evaluate_protocol_proposal(
-                    negotiation_status=status,
-                    counterparty_round=sequence_id,
-                    candidate_protocols=candidate_protocols,
-                    modification_summary=modification_summary
-                )
-                
-                if result.status == NegotiationStatus.NEGOTIATING:
-                    response = self.create_protocol_negotiation_message(
-                        sequence_id=current_round,
-                        candidate_protocols=result.candidate_protocol,
-                        modification_summary=result.modification_summary,
-                        status=result.status
-                    )
-                    await self._send_message(response)
-                elif result.status == NegotiationStatus.REJECTED:
-                    return False, ""
-                elif result.status == NegotiationStatus.ACCEPTED:
-                    return True, result.candidate_protocol
-        
-        logging.error("Protocol negotiation failed")
-        return False, ""
 
     async def negotiate_protocol(self, requirement: str, 
                                input_description: str, 
@@ -283,7 +173,7 @@ class MetaProtocol:
         )
         
         # Create and send initial message
-        message = self.create_protocol_negotiation_message(
+        message = self._create_protocol_negotiation_message(
             sequence_id=round_num,
             candidate_protocols=protocol,
             status=status
@@ -315,6 +205,194 @@ class MetaProtocol:
         
         return False, ""
 
+    
+    async def wait_remote_negotiation(self) -> Tuple[bool, str]:
+        """Wait for remote negotiation and generate code implementation
+        
+        Returns:
+            Tuple containing:
+            - is_success: Whether negotiation and code generation succeeded
+            - module_path: Path to generated code (if successful)
+        """
+        logging.info("Starting protocol negotiation")
+
+        # Initialize protocol negotiator
+        self.negotiator = ProtocolNegotiator(
+            llm=self.llm,
+            get_capability_info_callback=self.get_capability_info_callback
+        )
+        
+        # Clear message queue
+        self.negotiation_messages.clear()
+        self.negotiation_messages_event.clear()
+        
+        success, protocol = await self._process_negotiation_messages()
+        if not success:
+            return False, ""
+
+        # Generate code implementation
+        if self.protocol_code_path and self.llm:
+            try:
+                code_generator = ProtocolCodeGenerator(
+                    llm=self.llm,
+                    protocol_doc=protocol,
+                    output_path=self.protocol_code_path
+                )
+                success, module_path = await code_generator.generate()
+                if success:
+                    return True, module_path
+                else:
+                    logging.error("Code generation failed")
+                    return False, ""
+            except Exception as e:
+                logging.error(f"Failed to generate code: {str(e)}\n{traceback.format_exc()}")
+                return False, ""
+        
+        return False, ""
+
+    async def notify_code_generation(self) -> None:
+        """Notify that code generation has been completed."""
+        message = self._create_code_generation_message(success=True)
+        await self._send_message(message)
+
+    async def wait_for_code_generation(self) -> bool:
+        """Wait for the remote side to send code generation status.
+        
+        Returns:
+            True if code generation succeeded, False otherwise
+        """
+        while True:
+            try:
+                if not self.code_generation_messages:   
+                    # Wait for negotiation messages with timeout
+                    await asyncio.wait_for(self.code_generation_messages_event.wait(), timeout=self.code_generation_timeout_seconds)
+                    # Clear event for next wait
+                    self.code_generation_messages_event.clear()
+                    
+                if self.code_generation_messages:
+                    message = self.code_generation_messages.pop(0)
+                    if message.get("action") == "codeGeneration":
+                        logging.info("Received code generation status: %s", message.get("status"))
+                        self.code_generation_messages_event.clear()
+                        return True
+            except asyncio.TimeoutError:
+                logging.error("Timeout waiting for code generation messages")
+                return False
+
+    def _handle_protocol_negotiation(self, data: Dict[str, Any]) -> None:
+        """Handle protocol negotiation messages by adding to queue
+        
+        Args:
+            data: Protocol negotiation message data
+        """
+        self.negotiation_messages.append(data)
+        # Set event to notify waiting coroutines
+        self.negotiation_messages_event.set()
+
+    def _handle_code_generation(self, data: Dict[str, Any]) -> None:
+        """Handle code generation status messages
+        
+        Args:
+            data: Code generation message data containing:
+                - status: Generation status (generated/error)
+        """
+        self.code_generation_messages.append(data)
+        self.code_generation_messages_event.set()
+
+    def _handle_test_cases_negotiation(self, data: Dict[str, Any]) -> None:
+        """Handle test cases negotiation messages
+        
+        Args:
+            data: Test cases message data containing:
+                - testCases: Test cases description
+                - modificationSummary: Optional modification summary
+                - status: Negotiation status
+        """
+        # TODO: Implement test cases negotiation handling
+        pass
+
+    def _handle_fix_error_negotiation(self, data: Dict[str, Any]) -> None:
+        """Handle error fixing negotiation messages
+        
+        Args:
+            data: Error fixing message data containing:
+                - errorDescription: Error description
+                - status: Negotiation status
+        """
+        # TODO: Implement error fixing negotiation handling
+        pass
+
+    def _handle_natural_language_negotiation(self, data: Dict[str, Any]) -> None:
+        """Handle natural language communication messages
+        
+        Args:
+            data: Natural language message data containing:
+                - type: Message type (REQUEST/RESPONSE)
+                - messageId: Unique message identifier
+                - message: Natural language message content
+        """
+        # TODO: Implement natural language communication handling
+        pass
+
+    async def _process_negotiation_messages(self) -> Tuple[bool, str]:
+        """Process protocol negotiation messages and handle the negotiation flow
+        
+        Returns:
+            Tuple containing:
+            - is_success: Whether the negotiation was successful
+            - protocol: Agreed protocol content if successful, empty string if failed
+        """
+        while True:
+            if not self.negotiation_messages:
+                try:
+                    # Wait for new message with timeout
+                    await asyncio.wait_for(self.negotiation_messages_event.wait(), timeout=self.negotiation_timeout_seconds)
+                    # Clear event for next wait
+                    self.negotiation_messages_event.clear()
+                except asyncio.TimeoutError:
+                    stack_trace = traceback.format_exc()
+                    logging.error(f"Protocol negotiation timeout\nStack trace:\n{stack_trace}")
+                    return False, ""
+            
+            logging.info("Start processing negotiation messages")
+            while self.negotiation_messages:
+                data = self.negotiation_messages.pop(0)
+                logging.info(f"Processing negotiation message: {data}")
+                
+                if not self.negotiator:
+                    logging.error("Protocol negotiator not initialized")
+                    return False, ""
+                
+                # Extract message fields
+                sequence_id = data.get("sequenceId")
+                candidate_protocols = data.get("candidateProtocols", "")
+                modification_summary = data.get("modificationSummary", "")
+                status = NegotiationStatus(data.get("status", NegotiationStatus.NEGOTIATING.value))
+                
+                # Evaluate protocol proposal
+                result, current_round = await self.negotiator.evaluate_protocol_proposal(
+                    negotiation_status=status,
+                    counterparty_round=sequence_id,
+                    candidate_protocols=candidate_protocols,
+                    modification_summary=modification_summary
+                )
+                
+                if result.status == NegotiationStatus.NEGOTIATING:
+                    response = self._create_protocol_negotiation_message(
+                        sequence_id=current_round,
+                        candidate_protocols=result.candidate_protocol,
+                        modification_summary=result.modification_summary,
+                        status=result.status
+                    )
+                    await self._send_message(response)
+                elif result.status == NegotiationStatus.REJECTED:
+                    return False, ""
+                elif result.status == NegotiationStatus.ACCEPTED:
+                    return True, result.candidate_protocol
+        
+        logging.error("Protocol negotiation failed")
+        return False, ""
+
     async def _send_message(self, message: Dict[str, Any], protocol_type: ProtocolType = ProtocolType.META) -> None:
         """Send encoded message with protocol header
         
@@ -325,11 +403,11 @@ class MetaProtocol:
         Raises:
             RuntimeError: If send_callback is not set
         """
-        header = self.encode_protocol_header(protocol_type)
+        header = self._encode_protocol_header(protocol_type)
         message_bytes = json.dumps(message).encode('utf-8')
         await self.send_data(header + message_bytes)
 
-    def encode_protocol_header(self, protocol_type: ProtocolType) -> bytes:
+    def _encode_protocol_header(self, protocol_type: ProtocolType) -> bytes:
         """Encode protocol header
         
         Args:
@@ -342,7 +420,7 @@ class MetaProtocol:
         header = protocol_type.value << 6
         return bytes([header])
         
-    def decode_protocol_header(self, header_byte: bytes) -> ProtocolType:
+    def _decode_protocol_header(self, header_byte: bytes) -> ProtocolType:
         """Decode protocol header
         
         Args:
@@ -354,7 +432,7 @@ class MetaProtocol:
         protocol_type = header_byte[0] >> 6
         return ProtocolType(protocol_type)
 
-    def create_protocol_negotiation_message(
+    def _create_protocol_negotiation_message(
         self,
         sequence_id: int,
         candidate_protocols: str,
@@ -382,7 +460,7 @@ class MetaProtocol:
             message["modificationSummary"] = modification_summary
         return message
 
-    def create_code_generation_message(self, success: bool = True) -> Dict[str, str]:
+    def _create_code_generation_message(self, success: bool = True) -> Dict[str, str]:
         """Create code generation message
         
         Args:
@@ -396,7 +474,7 @@ class MetaProtocol:
             "status": "generated" if success else "error"
         }
 
-    def create_test_cases_message(
+    def _create_test_cases_message(
         self,
         test_cases: str,
         modification_summary: Optional[str] = None,
@@ -421,7 +499,7 @@ class MetaProtocol:
             message["modificationSummary"] = modification_summary
         return message
 
-    def create_fix_error_message(
+    def _create_fix_error_message(
         self,
         error_description: str,
         status: NegotiationStatus = NegotiationStatus.NEGOTIATING
@@ -441,7 +519,7 @@ class MetaProtocol:
             "status": status.value
         }
 
-    def create_natural_language_message(
+    def _create_natural_language_message(
         self,
         message: str,
         is_request: bool = True

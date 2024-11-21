@@ -178,7 +178,7 @@ class RequesterBase(ABC):
 # Please generate the requester class according to the following requirements:
 1. The class must inherit from RequesterBase, import RequesterBase class using:
 ```
-from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
+from agent_connect.app_protocols import RequesterBase
 ```
 
 2. The class name should use the class name defined in the API documentation

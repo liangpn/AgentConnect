@@ -27,8 +27,8 @@ sys.path.append(current_directory)
 sys.path.append(current_directory + "/../")
 sys.path.append(current_directory + "/../../")
 
-from utils.crypto_tool import decrypt_aes_gcm_sha256, derive_tls13_data_keys, generate_16_char_from_random_num, generate_random_hex, generate_ec_key_pair, generate_shared_secret, get_key_length_from_cipher_suite, get_public_key_from_hex, load_private_key_from_pem, verify_did_with_public_key, verify_signature_for_json
-from message_generation import generate_destination_hello, generate_finished_message, generate_source_hello
+from agent_connect.utils.crypto_tool import decrypt_aes_gcm_sha256, derive_tls13_data_keys, generate_16_char_from_random_num, generate_random_hex, generate_ec_key_pair, generate_shared_secret, get_key_length_from_cipher_suite, get_public_key_from_hex, load_private_key_from_pem, verify_did_with_public_key, verify_signature_for_json
+from agent_connect.e2e_encryption.message_generation import generate_destination_hello, generate_finished_message, generate_source_hello
 
 class ECKeyPair:
     def __init__(self, curve: ec.EllipticCurve):
@@ -341,47 +341,47 @@ class ShortTermKeyGenerater:
 
         verify_data = self.finished_message['verifyData']
         if not verify_data:
-            logging.error("verifyData为空")
+            logging.error("verifyData is empty")
             return False
 
         content= decrypt_aes_gcm_sha256(verify_data, self.receive_decryption_key)
         content_dict = json.loads(content)
         if not content_dict:
-            logging.error("ciphertext为空")
+            logging.error("ciphertext is empty")
             return False
         
         secret_key_id = content_dict['secretKeyId']
         if not secret_key_id:
-            logging.error("secretKeyId为空")
+            logging.error("secretKeyId is empty")
             return False
         
         expected_secret_key_id = generate_16_char_from_random_num(self.source_hello_random, self.destination_hello_random)
 
         if secret_key_id != expected_secret_key_id:
-            logging.error("secretKeyId不匹配")
+            logging.error("secretKeyId does not match")
             return False
         
         self.secret_key_id = secret_key_id
 
-        logging.info("Finished消息处理成功")
+        logging.info("Finished message processed successfully")
         return True
 
     def extract_public_key(self, did_document: Dict[str, Any], key_id: str) -> ec.EllipticCurvePublicKey:
-        """从DID文档中提取公钥"""
+        """Extract public key from DID document"""
         vm = did_document['verificationMethod']
         if vm['id'] == key_id and vm['type'] == "EcdsaSecp256r1VerificationKey2019":
             public_key_hex = vm['publicKeyHex']
-            # 确保公钥以 '04' 开头
+            # Ensure public key starts with '04'
             if not public_key_hex.startswith('04'):
-                logging.error(f"公钥必须以 '04' 开头: {public_key_hex}")
-                raise ValueError("公钥必须以 '04' 开头")
+                logging.error(f"Public key must start with '04': {public_key_hex}")
+                raise ValueError("Public key must start with '04'")
             
-            public_key_bytes = bytes.fromhex(public_key_hex)  # 确保从正确的位置开始转换
+            public_key_bytes = bytes.fromhex(public_key_hex)  # Ensure conversion starts from the correct position
             return ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), public_key_bytes)
         
-        raise ValueError(f"在DID文档中未找到公钥 {key_id}")
+        raise ValueError(f"Public key not found in DID document {key_id}")
 
-    # TODO: 捕获异常，发送错误消息
+    # TODO: Capture exceptions and send error messages
     async def generate_short_term_key_active(self):
 
         await self.send_source_hello()
@@ -390,14 +390,14 @@ class ShortTermKeyGenerater:
 
         if not self.destination_hello_message:
             try:
-                # 等待destination_hello消息到来
+                # Wait for destination_hello message to arrive
                 await asyncio.wait_for(self.event.wait(), timeout=10)
             except asyncio.TimeoutError:
                 if not self.destination_hello_message:
                     logging.error("wait destination hello timeout!")
                     return False
         
-        # 处理destination_hello消息
+        # Process destination_hello message
         if not self.process_destination_hello():
             return False
         
@@ -405,12 +405,12 @@ class ShortTermKeyGenerater:
 
         await self.send_finished()
 
-        # 更新状态
+        # Update state
         self.state = "wait_finished"
 
         if not self.finished_message:
             try:
-                # 等待finished消息到来
+                # Wait for finished message to arrive
                 await asyncio.wait_for(self.event.wait(), timeout=10)
             except asyncio.TimeoutError:
                 logging.error("wait finished timeout!")
@@ -437,12 +437,12 @@ class ShortTermKeyGenerater:
 
         await self.send_finished()
 
-        # 更新状态
+        # Update state
         self.state = "wait_finished"
 
         if not self.finished_message:
             try:
-                # 等待finished消息到来
+                # Wait for finished message to arrive
                 await asyncio.wait_for(self.event.wait(), timeout=10)
             except asyncio.TimeoutError:
                 logging.error("generate_short_term_key_passive wait finished timeout!")
@@ -455,7 +455,3 @@ class ShortTermKeyGenerater:
         logging.info(f"generate_short_term_key_passive, success, secret_key_id: {self.secret_key_id}")
         return True
         
-
-# 示例用法
-if __name__ == "__main__":
-    print('')

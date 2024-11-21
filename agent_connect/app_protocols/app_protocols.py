@@ -21,7 +21,7 @@ import os
 import json
 import hashlib
 import importlib.util
-from typing import Dict, Optional, Any, Type
+from typing import Dict, Optional, Any, Tuple, Type
 
 from agent_connect.app_protocols.protocol_base.provider_base import ProviderBase
 from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
@@ -89,37 +89,42 @@ class AppProtocols:
                 return False
         return True
     
-    def load_protocol(self, protocol_dir: str) -> bool:
-        """Load single protocol directory
+    def load_protocol(self, protocol_dir: str) -> Optional[str]:
+        """Load a single protocol directory
         
         Args:
-            protocol_dir: Protocol directory path
+            protocol_dir: Path to the protocol directory
             
         Returns:
-            bool: Loading result
+            str: Hash value of the successfully loaded protocol
+            None: If loading fails
         """
         meta_data_path = os.path.join(protocol_dir, 'meta_data.json')
         if not os.path.exists(meta_data_path):
             logging.error(f"meta_data.json not found: {protocol_dir}")
-            return False
+            return None
 
         with open(meta_data_path, 'r') as f:
             meta_data = json.load(f)
 
         if not self.verify_protocol_files(protocol_dir, meta_data):
-            return False
+            return None
 
+        protocol_hash = None
+        
         # Load requester
         requester_container = RequesterContainer(protocol_dir, meta_data)
         if requester_container.requester_class:
             self.requester_protocols[requester_container.protocol_hash] = requester_container
+            protocol_hash = requester_container.protocol_hash
 
         # Load provider  
         provider_container = ProviderContainer(protocol_dir, meta_data)
         if provider_container.provider_class:
             self.provider_protocols[provider_container.protocol_hash] = provider_container
+            protocol_hash = provider_container.protocol_hash
             
-        return True
+        return protocol_hash
 
     def reload_all_protocols(self) -> None:
         """Load all protocols under all protocol paths"""
@@ -132,32 +137,36 @@ class AppProtocols:
                     if os.path.isdir(full_protocol_dir):
                         self.load_protocol(full_protocol_dir)
                         
-    def get_requester_by_hash(self, protocol_hash: str) -> Optional[RequesterBase]:
+    def get_requester_by_hash(self, protocol_hash: str) -> Tuple[Optional[RequesterBase], Optional[dict]]:
         """Get requester class by protocol hash
         
         Args:
             protocol_hash: Hash value of the protocol document
             
         Returns:
-            RequesterBase class if found, None otherwise
+            Tuple[RequesterBase class, send request description] if found, (None, None) otherwise
         """
-        container = self.requester_protocols.get(protocol_hash)
-        return container.requester_class if container else None
+        container: Optional[RequesterContainer] = self.requester_protocols.get(protocol_hash, None)
+        if container:
+            return container.requester_class, container.send_request_description
+        return None, None
 
-    def get_provider_by_hash(self, protocol_hash: str) -> Optional[ProviderBase]:
+    def get_provider_by_hash(self, protocol_hash: str) -> Tuple[Optional[ProviderBase], Optional[dict]]:
         """Get provider class by protocol hash
         
         Args:
             protocol_hash: Hash value of the protocol document
             
         Returns:
-            ProviderBase class if found, None otherwise
+            Tuple[ProviderBase class, set protocol callback description] if found, (None, None) otherwise
         """
-        container = self.provider_protocols.get(protocol_hash)
-        return container.provider_class if container else None
+        container: Optional[ProviderContainer] = self.provider_protocols.get(protocol_hash, None)
+        if container:
+            return container.provider_class, container.set_protocol_callback_description
+        return None, None
 
 
-    async def load_protocol_from_url(self, url: str) -> bool:
+    async def load_protocol_from_url(self, url: str) -> Optional[str]:
         """Load protocol from remote url"""
         pass
 

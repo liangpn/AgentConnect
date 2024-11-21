@@ -7,7 +7,7 @@
 
 import datetime
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 import asyncio
 import json
 from agent_connect.e2e_encryption.short_term_key_generater import ShortTermKeyGenerater
@@ -31,6 +31,7 @@ class SimpleNodeSession:
             wss_wraper (SimpleWssWraper): The WebSocket wrapper.
         """
         self.local_did = local_did
+        self.remote_did = None
         self.private_key_pem = private_key_pem
         self.did_document_json = did_document_json
         self.wss_wraper: SimpleWssWraper = wss_wraper
@@ -41,6 +42,13 @@ class SimpleNodeSession:
 
         if isinstance(self.wss_wraper, SimpleClientWssWraper):
             self._start_heartbeat()
+
+    
+    def set_remote_did(self, remote_did: str):
+        """
+        Set the remote DID.
+        """
+        self.remote_did = remote_did
 
     def set_recv_task(self, task: asyncio.Task):
         """
@@ -103,7 +111,7 @@ class SimpleNodeSession:
             "message": "ping"
         }
         await self.wss_wraper.send_data(heartbeat)
-        logging.info(f"Heartbeat request sent: {heartbeat}")
+        logging.debug(f"Heartbeat request sent: {heartbeat}")
 
     async def _process_short_term_key_negotiation_messages(self):
         """
@@ -289,16 +297,14 @@ class SimpleNodeSession:
             "message": "pong"
         }
         await self.wss_wraper.send_data(response)
-        logging.info(f"Heartbeat response sent: {response}")
+        logging.debug(f"Heartbeat response sent: {response}")
 
-    async def receive_message(self) -> Optional[Tuple[str, str, str]]:
+    async def receive_message(self) -> Optional[bytes]:
         """
         Asynchronously receive and decrypt messages.
 
         Returns:
-            Optional[Tuple[str, str, str]]: 
-                If message is successfully received and decrypted, returns a tuple (source DID, destination DID, decrypted message content)
-                If received data is not a message or decryption fails, returns None
+            Optional[bytes]: Decrypted message content
         """
         while True:
 
@@ -313,9 +319,13 @@ class SimpleNodeSession:
                 logging.error(f"Received non-message type data: {json_data['type']}")
                 continue
 
-            return self._decrypt_message(json_data)
+            decrypted_message = self._decrypt_message(json_data)
+            if decrypted_message:
+                return decrypted_message.encode('utf-8')
+            else:
+                return None
 
-    def _decrypt_message(self, json_data: dict) -> Optional[Tuple[str, str, str]]:
+    def _decrypt_message(self, json_data: dict) -> Optional[str]:
         """
         Decrypt received message.
 
@@ -323,17 +333,15 @@ class SimpleNodeSession:
             json_data (dict): Received JSON data
 
         Returns:
-            Optional[Tuple[str, str, str]]: 
-                If decryption is successful, returns a tuple (source DID, destination DID, decrypted message content)
-                If decryption fails, returns None
+            Optional[str]: Decrypted message content
         """
         if not self.short_term_key:
             logging.error("No available short-term key")
-            return '', '', ''
+            return ''
 
         if json_data['secretKeyId'] != self.short_term_key['secret_key_id']:
             logging.error(f"Key ID mismatch: {json_data['secretKeyId']} != {self.short_term_key['secret_key_id']}")
-            return '', '', ''
+            return ''
 
         encrypted_data = json_data['encryptedData']
         secret_key = bytes.fromhex(self.short_term_key['receive_decryption_key'])
@@ -341,25 +349,25 @@ class SimpleNodeSession:
         try:
             plaintext = decrypt_aes_gcm_sha256(encrypted_data, secret_key)
             logging.info(f"Message decryption successful")
-            return json_data['sourceDid'], json_data['destinationDid'], plaintext
+            return plaintext
         except Exception as e:
             logging.error(f"Message decryption failed: {e}")
-            return '', '', ''
+            return ''
 
-    async def send_message(self, message: str, destination_did: str) -> bool:
+    async def send_message(self, message: Union[str, bytes]) -> bool:
         """
-        Send message to other DID.
+        Send message to the previously set destination DID.
 
         Args:
-            message (str): Message content to be sent.
-            destination_did (str): Target DID.
+            message (Union[str, bytes]): Message content to be sent.
 
         Returns:
             bool: Returns True if sending is successful, False if failed.
         """
         try:
-            # Convert message to bytes
-            message_bytes = message.encode('utf-8')
+            destination_did = self.remote_did  # Use previously set remote DID
+            # Convert message to bytes if it's a string
+            message_bytes = message.encode('utf-8') if isinstance(message, str) else message
 
             # Generate encrypted message
             encrypted_message = generate_encrypted_message(

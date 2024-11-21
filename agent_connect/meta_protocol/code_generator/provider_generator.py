@@ -184,7 +184,7 @@ class ProviderBase(ABC):
 # Please generate provider class according to the following requirements:
 1. Class must inherit from ProviderBase, import ProviderBase class as follows:
 ```
-from agent_connect.app_protocols.protocol_base.provider_base import ProviderBase
+from agent_connect.app_protocols import ProviderBase
 2. Class name should use the class name defined in API documentation
 
 3. Code requirements:

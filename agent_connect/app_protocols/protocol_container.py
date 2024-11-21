@@ -53,6 +53,7 @@ class RequesterContainer(ProtocolContainer):
     def __init__(self, protocol_dir: str, meta_data: Dict):
         super().__init__(protocol_dir, meta_data)
         self.class_info = self._load_class_info()
+        self.send_request_description = self._extract_send_request_description()
         self.requester_class = self._load_requester()
         
     def _load_class_info(self) -> Dict:
@@ -62,6 +63,10 @@ class RequesterContainer(ProtocolContainer):
             self.meta_data['files']['requester_description']['file']
         )
         return self._extract_class_info(desc_path)
+    
+    def _extract_send_request_description(self) -> Dict:
+        """Extract send request description from class info"""
+        return next((item for item in self.class_info['interfaces'] if item['function']['name'] == 'send_request'), None)
         
     def _load_requester(self) -> Optional[Type[RequesterBase]]:
         """Load requester class"""
@@ -82,6 +87,7 @@ class ProviderContainer(ProtocolContainer):
     def __init__(self, protocol_dir: str, meta_data: Dict):
         super().__init__(protocol_dir, meta_data)
         self.class_info = self._load_class_info()
+        self.set_protocol_callback_description = self._extract_set_protocol_callback_description()
         self.provider_class = self._load_provider()
         
     def _load_class_info(self) -> Dict:
@@ -91,6 +97,10 @@ class ProviderContainer(ProtocolContainer):
             self.meta_data['files']['provider_description']['file']
         )
         return self._extract_class_info(desc_path)
+        
+    def _extract_set_protocol_callback_description(self) -> Dict:
+        """Extract set protocol callback description from class info"""
+        return next((item for item in self.class_info['interfaces'] if item['function']['name'] == 'set_protocol_callback'), None)
         
     def _load_provider(self) -> Optional[Type[ProviderBase]]:
         """Load provider class"""

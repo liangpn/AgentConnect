@@ -29,8 +29,8 @@ async def test_app_protocols():
         education_protocol_hash = "sha256:2664c06c8ff8f26a56a3a7d8da81c32ab1365d4c8cc1501b887dde82e0067f40"
         
         # Get Requester and Provider classes
-        requester_class = app_protocols.get_requester_by_hash(education_protocol_hash)
-        provider_class = app_protocols.get_provider_by_hash(education_protocol_hash)
+        requester_class, send_request_description = app_protocols.get_requester_by_hash(education_protocol_hash)
+        provider_class, set_protocol_callback_description = app_protocols.get_provider_by_hash(education_protocol_hash)
         
         if requester_class and provider_class:
             logging.info("Successfully loaded protocol classes")
@@ -82,8 +82,8 @@ async def test_app_protocols():
             
         # Test invalid protocol hash
         invalid_hash = "sha256:invalid_hash_value"
-        invalid_requester = app_protocols.get_requester_by_hash(invalid_hash)
-        invalid_provider = app_protocols.get_provider_by_hash(invalid_hash)
+        invalid_requester, invalid_send_request_description = app_protocols.get_requester_by_hash(invalid_hash)
+        invalid_provider, invalid_set_protocol_callback_description = app_protocols.get_provider_by_hash(invalid_hash)
         
         if invalid_requester is None and invalid_provider is None:
             logging.info("Invalid protocol hash handled correctly")
