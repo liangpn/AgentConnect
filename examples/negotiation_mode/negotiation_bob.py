@@ -19,7 +19,7 @@ from agent_connect.simple_node import SimpleNegotiationNode, ProviderSession
 from agent_connect.app_protocols import ProviderBase
 from agent_connect.utils.log_base import set_log_color_level
 
-from utils import generate_did_info, get_llm_instance
+from utils import generate_did_info, get_llm_instance, mock_capability_info
 
 async def new_provider_negotiation_session_callback(provider_session: ProviderSession) -> None:
     """Process new negotiation sessions"""
@@ -46,7 +46,8 @@ async def main() -> None:
         host_port="8001",
         host_ws_path="/ws",
         protocol_code_path=os.path.join(g_current_dir, "protocol_code"),
-        new_provider_session_callback=new_provider_negotiation_session_callback
+        new_provider_session_callback=new_provider_negotiation_session_callback,
+        get_capability_info_callback=mock_capability_info
     )
 
     # generate the DID information for Bob

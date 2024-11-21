@@ -5,6 +5,7 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
+import asyncio
 import json
 import os
 import logging
@@ -77,3 +78,20 @@ def load_bob_did() -> str:
     with open(bob_json_path, "r") as f:
         bob_info: Dict[str, str] = json.load(f)
     return bob_info["did"] 
+
+# Mock callback function for getting capability information
+async def mock_capability_info(requirement: str, 
+                             input_description: str, 
+                             output_description: str) -> str:
+    """Mock callback function for getting capability information"""
+    logging.info(f"Requirement: {requirement}")
+    logging.info(f"Input description: {input_description}")
+    logging.info(f"Output description: {output_description}")
+    await asyncio.sleep(0.01)
+    return """
+    Capability Assessment:
+    - Requirements: Can fully meet the specified requirements
+    - Input Format: Can process all specified input fields
+    - Output Format: Can generate all required output fields
+    - No significant limitations or constraints identified
+    """

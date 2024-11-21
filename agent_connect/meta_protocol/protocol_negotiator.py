@@ -395,11 +395,12 @@ The protocol should be practical and implementable.'''
             expected_round = self.negotiation_round + 1
             if counterparty_round != expected_round:
                 logging.error(f"Invalid round number. Expected {expected_round}, got {counterparty_round}")
-                return NegotiationResult(
-                    status=NegotiationStatus.REJECTED,
-                    candidate_protocol="",
-                    modification_summary=f"Invalid round number. Expected {expected_round}, got {counterparty_round}"
-                ), self.negotiation_round
+                # TODO: Handle invalid round number, JUST PRINT FOR NOW
+                # return NegotiationResult(
+                #     status=NegotiationStatus.REJECTED,
+                #     candidate_protocol="",
+                #     modification_summary=f"Invalid round number. Expected {expected_round}, got {counterparty_round}"
+                # ), self.negotiation_round
         
         # Handle terminal states
         if negotiation_status == NegotiationStatus.ACCEPTED:
@@ -530,12 +531,14 @@ Please evaluate this protocol proposal:
                             "tool_call_id": tool_call.id
                         })
 
-            self.negotiation_round += 1
+            self.negotiation_round += 2
             
             # Parse JSON response from assistant message
             if not assistant_message.content:
                 raise ValueError("Received empty response from LLM")
             
+            logging.info(f"Provider evaluation result: {assistant_message.content}")
+
             result_json = json.loads(assistant_message.content)
             result = NegotiationResult(
                 status=NegotiationStatus(result_json["status"]),
@@ -609,7 +612,7 @@ Please evaluate this protocol proposal:
             )
             
             result_json = json.loads(response.choices[0].message.content)
-            self.negotiation_round += 1
+            self.negotiation_round += 2
             
             result = NegotiationResult(
                 status=NegotiationStatus(result_json["status"]),
