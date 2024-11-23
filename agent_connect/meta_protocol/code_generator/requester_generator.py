@@ -5,12 +5,14 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
+import json
 from typing import Dict, Tuple, Any, Optional
 import logging
 import traceback
 
 from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
 from agent_connect.utils.llm.base_llm import BaseLLM
+from agent_connect.utils.llm_output_processer import extract_code_from_llm_output
 
 REQUESTER_DESCRIPTION_PROMPT = """
 As an experienced protocol architect and system developer, please help us analyze the protocol documentation thoroughly to build accurate and comprehensive API description files.
@@ -20,7 +22,8 @@ Through your professional perspective, extract core interface information from p
 
 # Please pay special attention to the following points:
 1. Interface Requirements
-  - Define a class with a name designed by you
+  - Please design a module name based on protocol documentation, like "user_education_info_protocol"
+  - Please design a class name based on protocol documentation, like "ProtocolRequester"
   - Include a send_request method in the class for sending requests and returning data
   - Deeply analyze protocol documentation to design send_request method parameters, typically including all parameters from request protocol
   - Design send_request method return value, which typically includes request success status and result data
@@ -51,6 +54,7 @@ Through your professional perspective, extract core interface information from p
 # Output Example:
 {
   "version": "1.0",
+  "module_name": "user_education_info_protocol",
   "definitions": [
     {
       "type": "class", 
@@ -232,15 +236,12 @@ async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
 6. For self.received_messages and self.messages_event.wait(), always check if self.received_messages is empty first. If it is empty, call self.messages_event.wait() to wait for a message; otherwise, directly process self.received_messages.
 
 # Output format
-Output should include module name and code. The module name is generated based on protocol content, without distinguishing between requester or provider.
-Output in the following format, the code part should be directly runnable in Python files(do not include any other content, like backticks):
---[ module_name ]--
-XXXX
---[END]--
+Output code in the following format, code is wrapped with three backticks.
+An example output is as follows (XXXX is runnable Python code):
 
---[ requester_code ]--
+```python
 XXXX
---[END]--
+```
 '''
 
 async def _generate_requester_class(
@@ -251,7 +252,6 @@ async def _generate_requester_class(
     # Use REQUESTER_CLASS_PROMPT as system prompt
     system_prompt = REQUESTER_CLASS_PROMPT
     
-    # Simple user prompt with protocol documentation
     user_prompt = f'''
 Please generate a requester class based on the following protocol documentation:
 
@@ -266,39 +266,15 @@ Please generate a requester class based on the following protocol documentation:
     
     # Call OpenAI API
     content = await llm.async_generate_response(system_prompt, user_prompt)
+
+    logging.info(f"Generated requester code: {content}")
     
-    try:
-        # Extract module_name and requester_code from content
-        # Find module_name section
-        module_name_start = content.find("--[ module_name ]--") + len("--[ module_name ]--")
-        if module_name_start == -1:
-            raise ValueError("Could not find module_name marker")
-            
-        module_name_end = content.find("--[END]--", module_name_start)
-        if module_name_end == -1:
-            raise ValueError("Could not find module_name end marker") 
-            
-        module_name = content[module_name_start:module_name_end].strip()
-
-        # Find requester_code section
-        requester_code_start = content.find("--[ requester_code ]--") + len("--[ requester_code ]--")
-        if requester_code_start == -1:
-            raise ValueError("Could not find requester_code marker")
-            
-        requester_code_end = content.find("--[END]--", requester_code_start)
-        if requester_code_end == -1:
-            raise ValueError("Could not find requester_code end marker")
-            
-        requester_code = content[requester_code_start:requester_code_end].strip()
-
-        if not module_name or not requester_code:
-            raise ValueError("Extracted module_name or requester_code is empty")
-
-        return module_name, requester_code
+    requester_code = extract_code_from_llm_output(content)
+    if not requester_code:
+        logging.error("Failed to extract requester code from LLM output")
+        return ""
         
-    except Exception as e:
-        logging.error(f"Failed to parse content: {str(e)}\nStack trace:\n{traceback.format_exc()}")
-        return "", ""
+    return requester_code
 
 async def _generate_requester_description(
     protocol_doc: Dict[str, Any],
@@ -331,6 +307,8 @@ Please generate a requester description JSON based on the following protocol doc
         ],
         response_format={"type": "json_object"}
     )
+
+    logging.info(f"Generated requester description: {response.choices[0].message.content}")
     
     return response.choices[0].message.content
 
@@ -341,6 +319,9 @@ async def generate_requester_code(
  
     # Generate requester class code and description
     description_json = await _generate_requester_description(protocol_doc, llm)
-    module_name, requester_code = await _generate_requester_class(protocol_doc, description_json, llm)
+    description_dict = json.loads(description_json)  # Convert to JSON
+    module_name = description_dict.get("module_name", "protocol_module")
+
+    requester_code = await _generate_requester_class(protocol_doc, description_dict, llm)
 
     return module_name, requester_code, description_json

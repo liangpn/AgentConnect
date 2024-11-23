@@ -9,7 +9,7 @@ import json
 import hashlib
 import base64
 import base58
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from copy import deepcopy
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import hashes, serialization
@@ -26,7 +26,7 @@ def extract_public_key(did_document: Dict[str, Any], key_id: str) -> ec.Elliptic
             return ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), public_key_bytes)
     raise ValueError(f"Public key {key_id} not found in DID document")
 
-def verify_did_document(did_document: dict) -> (bool, str):
+def verify_did_document(did_document: dict) -> Tuple[bool, str]:
     """Verify DID document"""
     try:
         # Extract signature-related data

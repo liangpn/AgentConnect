@@ -5,10 +5,12 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
+import json
 import logging
 import traceback
 from typing import Any, Dict, Tuple
 from agent_connect.utils.llm.base_llm import BaseLLM
+from agent_connect.utils.llm_output_processer import extract_code_from_llm_output
 
 PROVIDER_DESCRIPTION_PROMPT = """
 As an experienced protocol architect and system developer, please help us analyze protocol documentation to build accurate and comprehensive Python API description documents.
@@ -18,7 +20,8 @@ Through your professional perspective, extract core interface information from p
 
 # Please pay special attention to the following points:
 1. Interface Requirements
-  - Please design a class name based on protocol documentation
+  - Please design a module name based on protocol documentation, like "user_education_info_protocol"
+  - Please design a class name based on protocol documentation, like "ProtocolProvider"
   - Define set_protocol_callback method for setting protocol message handling callback:
     - Method definition: def set_protocol_callback(self, callback: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]) -> None:
     - Function parameter requirements: Input parameter is dictionary type (dict[str, Any]), containing received protocol messages and other necessary data
@@ -50,6 +53,7 @@ Through your professional perspective, extract core interface information from p
 # Output Example:
 {
   "version": "1.0",
+  "module_name": "user_education_info_protocol",
   "definitions": [
     {
       "type": "class", 
@@ -239,15 +243,12 @@ async def handle_message(self, message: bytes) -> None:
 ```
 
 # Output Format
-Output should include module name and code. The module name is generated based on protocol content, without distinguishing between requester or provider.
-Output in the following format, the code part should be directly runnable in Python files(do not include any other content, like backticks):
---[ module_name ]--
-XXXX
---[END]--
+Output code in the following format, code is wrapped with three backticks.
+An example output is as follows (XXXX is runnable Python code):
 
---[ provider_code ]--
+```python
 XXXX
---[END]--
+```
 '''
 
 async def _generate_provider_class(
@@ -271,36 +272,15 @@ Please generate a provider class based on the following protocol documentation:
 '''
     
     content = await llm.async_generate_response(system_prompt, user_prompt)
+
+    logging.info(f'Generated provider class: {content}')
     
-    try:
-        module_name_start = content.find("--[ module_name ]--") + len("--[ module_name ]--")
-        if module_name_start == -1:
-            raise ValueError("Could not find module_name marker")
-            
-        module_name_end = content.find("--[END]--", module_name_start)
-        if module_name_end == -1:
-            raise ValueError("Could not find module_name end marker") 
-            
-        module_name = content[module_name_start:module_name_end].strip()
-
-        provider_code_start = content.find("--[ provider_code ]--") + len("--[ provider_code ]--")
-        if provider_code_start == -1:
-            raise ValueError("Could not find provider_code marker")
-            
-        provider_code_end = content.find("--[END]--", provider_code_start)
-        if provider_code_end == -1:
-            raise ValueError("Could not find provider_code end marker")
-            
-        provider_code = content[provider_code_start:provider_code_end].strip()
-
-        if not module_name or not provider_code:
-            raise ValueError("Extracted module_name or provider_code is empty")
-
-        return module_name, provider_code
+    provider_code = extract_code_from_llm_output(content)
+    if not provider_code:
+        logging.error("Failed to extract provider code from LLM output")
+        return ""
         
-    except Exception as e:
-        logging.error(f"Failed to parse content: {str(e)}\nStack trace:\n{traceback.format_exc()}")
-        return "", ""
+    return provider_code
 
 async def _generate_provider_description(
     protocol_doc: Dict[str, Any],
@@ -333,6 +313,8 @@ Please generate provider description JSON based on the following protocol docume
         response_format={"type": "json_object"}
     )
     
+    logging.info(f"Generated provider description: {response.choices[0].message.content}")
+
     return response.choices[0].message.content
 
 async def generate_provider_code(
@@ -341,7 +323,10 @@ async def generate_provider_code(
 ) -> Tuple[str, str, str]:
     
     description_json = await _generate_provider_description(protocol_doc, llm)
-    module_name, provider_code = await _generate_provider_class(protocol_doc, description_json, llm)
+    description_dict = json.loads(description_json)
+    module_name = description_dict.get("module_name", "protocol_module")
+    
+    provider_code = await _generate_provider_class(protocol_doc, description_json, llm)
 
     return module_name, provider_code, description_json
 

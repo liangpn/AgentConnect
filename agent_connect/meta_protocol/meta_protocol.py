@@ -113,6 +113,7 @@ class MetaProtocol:
                 
             # Parse remaining data as JSON, skipping first byte
             json_data = json.loads(data[1:].decode('utf-8'))
+            logging.info(f"Meta Protocol Received message: {json_data}")
             action = json_data.get("action")
 
             if action == "protocolNegotiation":
@@ -386,8 +387,24 @@ class MetaProtocol:
                     )
                     await self._send_message(response)
                 elif result.status == NegotiationStatus.REJECTED:
+                    # 发送拒绝消息
+                    response = self._create_protocol_negotiation_message(
+                        sequence_id=current_round,
+                        candidate_protocols=result.candidate_protocol,
+                        modification_summary=result.modification_summary,
+                        status=result.status
+                    )
+                    await self._send_message(response)
                     return False, ""
                 elif result.status == NegotiationStatus.ACCEPTED:
+                    # 发送接受消息
+                    response = self._create_protocol_negotiation_message(
+                        sequence_id=current_round,
+                        candidate_protocols=result.candidate_protocol,
+                        modification_summary=result.modification_summary,
+                        status=result.status
+                    )
+                    await self._send_message(response)
                     return True, result.candidate_protocol
         
         logging.error("Protocol negotiation failed")
@@ -403,6 +420,9 @@ class MetaProtocol:
         Raises:
             RuntimeError: If send_callback is not set
         """
+
+        logging.info(f"Meta Protocol Sending message[protocol_type={protocol_type}]: {message}")
+
         header = self._encode_protocol_header(protocol_type)
         message_bytes = json.dumps(message).encode('utf-8')
         await self.send_data(header + message_bytes)

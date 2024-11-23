@@ -21,6 +21,7 @@ import os
 import json
 import hashlib
 import importlib.util
+import traceback
 from typing import Dict, Optional, Any, Tuple, Type
 
 from agent_connect.app_protocols.protocol_base.provider_base import ProviderBase
@@ -99,32 +100,37 @@ class AppProtocols:
             str: Hash value of the successfully loaded protocol
             None: If loading fails
         """
-        meta_data_path = os.path.join(protocol_dir, 'meta_data.json')
-        if not os.path.exists(meta_data_path):
-            logging.error(f"meta_data.json not found: {protocol_dir}")
-            return None
+        try:
+            meta_data_path = os.path.join(protocol_dir, 'meta_data.json')
+            if not os.path.exists(meta_data_path):
+                logging.error(f"meta_data.json not found: {protocol_dir}")
+                return None
 
-        with open(meta_data_path, 'r') as f:
-            meta_data = json.load(f)
+            with open(meta_data_path, 'r') as f:
+                meta_data = json.load(f)
 
-        if not self.verify_protocol_files(protocol_dir, meta_data):
-            return None
+            if not self.verify_protocol_files(protocol_dir, meta_data):
+                return None
 
-        protocol_hash = None
-        
-        # Load requester
-        requester_container = RequesterContainer(protocol_dir, meta_data)
-        if requester_container.requester_class:
-            self.requester_protocols[requester_container.protocol_hash] = requester_container
-            protocol_hash = requester_container.protocol_hash
-
-        # Load provider  
-        provider_container = ProviderContainer(protocol_dir, meta_data)
-        if provider_container.provider_class:
-            self.provider_protocols[provider_container.protocol_hash] = provider_container
-            protocol_hash = provider_container.protocol_hash
+            protocol_hash = None
             
-        return protocol_hash
+            # Load requester
+            requester_container = RequesterContainer(protocol_dir, meta_data)
+            if requester_container.requester_class:
+                self.requester_protocols[requester_container.protocol_hash] = requester_container
+                protocol_hash = requester_container.protocol_hash
+
+            # Load provider  
+            provider_container = ProviderContainer(protocol_dir, meta_data)
+            if provider_container.provider_class:
+                self.provider_protocols[provider_container.protocol_hash] = provider_container
+                protocol_hash = provider_container.protocol_hash
+                
+            return protocol_hash
+        except Exception as e:
+            logging.error(f"Failed to load protocol from {protocol_dir}: {str(e)}")
+            logging.error("Stack trace:\n" + traceback.format_exc())
+            return None
 
     def reload_all_protocols(self) -> None:
         """Load all protocols under all protocol paths"""

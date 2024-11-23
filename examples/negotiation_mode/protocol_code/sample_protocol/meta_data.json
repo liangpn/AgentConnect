@@ -1,0 +1,28 @@
+{
+  "meta_data_specification_version": "1.0",
+  "protocol_name": "sample_protocol",
+  "protocol_version": "1.0",
+  "timestamp": "2024-11-23T03:32:13.839964+00:00",
+  "files": {
+    "protocol_document": {
+      "file": "protocol_document.md",
+      "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "requester": {
+      "file": "requester.py",
+      "hash": "sha256:6735a308401652e2372d4c49e3ea76532d238755b855e7dd1077163fc87de8a7"
+    },
+    "requester_description": {
+      "file": "requester_description.json",
+      "hash": "sha256:7ceb91338e1b1578109f9d4201456807727b0f064cf61af4d580e599bc686826"
+    },
+    "provider": {
+      "file": "provider.py",
+      "hash": "sha256:727dd4287db3265d6de3624bc5d99af6268c13e713ff69fe74e897ce093ceb29"
+    },
+    "provider_description": {
+      "file": "provider_description.json",
+      "hash": "sha256:6b3ca4d04f9ac20d7a24411929d3046381d12d5b465fb1875a56fcdf47ba4053"
+    }
+  }
+}

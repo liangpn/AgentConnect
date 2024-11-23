@@ -1,0 +1,87 @@
+{
+  "version": "1.0",
+  "module_name": "example_protocol",
+  "definitions": [
+    {
+      "type": "class",
+      "class": {
+        "name": "ProtocolProvider",
+        "description": "Protocol provider class responsible for managing the example protocol communication.",
+        "interfaces": [
+          {
+            "type": "function",
+            "function": {
+              "name": "set_protocol_callback",
+              "description": "Set asynchronous callback function for handling messages received via the example protocol.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "callback": {
+                    "type": "function",
+                    "description": "Asynchronous function for processing received protocol messages.",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "message_type": {
+                          "type": "string",
+                          "description": "Type of the received message indicating the operation to be performed."
+                        },
+                        "payload": {
+                          "type": "object",
+                          "description": "Data payload of the received message containing relevant information for processing.",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "description": "Key for identifying the resource."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "Value associated with the key."
+                            }
+                          },
+                          "required": ["key", "value"]
+                        }
+                      },
+                      "required": ["message_type", "payload"]
+                    },
+                    "returns": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "HTTP status code indicating the result of the message processing.",
+                          "enum": [200, 400, 500]
+                        },
+                        "result": {
+                          "type": "object",
+                          "description": "Detailed result of processing the protocol message.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "description": "Human-readable status of the result, e.g., 'success' or 'error'.",
+                              "enum": ["success", "error"]
+                            },
+                            "details": {
+                              "type": "string",
+                              "description": "Additional details about the processing result, especially in error cases."
+                            }
+                          }
+                        },
+                        "error_message": {
+                          "type": "string",
+                          "description": "Error message detailing what went wrong during the processing if unsuccessful."
+                        }
+                      },
+                      "required": ["code"]
+                    }
+                  }
+                },
+                "required": ["callback"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
