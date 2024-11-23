@@ -144,7 +144,7 @@ class AppProtocols:
                         self.load_protocol(full_protocol_dir)
                         
     def get_requester_by_hash(self, protocol_hash: str) -> Tuple[Optional[RequesterBase], Optional[dict]]:
-        """Get requester class by protocol hash
+        """Get requester class and send request description by protocol hash
         
         Args:
             protocol_hash: Hash value of the protocol document
@@ -158,17 +158,17 @@ class AppProtocols:
         return None, None
 
     def get_provider_by_hash(self, protocol_hash: str) -> Tuple[Optional[ProviderBase], Optional[dict]]:
-        """Get provider class by protocol hash
+        """Get provider class and protocol callback description by protocol hash
         
         Args:
             protocol_hash: Hash value of the protocol document
             
         Returns:
-            Tuple[ProviderBase class, set protocol callback description] if found, (None, None) otherwise
+            Tuple[ProviderBase class, protocol callback description] if found, (None, None) otherwise
         """
         container: Optional[ProviderContainer] = self.provider_protocols.get(protocol_hash, None)
         if container:
-            return container.provider_class, container.set_protocol_callback_description
+            return container.provider_class, container.protocol_callback_description
         return None, None
 
 

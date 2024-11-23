@@ -261,7 +261,7 @@ class SimpleNode:
             logging.info(f"Closing session with DID: {remote_did}")
             await simple_session.close()
 
-    async def connect_to_did(self, destination_did: str) -> SimpleNodeSession:
+    async def connect_to_did(self, destination_did: str, protocol_hash: Optional[str] = None) -> SimpleNodeSession:
         """
         Create a session with the target DID.
 
@@ -299,7 +299,11 @@ class SimpleNode:
         simple_wss_wraper = SimpleClientWssWraper(websocket)
 
         # Create SimpleNodeSession
-        simple_session = SimpleNodeSession(self.did, self.private_key_pem, self.did_document_json, simple_wss_wraper)
+        simple_session = SimpleNodeSession(self.did, 
+                                           self.private_key_pem, 
+                                           self.did_document_json, 
+                                           simple_wss_wraper,
+                                           protocol_hash=protocol_hash)
 
         # Wait for short-term key negotiation to complete
         success, remote_did, secret_info_json = await simple_session.generate_short_term_key_active(destination_did)

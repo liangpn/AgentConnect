@@ -79,7 +79,7 @@ class RequesterSession():
                  requester_instance: RequesterBase,
                  send_request_description: Optional[dict],
                  simple_session: SimpleNodeSession, 
-                 message_receiver_task: MessageReceiverTask):
+                 message_receiver_task: Optional[MessageReceiverTask]):
         self.meta_protocol = meta_protocol
         self.protocol_hash = protocol_hash
         self.requester_instance = requester_instance
@@ -110,13 +110,13 @@ class ProviderSession():
                  meta_protocol: MetaProtocol,
                  protocol_hash: str,
                  provider_instance: ProviderBase,
-                 set_protocol_callback_description: Optional[dict],
+                 protocol_callback_description: Optional[dict],
                  simple_session: SimpleNodeSession, 
                  message_receiver_task: MessageReceiverTask):
         self.meta_protocol = meta_protocol
         self.protocol_hash = protocol_hash
         self.provider_instance = provider_instance
-        self.set_protocol_callback_description = set_protocol_callback_description
+        self.protocol_callback_description = protocol_callback_description
         self.simple_session = simple_session
         self.message_receiver_task = message_receiver_task
         self.remote_did = simple_session.remote_did
@@ -186,7 +186,7 @@ class SimpleNegotiationNode():
 
         # load app protocol code
         protocol_hash = self.app_protocols.load_protocol(module_path)
-        provider_class, set_protocol_callback_description = self.app_protocols.get_provider_by_hash(protocol_hash)
+        provider_class, protocol_callback_description = self.app_protocols.get_provider_by_hash(protocol_hash)
         provider_instance: ProviderBase = provider_class()
         
         provider_instance.set_send_callback(simple_session.send_message)
@@ -197,14 +197,14 @@ class SimpleNegotiationNode():
         provider_session = ProviderSession(meta_protocol=meta_protocol,
                                 protocol_hash=protocol_hash,
                                 provider_instance=provider_instance,
-                                set_protocol_callback_description=set_protocol_callback_description,
+                                protocol_callback_description=protocol_callback_description,
                                 simple_session=simple_session,
                                 message_receiver_task=message_receiver_task)
         
         if self.new_provider_session_callback:
             await self.new_provider_session_callback(provider_session)
 
-    async def connect_to_did(self, 
+    async def connect_to_did_with_negotiation(self, 
                              destination_did: str, 
                              requirement: str, 
                              input_description: str, 
@@ -233,6 +233,39 @@ class SimpleNegotiationNode():
 
         # load app protocol code
         protocol_hash = self.app_protocols.load_protocol(module_path)
+        requester_class, send_request_description = self.app_protocols.get_requester_by_hash(protocol_hash)
+        requester_instance: RequesterBase = requester_class()
+        
+        requester_instance.set_send_callback(simple_session.send_message)
+        await message_receiver_task.set_app_protocol_handler(requester_instance)
+
+        return RequesterSession(meta_protocol=meta_protocol,
+                                protocol_hash=protocol_hash,
+                                requester_instance=requester_instance,
+                                send_request_description=send_request_description,
+                                simple_session=simple_session,
+                                message_receiver_task=message_receiver_task)
+    
+    # TODO: Not supported yet, to be implemented
+    async def connect_to_did_with_protocol(self, 
+                             destination_did: str, 
+                             protocol_hash: str) -> Optional[RequesterSession]:
+        
+        simple_session: SimpleNodeSession = await self.simple_node.connect_to_did(destination_did, protocol_hash=protocol_hash)
+        if not simple_session:
+            logging.error(f"Failed to connect to {destination_did}")
+            return None
+        
+        meta_protocol = MetaProtocol(
+            send_callback=simple_session.send_message,
+            get_capability_info_callback=self.get_capability_info_callback,
+            llm=self.llm,
+            protocol_code_path=self.protocol_code_path
+        )
+
+        message_receiver_task = MessageReceiverTask(simple_session=simple_session, meta_protocol=meta_protocol)
+
+        # load app protocol code
         requester_class, send_request_description = self.app_protocols.get_requester_by_hash(protocol_hash)
         requester_instance: RequesterBase = requester_class()
         

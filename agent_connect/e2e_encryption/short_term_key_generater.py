@@ -13,7 +13,7 @@ import os
 import sys
 import logging
 from copy import deepcopy
-from typing import Callable, List, Dict, Any
+from typing import Callable, List, Dict, Any, Optional
 import json
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
@@ -40,9 +40,13 @@ class ECKeyPair:
         self.private_key, self.public_key, self.public_key_hex = generate_ec_key_pair(curve)
 
 class ShortTermKeyGenerater:
-    def __init__(self, local_did: str, did_private_key_pem: str, 
-                 remote_did: str, json_send_func: Callable[[Dict[str, Any]], None],
-                 is_initiator: bool, session_id: str=None):
+    def __init__(self, local_did: str, 
+                 did_private_key_pem: str, 
+                 remote_did: str, 
+                 json_send_func: Callable[[Dict[str, Any]], None],
+                 is_initiator: bool, 
+                 session_id: str=None, 
+                 protocol_hash: Optional[str] = None):
         self.session_id: str = session_id if session_id else generate_random_hex(16)
         self.json_send_func: Callable[[Dict[str, Any]], None] = json_send_func
         self.is_initiator: bool = is_initiator
@@ -85,6 +89,8 @@ class ShortTermKeyGenerater:
         self.secret_key_id: str = None
         self.key_expires: int = None
         self.cipher_suite: str = None
+
+        self.protocol_hash: Optional[str] = protocol_hash
 
     def get_final_short_term_key(self):
         return  self.remote_did, \

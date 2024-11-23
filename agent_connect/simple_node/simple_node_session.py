@@ -20,7 +20,8 @@ class SimpleNodeSession:
     def __init__(self, local_did: str, 
                  private_key_pem: str, 
                  did_document_json: str, 
-                 wss_wraper: SimpleWssWraper):
+                 wss_wraper: SimpleWssWraper,
+                 protocol_hash: Optional[str] = None):
         """
         Initialize a SimpleNodeSession.
 
@@ -39,7 +40,7 @@ class SimpleNodeSession:
         self.short_term_key: dict = {}  # Store single short-term key information
         self.recv_task: asyncio.Task = None
         self.heartbeat_task: asyncio.Task = None
-
+        self.protocol_hash: Optional[str] = protocol_hash
         if isinstance(self.wss_wraper, SimpleClientWssWraper):
             self._start_heartbeat()
 
@@ -236,7 +237,8 @@ class SimpleNodeSession:
                 self.private_key_pem, 
                 remote_did, 
                 self.wss_wraper.send_data, 
-                is_initiator=True
+                is_initiator=True,
+                protocol_hash=self.protocol_hash
             )
 
             recv_task = asyncio.create_task(self._process_short_term_key_negotiation_messages())

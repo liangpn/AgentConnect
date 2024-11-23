@@ -9,7 +9,7 @@
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import hashlib
 import hmac
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -39,10 +39,16 @@ def generate_register_message(version: str,
 
 
 # Generate SourceHello message
-def generate_source_hello(version: str, session_id: str, source_private_key: ec.EllipticCurvePrivateKey, 
-                          source_did: str, destination_did: str, random: str,
-                          source_public_key_hex: str, key_share_list: List[Dict[str, Any]],
-                          cipher_suite_list: List[str]) -> Dict[str, Any]:
+def generate_source_hello(version: str, 
+                          session_id: str, 
+                          source_private_key: ec.EllipticCurvePrivateKey, 
+                          source_did: str, 
+                          destination_did: str, 
+                          random: str,
+                          source_public_key_hex: str, 
+                          key_share_list: List[Dict[str, Any]],
+                          cipher_suite_list: List[str],
+                          protocol_hash: Optional[str] = None) -> Dict[str, Any]:
         
     source_hello = {
         "version": version,
@@ -65,7 +71,11 @@ def generate_source_hello(version: str, session_id: str, source_private_key: ec.
             # "secp384r1",
             # "secp521r1"
         ],
-        "keyShares": key_share_list
+        "keyShares": key_share_list,
+        "metaProtocol": {
+            "version": "1.0",
+            "protocolHash": protocol_hash
+        }
     }
 
     proof = {
