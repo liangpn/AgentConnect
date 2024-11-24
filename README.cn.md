@@ -93,53 +93,48 @@ pip install agent-connect
 
 在安装完agent-connect库后，可以运行我们的demo，体验agent-connect的强大功能。我们当前提供两种模式：单节点模式和托管模式。
 
+下载仓库代码：
+
+```bash
+git clone https://github.com/chgaowei/AgentConnect.git
+```
+
 #### 单节点模式
 
 在单节点模式下，你不需要其他任何三方服务，就可以完成DID的身份验证和加密通信。
 
-你可以运行examples目录下的simple_node代码，先启动alice的节点，再启动bob的节点，bob节点会根据alice的DID，向alice节点请求alice的DID文档，并且根据DID文档中的公钥和消息服务地址，和alice建立加密连接通道，发送一条加密消息。alice节点收到消息后，会解密消息，并且发送一条加密消息给bob。
+你可以运行examples/simple_node_mode目录下demo代码。先启动bob的节点，再启动alice的节点，alice节点会根据bob的DID，向bob节点请求bob的DID文档，并且根据DID文档中的公钥和消息服务地址，和bob建立加密连接通道，发送一条加密消息。bob节点收到消息后，会解密消息，并且发送一条加密消息给alice。
 
-1. 启动alice的节点
-```bash
-python simple_node_alice.py
-```
-
-2. 启动bob的节点
+1. 启动bob的节点
 ```bash
 python simple_node_bob.py
 ``` 
 
-#### 托管模式
-
-在托管模式下，我们提供一个did server，用于托管用户的did文档、转发不同DID之间的消息。
-
-你可以运行examples目录下的sample代码，先生成alice和bob的did文件，并且将alice的did文件保存到did server，然后bob可以连接alice的did，进行端到端的加密通信。
-
-1. 生成两个did文档alice.json和bob.json，保存到指定文件中，并注册到did server
+2. 启动alice的节点
 ```bash
-python sample_did.py alice.json
-python sample_did.py bob.json
-```
-
-2. 启动alice的demo
-```bash
-python sample_alice.py alice.json
-```
-
-3. 启动bob的demo
-```bash
-python sample_bob.py bob.json
+python simple_node_alice.py
 ```
 
 可以通过日志看到，alice和bob成功连接，并且进行端到端的加密通信。
 
+#### 元协议协商模式
 
-## 打包上传（先更改setup.py中版本号）
+在元协议协商模式下，alice和bob先协商出一个协议，然后根据协议生成处理代码，然后运行代码完成数据通信。后面alice和bob就可以使用协议代码直接进行数据通信。
 
+你可以运行examples/negotiation_mode目录下demo代码。先启动bob的节点，再启动alice的节点。
+
+1. 启动bob的节点
 ```bash
-python setup.py sdist bdist_wheel 
-twine upload dist/*        
+python negotiation_bob.py
+``` 
+
+2. 启动alice的节点
+```bash
+python negotiation_alice.py
 ```
+
+可以通过日志看到，alice和bob成功连接，并且进行端到端的加密通信。
+
 
 ## 贡献
 

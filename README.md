@@ -91,55 +91,49 @@ pip install agent-connect
 
 ### Running
 
-After installing the agent-connect library, you can run our demo to experience the powerful features of agent-connect. We currently provide two modes: single-node mode and hosted mode.
+After installing the agent-connect library, you can run our demo to experience the powerful features of agent-connect. We currently provide two modes: Single Node Mode and Hosted Mode.
 
-#### Single-Node Mode
+Download the repository code:
 
-In single-node mode, you can complete DID identity verification and encrypted communication without any third-party services.
+```bash
+git clone https://github.com/chgaowei/AgentConnect.git
+```
 
-You can run the simple_node code in the examples directory. First start Alice's node, then start Bob's node. Bob's node will request Alice's DID document based on Alice's DID, and establish an encrypted connection channel with Alice based on the public key and message service address in the DID document, sending an encrypted message. When Alice's node receives the message, it will decrypt the message and send an encrypted message back to Bob.
+#### Single Node Mode
 
-1. Start Alice's node
+In Single Node Mode, you can complete DID authentication and encrypted communication without any third-party services.
+
+You can run the demo code in the examples/simple_node_mode directory. First start Bob's node, then start Alice's node. Alice's node will request Bob's DID document based on Bob's DID, and establish an encrypted connection channel with Bob using the public key and message service address in the DID document to send an encrypted message. When Bob's node receives the message, it will decrypt the message and send an encrypted message back to Alice.
+
+1. Start Bob's node
+```bash
+python simple_node_bob.py
+```
+
+2. Start Alice's node
 ```bash
 python simple_node_alice.py
 ```
 
-2. Start Bob's node
+Through the logs, you can see that Alice and Bob successfully connect and perform end-to-end encrypted communication.
+
+#### Meta-Protocol Negotiation Mode
+
+In Meta-Protocol Negotiation Mode, Alice and Bob first negotiate a protocol, then generate processing code based on the protocol, and run the code to complete data communication. Afterwards, Alice and Bob can use the protocol code directly for data communication.
+
+You can run the demo code in the examples/negotiation_mode directory. First start Bob's node, then start Alice's node.
+
+1. Start Bob's node
 ```bash
-python simple_node_bob.py
-``` 
-
-#### Hosted Mode
-
-In hosted mode, we provide a DID server to host user's DID documents and forward messages between different DIDs.
-
-You can run the sample code in the examples directory. First generate the alice and bob's DID documents, and save alice's DID document to the DID server, then bob can connect to alice's DID for end-to-end encrypted communication.
-
-1. Generate two DID documents alice.json and bob.json, save them to the specified files, and register them to the DID server
-```bash
-python sample_did.py alice.json
-python sample_did.py bob.json
+python negotiation_bob.py
 ```
 
-2. Start Alice's demo
+2. Start Alice's node
 ```bash
-python sample_alice.py alice.json
+python negotiation_alice.py
 ```
 
-3. Start Bob's demo
-```bash
-python sample_bob.py bob.json
-```
-
-You can see from the logs that Alice and Bob successfully connected and performed end-to-end encrypted communication.
-
-
-## Package Upload (Change the version number in setup.py first)
-
-```bash
-python setup.py sdist bdist_wheel 
-twine upload dist/*        
-```
+Through the logs, you can see that Alice and Bob successfully connect and perform end-to-end encrypted communication.
 
 ## Contribution
 
