@@ -5,7 +5,6 @@
 #
 # This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
-
 import asyncio
 import json
 import os
@@ -25,14 +24,11 @@ def generate_did_info(alice_node: SimpleNode):
     alice_json_path = os.path.join(current_dir, "alice.json")  # Construct the path to alice.json
 
     if os.path.exists(alice_json_path):
-        # Load existing DID information if available
         print("Loading existing Alice DID information")
         with open(alice_json_path, "r") as f:
             alice_info = json.load(f)
         alice_node.set_did_info(alice_info["private_key_pem"], alice_info["did"], alice_info["did_document_json"])
     else:
-
-        # Generate new DID information
         print("Generating new Alice DID information")
         private_key_pem, did, did_document_json = alice_node.generate_did_document()
         alice_node.set_did_info(private_key_pem, did, did_document_json)
@@ -45,32 +41,18 @@ def generate_did_info(alice_node: SimpleNode):
                 "did_document_json": did_document_json
             }, f)
 
-
 async def ws_new_session_callback(simple_session: SimpleNodeSession):
-    print(f"New session established from {simple_session.remote_did}")
-
-    while True:
-        message = await simple_session.receive_message()
-        message = message.decode('utf-8') if message else None
-        print(f"Received message content: {message}")
-        
-        # Send reply
-        reply = f"Hello {simple_session.remote_did}, I'm Alice!"
-        success = await simple_session.send_message(reply)
-
-        if success:
-            print(f"Successfully replied to {simple_session.remote_did}")
-        else:
-            print(f"Failed to reply to {simple_session.remote_did}")
+    print(f"New session established with DID: {simple_session.remote_did}")
 
 async def main():
     # 使用新的接口创建节点，只指定ws路径
     alice_node = SimpleNode(
         host_domain="localhost", 
         new_session_callback=ws_new_session_callback,
-        host_port="8000",
+        host_port="8001",
         host_ws_path="/ws"
     )
+    
     generate_did_info(alice_node)
 
     print(f"Alice's DID: {alice_node.did}")
@@ -78,9 +60,31 @@ async def main():
     # Start the node
     alice_node.run()
     
+    # Read bob's DID
+    current_dir = os.path.dirname(os.path.abspath(__file__))  # Get the current file's directory
+    bob_json_path = os.path.join(current_dir, "bob.json")  # Construct the path to alice.json
+    with open(bob_json_path, "r") as f:
+        bob_info = json.load(f)
+    bob_did = bob_info["did"]
+    
     try:
+        # Connect to bob
+        alice_session = await alice_node.connect_to_did(bob_did)
+
+        # Send message to bob
+        message = "Hello bob, I'm Alice!"
+        success = await alice_session.send_message(message)
+        if success:
+            print(f"Successfully sent message to {bob_did}")
+        else:
+            print(f"Failed to send message to {bob_did}")
+        
+        # Wait for bob's reply
         while True:
-            await asyncio.sleep(1)
+            reply = await alice_session.receive_message()
+            reply = reply.decode('utf-8') if reply else None
+            print(f"Received reply content: {reply}")
+
     except asyncio.CancelledError:
         print("Alice node is shutting down...")
     finally:
