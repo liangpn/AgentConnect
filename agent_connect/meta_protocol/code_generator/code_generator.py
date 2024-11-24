@@ -73,6 +73,7 @@ class ProtocolCodeGenerator:
             module_name = f"{module_name}_{timestamp}"
             module_path = self.output_path / module_name
         
+        logging.info(f"Creating module structure for: {module_name}")
         module_path.mkdir(parents=True, exist_ok=True)
         self._module_name = module_name  # Update the internal module name
         self._generate_init_file(module_name)

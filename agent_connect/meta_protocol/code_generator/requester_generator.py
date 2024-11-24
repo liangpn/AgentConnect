@@ -195,6 +195,7 @@ from agent_connect.app_protocols import RequesterBase
   - Handle exceptions and edge cases properly
   - Ensure code testability and robustness
   - Internal method names should start with underscore (_)
+  - Automatically import required modules, like Optional, Any, etc.
 
 4. Please implement all abstract methods
 

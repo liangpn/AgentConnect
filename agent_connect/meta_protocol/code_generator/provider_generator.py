@@ -189,6 +189,8 @@ class ProviderBase(ABC):
 1. Class must inherit from ProviderBase, import ProviderBase class as follows:
 ```
 from agent_connect.app_protocols import ProviderBase
+```
+
 2. Class name should use the class name defined in API documentation
 
 3. Code requirements:
@@ -199,6 +201,7 @@ from agent_connect.app_protocols import ProviderBase
   - Handle exceptions and edge cases properly
   - Ensure code testability and robustness
   - Internal method names should start with underscore (_)
+  - Automatically import required modules, like Optional, Any, etc.
 
 4. Implement all abstract methods
 
