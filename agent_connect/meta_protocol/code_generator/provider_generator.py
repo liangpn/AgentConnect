@@ -307,6 +307,9 @@ Please generate provider description JSON based on the following protocol docume
 {protocol_doc}
 --[END]--'''
 
+    logging.info(f"Generating provider description system prompt: {system_prompt}")
+    logging.info(f"Generating provider description user prompt: {user_prompt}")
+
     response = await llm.client.chat.completions.create(
         model=llm.model_name,
         messages=[

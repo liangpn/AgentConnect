@@ -7,6 +7,7 @@
 
 import datetime
 import logging
+import traceback
 from typing import Optional, Tuple, Union
 import asyncio
 import json
@@ -99,7 +100,10 @@ class SimpleNodeSession:
                 break
             except Exception as e:
                 logging.error(f"Error sending heartbeat: {str(e)}")
-
+                stack_trace = traceback.format_exc()
+                logging.error(f"Heartbeat task exception: {e}, remote did: {self.remote_did}\nStack trace:\n{stack_trace}")
+                return
+            
     async def _send_heartbeat_request(self):
         """
         Send a heartbeat request.

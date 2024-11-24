@@ -66,6 +66,10 @@ async def new_provider_negotiation_session_callback(provider_session: ProviderSe
     else:
         print("Code generation failed")
 
+    # wait for protocol processing
+    while True:
+        await asyncio.sleep(1)
+
 async def main() -> None:
     # create the node for Bob
     bob_node: SimpleNegotiationNode = SimpleNegotiationNode(

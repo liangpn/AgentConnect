@@ -86,7 +86,7 @@ async def main() -> None:
 
     # generate the code for the protocol interface
     python_code_path = os.path.join(g_current_dir, "workflow_code/requester_flow.py")
-    call_requester_interface = generate_code_for_protocol_requester_interface(llm, 
+    call_requester_interface = await generate_code_for_protocol_requester_interface(llm, 
                                                      interface_description, 
                                                      python_code_path)
 

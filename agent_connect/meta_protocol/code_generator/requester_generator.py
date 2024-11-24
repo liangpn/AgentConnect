@@ -158,7 +158,7 @@ class RequesterBase(ABC):
         """
         self._send_callback = callback
     
-    def handle_message(self, message: bytes) -> None:
+    async def handle_message(self, message: bytes) -> None:
         """Handle received message, called by the class user
         
         Args:
@@ -299,6 +299,9 @@ Please generate a requester description JSON based on the following protocol doc
 --[ protocol documentation ]--
 {protocol_doc}
 --[END]--'''
+
+    logging.info(f"Generating requester description system prompt: {system_prompt}")
+    logging.info(f"Generating requester description user prompt: {user_prompt}")
 
     response = await llm.client.chat.completions.create(
         model=llm.model_name,

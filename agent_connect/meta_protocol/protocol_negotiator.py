@@ -170,7 +170,7 @@ Output format is NegotiationResult:
 Note: When status is "negotiating", candidate_protocol should contain the complete protocol content, not just the modifications. The modification_summary field is used to explain what changes were made and why.
 '''
 
-class NegotiationStatus(Enum):
+class NegotiationStatus(str, Enum):
     """Negotiation status enum"""
     NEGOTIATING = "negotiating"
     REJECTED = "rejected" 
@@ -190,7 +190,7 @@ class NegotiationResult(BaseModel):
         description="Summary of modifications made to the counterparty's protocol in candidate_protocol, included when status is negotiating, empty otherwise"
     )
 
-class NegotiatorRole(Enum):
+class NegotiatorRole(str, Enum):
     """Negotiator role enum"""
     PROVIDER = "provider"
     REQUESTER = "requester"
@@ -404,10 +404,14 @@ The protocol should be practical and implementable.'''
         
         # Handle terminal states
         if negotiation_status == NegotiationStatus.ACCEPTED:
+            # Check if candidate protocols match the latest negotiation history
+            if self.negotiation_history and candidate_protocols != self.negotiation_history[-1].candidate_protocols:
+                logging.error(f"Protocol mismatch in ACCEPTED state. Latest history: {self.negotiation_history[-1].candidate_protocols}, \nreceived: {candidate_protocols}")
+
             # Return the latest protocol from history if available
             return NegotiationResult(
                 status=NegotiationStatus.ACCEPTED,
-                candidate_protocol=self.negotiation_history[-1].candidate_protocols if self.negotiation_history else "",
+                candidate_protocol=self.negotiation_history[-1].candidate_protocols if self.negotiation_history else candidate_protocols,
                 modification_summary=None
             ), self.negotiation_round
             
@@ -540,11 +544,10 @@ Please evaluate this protocol proposal:
             logging.info(f"Provider evaluation result: {assistant_message.content}")
 
             result_json = json.loads(assistant_message.content)
-            result = NegotiationResult(
-                status=NegotiationStatus(result_json["status"]),
-                candidate_protocol=result_json["candidate_protocol"],
-                modification_summary=result_json["modification_summary"]
-            )
+            
+            result = self._parse_negotiation_result(result_json)
+            if result.status == NegotiationStatus.ACCEPTED:
+                result.candidate_protocol = candidate_protocols
 
             logging.info(f"Provider evaluation result: status={result.status.name}, round={self.negotiation_round}")
 
@@ -614,11 +617,9 @@ Please evaluate this protocol proposal:
             result_json = json.loads(response.choices[0].message.content)
             self.negotiation_round += 2
             
-            result = NegotiationResult(
-                status=NegotiationStatus(result_json["status"]),
-                candidate_protocol=result_json["candidate_protocol"],
-                modification_summary=result_json["modification_summary"]
-            )
+            result = self._parse_negotiation_result(result_json)
+            if result.status == NegotiationStatus.ACCEPTED:
+                result.candidate_protocol = candidate_protocols
 
             logging.info(f"Requester evaluation result: status={result.status.name}, round={self.negotiation_round}")
 
@@ -637,6 +638,39 @@ Please evaluate this protocol proposal:
                 status=NegotiationStatus.REJECTED,
                 candidate_protocol="",
                 modification_summary=f"Error during evaluation: {str(e)}"
+            )
+
+    def _parse_negotiation_result(self, result_json: Dict[str, Any]) -> NegotiationResult:
+        """Parse and validate negotiation result from JSON response
+        
+        Args:
+            result_json: Raw JSON response from LLM
+            
+        Returns:
+            NegotiationResult: Validated negotiation result
+            
+        Raises:
+            ValueError: If required fields are missing or invalid
+        """
+        try:
+            status_str = result_json.get("status")
+            if not status_str:
+                logging.warning("Status field missing in response, using REJECTED")
+                status = NegotiationStatus.REJECTED
+            else:
+                status = NegotiationStatus(status_str.lower())
+            
+            return NegotiationResult(
+                status=status,
+                candidate_protocol=result_json.get("candidate_protocol", ""),
+                modification_summary=result_json.get("modification_summary", "")
+            )
+        except ValueError as e:
+            logging.error(f"Invalid negotiation result: {e}")
+            return NegotiationResult(
+                status=NegotiationStatus.REJECTED,
+                candidate_protocol="",
+                modification_summary=f"Error parsing result: {str(e)}"
             )
 
 

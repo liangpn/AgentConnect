@@ -11,6 +11,7 @@ import os
 import logging
 
 import sys
+import traceback
 from typing import Any, Awaitable, Callable, List, Optional, Tuple, Union
 
 from agent_connect.app_protocols import ProviderBase, RequesterBase
@@ -48,16 +49,16 @@ class MessageReceiverTask:
                     self.meta_protocol.handle_meta_data(message) 
                 elif protocol_type == ProtocolType.APPLICATION.value: 
                     if self.app_protocol_handler:  
-                        self.app_protocol_handler.handle_message(message)  
+                        await self.app_protocol_handler.handle_message(message)  
                     else: # if app protocol handler is not set, save the message to app messages queue
                         self.app_messages_queue.append(message)
                 else:
                     logging.error(f"Invalid protocol type: {protocol_type}")
-
         except asyncio.CancelledError:
             logging.info(f"Receive message task cancelled. remote did: {self.simple_session.remote_did}")
         except Exception as e:
-            logging.error(f"Receive message task exception: {e}, remote did: {self.simple_session.remote_did}")
+            stack_trace = traceback.format_exc()
+            logging.error(f"Receive message task exception: {e}, remote did: {self.simple_session.remote_did}\nStack trace:\n{stack_trace}")
 
     def _start_receiving(self):
         """Start the message receiving coroutine."""

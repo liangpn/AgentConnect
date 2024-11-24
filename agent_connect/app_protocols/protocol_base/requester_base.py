@@ -34,7 +34,7 @@ class RequesterBase(ABC):
         """
         self._send_callback = callback
     
-    def handle_message(self, message: bytes) -> None:
+    async def handle_message(self, message: bytes) -> None:
         """Handle received message, called by the class user
         
         Args:

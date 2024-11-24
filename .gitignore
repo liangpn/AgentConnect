@@ -7,3 +7,5 @@ __pycache__/
 examples/*.json
 *.egg-info/
 build/
+examples/negotiation_mode/workflow_code/
+examples/negotiation_mode/protocol_code/

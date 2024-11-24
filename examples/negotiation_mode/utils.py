@@ -84,48 +84,50 @@ def load_bob_did() -> str:
 async def generate_code_for_protocol_requester_interface(llm: BaseLLM, 
                                          interface_description: Dict[str, Any], 
                                          code_path: str) -> str:
-    """根据接口描述生成协议接口代码
+    """Generate protocol interface code based on interface description
     
     Args:
-        llm: LLM实例
-        interface_description: 接口描述字典
-        code_path: 生成代码的保存路径
+        llm: LLM instance
+        interface_description: Interface description dictionary
+        code_path: Path to save the generated code
         
     Returns:
-        str: 生成的代码字符串
+        str: Generated code string
     """
-    # 构建系统提示词
-    system_prompt = """你是一个专业的Python开发者。
-# 请根据接口描述生成异步函数代码。代码需要遵循以下要求:
-1. 函数必须是异步函数(async def)
-2. 函数名必须为call_requester_interface
-3. 函数输入参数为RequesterBase实例
-4. RequesterBase导入方法:from agent_connect.app_protocols import RequesterBase
-5. 在函数中调用实例的send_request方法，并且根据方便描述，构造一个用于测试的合适的函数入参。
-6. 返回send_request方法返回的字典
-7. 代码需要类型提示
-8. 遵循Google Python风格指南
+    
+    system_prompt = """You are a professional Python developer.
+# Please generate async function code based on interface description. Code must meet the following requirements:
+1. Function definition: async def call_requester_interface(requester: RequesterBase) -> dict[str, Any]
+2. Function must be async (async def)
+3. Function name must be call_requester_interface
+4. Function input parameter is RequesterBase instance
+5. RequesterBase import method: from agent_connect.app_protocols import RequesterBase
+6. Call instance's send_request method in function, and construct appropriate test parameters based on description
+7. send_request definition: async def send_request(self, input: dict[str, Any]) -> dict[str, Any]:
+7. Function returns dictionary from send_request method
+8. Follow Google Python Style Guide
 
-# 输出格式
-输出代码以三个反引号包裹，中间的代码是可以运行的Python代码。
-示例如下：
+# Output Format
+Output code wrapped in three backticks, code in between must be runnable Python code. Do not generate any content besides code.
+Example:
 
 ```python
 XXXX
 ```
 """
 
-    # 构建用户提示词
-    user_prompt = f"""请根据以下接口描述生成代码:
+    user_prompt = f"""Please generate code based on the following interface description:
 {json.dumps(interface_description, indent=2)}
 
-生成的代码应该包含完整的异步函数定义、类型提示和注释。
+The generated code should include complete async function definitions, type hints and comments.
 """
 
-    # 调用LLM生成代码
+    print(f"Generating protocol requester interface code: {system_prompt}")
+    print(f"Generating protocol requester interface code: {user_prompt}")
+
     code = await llm.async_generate_response(system_prompt, user_prompt)
 
-    print(f"Generated code: {code}")
+    print(f"Generated protocol requester interface code: {code}")
 
     code = extract_code_from_llm_output(code)
     
@@ -155,66 +157,68 @@ async def generate_code_for_protocol_provider_callback(
     callback_description: Dict[str, Any],
     code_path: str
 ) -> str:
-    """根据回调函数描述生成provider回调处理函数代码
+    """Generate provider callback function code based on callback description
     
     Args:
-        llm: LLM实例
-        callback_description: 回调函数描述字典
-        code_path: 生成代码的保存路径
+        llm: LLM instance
+        callback_description: Callback function description dictionary
+        code_path: Path to save generated code
         
     Returns:
-        str: 生成的回调处理函数
+        str: Generated callback handler function
     """
-    # 构建系统提示词
-    system_prompt = """你是一个专业的Python开发者。
-# 请根据回调函数描述生成异步回调函数代码。代码需要遵循以下要求:
-1. 函数必须是异步函数(async def)
-2. 函数名必须为provider_callback
-3. 函数参数需要与回调函数描述中的参数定义保持一致
-4. 函数需要返回一个合适的响应数据,你可以自己构造测试数据
-5. 代码需要类型提示
-6. 遵循Google Python风格指南
-7. 生成的回调函数应该包含基本的参数验证和错误处理
+    # Build system prompt
+    system_prompt = """You are a professional Python developer.
+# Please generate async callback function code based on the callback function description. The code needs to meet the following requirements:
+1. Function definition: async def provider_callback(message: dict[str, Any]) -> dict[str, Any]
+2. Function must be async (async def)
+3. Function name must be provider_callback
+4. Function parameters must match the parameter definitions in callback description
+5. Function needs to return appropriate response data, you can construct test data
+6. Follow Google Python Style Guide
+7. Generated callback function should include basic parameter validation and error handling
 
-# 输出格式
-输出代码以三个反引号包裹，中间的代码是可以运行的Python代码。
-示例如下：
+# Output Format
+Output code should be wrapped in triple backticks, with runnable Python code in between. Do not generate any content besides the code.
+Example:
 
 ```python
 XXXX
 ```
 """
-
-    # 构建用户提示词
-    user_prompt = f"""请根据以下回调函数描述生成代码:
+    # Build user prompt
+    user_prompt = f"""Please generate code based on the following callback function description:
 {json.dumps(callback_description, indent=2)}
 
-生成的代码应该包含完整的异步函数定义、类型提示和注释。
+The generated code should include complete async function definition, type hints and comments.
 """
+    
 
-    # 调用LLM生成代码
+    print(f"Generating protocol provider callback function code: {system_prompt}")
+    print(f"Generating protocol provider callback function code: {user_prompt}")
+    # Call LLM to generate code
     code = await llm.async_generate_response(system_prompt, user_prompt)
     
-    print(f"Generated callback code: {code}")
+    print(f"Generated protocol provider callback function code: {code}")
     
     code = extract_code_from_llm_output(code)
     
-    # 确保目录存在
+    # Ensure directory exists
     directory = os.path.dirname(code_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    # 保存生成的代码
+    # Save generated code
     if code_path:
         with open(code_path, "w") as f:
             f.write(code)
             
-    # 动态加载生成的代码
+    # Dynamically load generated code
     spec = importlib.util.spec_from_file_location("provider_module", code_path)
     provider_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(provider_module)
 
-    # 返回生成的回调函数
+    # Return generated callback function
     if hasattr(provider_module, 'provider_callback'):
         return provider_module.provider_callback
     else:
