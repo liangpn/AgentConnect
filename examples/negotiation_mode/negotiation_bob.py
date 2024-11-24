@@ -14,7 +14,7 @@ from typing import Any, Dict
 
 g_current_dir: str = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(g_current_dir)
-sys.path.append(g_current_dir + "/../../")
+# sys.path.append(g_current_dir + "/../../")
 
 from agent_connect.simple_node import SimpleNegotiationNode, ProviderSession
 from agent_connect.app_protocols import ProviderBase

@@ -14,7 +14,7 @@ import logging
 import sys  
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../") 
+# sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../") 
 
 from agent_connect.simple_node import SimpleNode, SimpleNodeSession
 from agent_connect.utils.log_base import set_log_color_level

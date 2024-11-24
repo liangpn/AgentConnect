@@ -14,7 +14,7 @@ import importlib.util
 
 g_current_dir: str = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(g_current_dir)
-sys.path.append(g_current_dir + "/../../")
+# sys.path.append(g_current_dir + "/../../")
 
 from agent_connect.simple_node import SimpleNegotiationNode, RequesterSession
 from agent_connect.app_protocols import RequesterBase

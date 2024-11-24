@@ -15,7 +15,7 @@ from typing import Any, Dict, Tuple
 import sys
 g_current_dir: str = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(g_current_dir)
-sys.path.append(g_current_dir + "/../../")
+# sys.path.append(g_current_dir + "/../../")
 
 from agent_connect.utils.llm.base_llm import AzureLLM, BaseLLM
 from agent_connect.utils.llm_output_processer import extract_code_from_llm_output
