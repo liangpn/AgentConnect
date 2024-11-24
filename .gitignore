@@ -9,3 +9,5 @@ examples/*.json
 build/
 examples/negotiation_mode/workflow_code/
 examples/negotiation_mode/protocol_code/
+examples/negotiation_mode/*.json
+examples/simple_node_mode/*.json
