@@ -56,15 +56,15 @@ class AppProtocols:
         return actual_hash == expected_hash
 
     def load_python_class(self, file_path: str, class_name: str):
-        """动态加载 Python 类
+        """Dynamically load a Python class
         
         Args:
-            file_path: 包含类的 Python 文件路径
-            class_name: 要加载的类名
+            file_path: The path to the Python file containing the class
+            class_name: The name of the class to be loaded
             
         Returns:
-            Type[RequesterBase]: RequesterBase 的子类
-            None: 如果加载失败或类型不匹配
+            Type[RequesterBase]: A subclass of RequesterBase
+            None: If loading fails or type does not match
         """
         try:
             spec = importlib.util.spec_from_file_location(class_name, file_path)
