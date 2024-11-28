@@ -255,14 +255,3 @@ class WssMessageSDK:
         )
 
         await self.client.send_data(encrypted_message)
-
-
-# Example usage
-async def main():
-    sdk = await WssMessageSDK.create("wss://example.com/ws", "your_api_key", [("private_key_pem1", "did_doc1"), ("private_key_pem2", "did_doc2")], lambda x: print(f"Callback: {x}"))
-    source_did, destination_did, data = await sdk.recv_data()
-    print(source_did, destination_did, data)
-    await sdk.negotiate_short_term_keys("did:example:local", "your_private_key_pem", "did:example:remote")
-
-if __name__ == "__main__":
-    asyncio.run(main())
