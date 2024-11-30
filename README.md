@@ -75,6 +75,7 @@ To promote the Agent Network Protocol (ANP) as an industry standard, we will for
 Below are the current development features and progress of AgentConnect:
 
 - [x] Initial version development completed, supporting single-node mode and hosted mode
+- [ ] DID authentication supports HTTP protocol, which can be easily integrated into protocols such as MCP
 - [ ] Replace the core connection protocol with a binary format instead of the current JSON format to improve transmission efficiency
 - [ ] Support more data formats: files (images, videos, audio), live streaming, real-time communication (RTC), etc.
 - [ ] Design and implement the meta-protocol and layer0 protocol for collaboration between agents based on the Agent Network Protocol
