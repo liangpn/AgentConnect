@@ -147,7 +147,7 @@ def verify_signature_for_json(public_key: ec.EllipticCurvePublicKey, did_documen
 def generate_router_json(private_key: ec.EllipticCurvePrivateKey, did_document: Dict[str, Any]) -> Dict[str, Any]:
     """Generate router JSON dictionary based on private key and DID document"""
     router_did = did_document.get("id")
-    nonce = generate_random_hex(32)  # Assume there's a function generate_random_hex to generate random hex string
+    nonce = generate_random_hex(32)  # Generate random hex string for nonce
     current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
     # Get verificationMethod from DID document
@@ -328,28 +328,28 @@ def encrypt_aes_gcm_sha256(data: bytes, key: bytes) -> Dict[str, str]:
     if len(key) != 16:
         raise ValueError("Key must be 128 bits (16 bytes).")
     
-    # 生成随机IV
-    iv = os.urandom(12)  # 对于GCM，推荐的IV长度是12字节
+    # Generate random IV
+    iv = os.urandom(12)  # 12 bytes is recommended for GCM mode
     
-    # 创建加密对象
+    # Create encryptor object
     encryptor = Cipher(
         algorithms.AES(key),
         modes.GCM(iv),
         backend=default_backend()
     ).encryptor()
     
-    # 加密数据
+    # Encrypt data
     ciphertext = encryptor.update(data) + encryptor.finalize()
     
-    # 获取tag
+    # Get authentication tag
     tag = encryptor.tag
     
-    # 编码为Base64
+    # Encode as Base64
     iv_encoded = base64.b64encode(iv).decode('utf-8')
     tag_encoded = base64.b64encode(tag).decode('utf-8')
     ciphertext_encoded = base64.b64encode(ciphertext).decode('utf-8')
     
-    # 创建JSON对象
+    # Create JSON object
     encrypted_data = {
         "iv": iv_encoded,
         "tag": tag_encoded,
@@ -359,19 +359,19 @@ def encrypt_aes_gcm_sha256(data: bytes, key: bytes) -> Dict[str, str]:
     return encrypted_data
 
 def decrypt_aes_gcm_sha256(encrypted_json: Dict[str, str], key: bytes) -> str:
-    # Base64解码
+    # Base64 decode components
     iv = base64.b64decode(encrypted_json["iv"])
     ciphertext = base64.b64decode(encrypted_json["ciphertext"])
     tag = base64.b64decode(encrypted_json["tag"])
     
-    # 创建解密对象
+    # Create decryptor object
     decryptor = Cipher(
         algorithms.AES(key),
         modes.GCM(iv, tag),
         backend=default_backend()
     ).decryptor()
     
-    # 解密数据
+    # Decrypt data
     plaintext = decryptor.update(ciphertext) + decryptor.finalize()
     
     return plaintext.decode()
