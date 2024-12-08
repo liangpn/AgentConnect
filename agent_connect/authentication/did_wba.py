@@ -1,20 +1,10 @@
-# AgentConnect: https://github.com/chgaowei/AgentConnect
-# Author: GaoWei Chang
-# Email: chgaowei@gmail.com
-# Website: https://agent-network-protocol.com/
-#
-# This project is open-sourced under the MIT License. For details, please see the LICENSE file.
-'''
-Generate DID document
-Generate secure JWT
-Send HTTP request
-'''
-from typing import Dict, Tuple, Optional, List, Callable, Union
+import os
+import sys
+import re
 import urllib.parse
 import base64
 import logging
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, PrivateFormat, NoEncryption
+from typing import Any, Dict, Tuple, Optional, List, Callable, Union
 import aiohttp
 import asyncio
 import json
@@ -23,21 +13,23 @@ import hashlib
 from datetime import datetime, timezone, timedelta
 from canonicaljson import encode_canonical_json
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec, utils
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, utils
 from cryptography.exceptions import InvalidSignature
-import re
-from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.serialization import (
+    Encoding, PublicFormat, PrivateFormat, NoEncryption
+)
 import base58  # Need to add this dependency
+import traceback
+from .verification_methods import create_verification_method, VerificationMethod, CURVE_MAPPING
 
-logger = logging.getLogger(__name__)
-
-# 添加曲线映射字典
-CURVE_MAPPING = {
-    'secp256k1': ec.SECP256K1(),
-    'P-256': ec.SECP256R1(),
-    'P-384': ec.SECP384R1(),
-    'P-521': ec.SECP521R1(),
-}
+def _is_ip_address(hostname: str) -> bool:
+    """Check if a hostname is an IP address."""
+    # IPv4 pattern
+    ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+    # IPv6 pattern (simplified)
+    ipv6_pattern = r'^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$'
+    
+    return bool(re.match(ipv4_pattern, hostname) or re.match(ipv6_pattern, hostname))
 
 def _encode_base64url(data: bytes) -> str:
     """Encode bytes data to base64url format"""
@@ -46,22 +38,23 @@ def _encode_base64url(data: bytes) -> str:
 def _public_key_to_jwk(public_key: ec.EllipticCurvePublicKey) -> Dict:
     """Convert secp256k1 public key to JWK format"""
     numbers = public_key.public_numbers()
+    x = _encode_base64url(numbers.x.to_bytes((numbers.x.bit_length() + 7) // 8, 'big'))
+    y = _encode_base64url(numbers.y.to_bytes((numbers.y.bit_length() + 7) // 8, 'big')) 
+    compressed = public_key.public_bytes(encoding=Encoding.X962, format=PublicFormat.CompressedPoint)
+    kid = _encode_base64url(hashlib.sha256(compressed).digest())
     return {
         "kty": "EC",
         "crv": "secp256k1",
-        "x": _encode_base64url(numbers.x.to_bytes(32, 'big')),
-        "y": _encode_base64url(numbers.y.to_bytes(32, 'big')),
-        "kid": _encode_base64url(public_key.public_bytes(
-            encoding=Encoding.X962,
-            format=PublicFormat.CompressedPoint
-        ))
+        "x": x,
+        "y": y,
+        "kid": kid
     }
 
 def create_did_wba_document(
     hostname: str,
     port: Optional[int] = None,
     path_segments: Optional[List[str]] = None
-) -> Tuple[Dict, Dict]:
+) -> Tuple[Dict[str, Any], Dict[str, Tuple[bytes, bytes]]]:
     """
     Generate DID document and corresponding private key dictionary
     
@@ -73,26 +66,37 @@ def create_did_wba_document(
     Returns:
         Tuple[Dict, Dict]: Returns a tuple containing two dictionaries:
             - First dict is the DID document 
-            - Second dict is the private keys dictionary where key is DID fragment (e.g. "key-1") 
-              and value is the private key in PEM format
+            - Second dict is the keys dictionary where key is DID fragment (e.g. "key-1") 
+              and value is a tuple of (private_key_pem_bytes, public_key_pem_bytes)
+              
+    Raises:
+        ValueError: If hostname is empty or is an IP address
+
+    Note: Currently only secp256k1 is supported
     """
-    logger.info(f"Creating DID WBA document for hostname: {hostname}")
+    if not hostname:
+        raise ValueError("Hostname cannot be empty")
+        
+    if _is_ip_address(hostname):
+        raise ValueError("Hostname cannot be an IP address")
+    
+    logging.info(f"Creating DID WBA document for hostname: {hostname}")
     
     # Build base DID
     did_base = f"did:wba:{hostname}"
     if port is not None:
         encoded_port = urllib.parse.quote(f":{port}")
         did_base = f"{did_base}{encoded_port}"
-        logger.debug(f"Added port to DID base: {did_base}")
+        logging.debug(f"Added port to DID base: {did_base}")
     
     did = did_base
     if path_segments:
         did_path = ":".join(path_segments)
         did = f"{did_base}:{did_path}"
-        logger.debug(f"Added path segments to DID: {did}")
+        logging.debug(f"Added path segments to DID: {did}")
     
     # Generate secp256k1 key pair
-    logger.debug("Generating secp256k1 key pair")
+    logging.debug("Generating secp256k1 key pair")
     secp256k1_private_key = ec.generate_private_key(ec.SECP256K1())
     secp256k1_public_key = secp256k1_private_key.public_key()
     
@@ -116,17 +120,23 @@ def create_did_wba_document(
         "authentication": [verification_method["id"]]
     }
     
-    # Build private keys dictionary (serialize private key to PEM format)
-    private_keys = {
-        "key-1": secp256k1_private_key.private_bytes(
-            encoding=Encoding.PEM,
-            format=PrivateFormat.PKCS8,
-            encryption_algorithm=NoEncryption()
+    # Build keys dictionary with both private and public keys in PEM format
+    keys = {
+        "key-1": (
+            secp256k1_private_key.private_bytes(
+                encoding=Encoding.PEM,
+                format=PrivateFormat.PKCS8,
+                encryption_algorithm=NoEncryption()
+            ),
+            secp256k1_public_key.public_bytes(
+                encoding=Encoding.PEM,
+                format=PublicFormat.SubjectPublicKeyInfo
+            )
         )
     }
     
-    logger.info(f"Successfully created DID document with ID: {did}")
-    return did_document, private_keys
+    logging.info(f"Successfully created DID document with ID: {did}")
+    return did_document, keys
 
 async def resolve_did_wba_document(did: str) -> Dict:
     """
@@ -142,7 +152,7 @@ async def resolve_did_wba_document(did: str) -> Dict:
         ValueError: If DID format is invalid
         aiohttp.ClientError: If HTTP request fails
     """
-    logger.info(f"Resolving DID document for: {did}")
+    logging.info(f"Resolving DID document for: {did}")
 
     # Validate DID format
     if not did.startswith("did:wba:"):
@@ -153,21 +163,20 @@ async def resolve_did_wba_document(did: str) -> Dict:
     if len(did_parts) < 4:
         raise ValueError("Invalid DID format: missing domain")
 
-    domain = did_parts[2]
+    domain = urllib.parse.unquote(did_parts[2])
     path_segments = did_parts[3].split(":") if len(did_parts) > 3 else []
 
     try:
         # Create HTTP client
         timeout = aiohttp.ClientTimeout(total=10)
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            # Build URL
             url = f"https://{domain}"
             if path_segments:
                 url += '/' + '/'.join(path_segments)
             else:
                 url += '/.well-known/did.json'
 
-            logger.debug(f"Requesting DID document from URL: {url}")
+            logging.debug(f"Requesting DID document from URL: {url}")
 
             async with session.get(
                 url,
@@ -186,15 +195,15 @@ async def resolve_did_wba_document(did: str) -> Dict:
                         f"Got: {did_document.get('id')}"
                     )
 
-                logger.info(f"Successfully resolved DID document for: {did}")
+                logging.info(f"Successfully resolved DID document for: {did}")
                 return did_document
 
     except aiohttp.ClientError as e:
-        logger.error(f"Failed to resolve DID document: {str(e)}")
-        raise
+        logging.error(f"Failed to resolve DID document: {str(e)}\nStack trace:\n{traceback.format_exc()}")
+        return None
     except Exception as e:
-        logger.error(f"Failed to resolve DID document: {str(e)}")
-        raise
+        logging.error(f"Failed to resolve DID document: {str(e)}\nStack trace:\n{traceback.format_exc()}")
+        return None
 
 # Add a sync wrapper for backward compatibility
 def resolve_did_wba_document_sync(did: str) -> Dict:
@@ -212,7 +221,7 @@ def resolve_did_wba_document_sync(did: str) -> Dict:
 def generate_auth_header(
     did_document: Dict,
     service_domain: str,
-    sign_callback: Callable[[bytes, str], str]
+    sign_callback: Callable[[bytes, str], bytes]
 ) -> str:
     """
     Generate the Authorization header for DID authentication.
@@ -221,7 +230,8 @@ def generate_auth_header(
         did_document: DID document dictionary.
         service_domain: Server domain.
         sign_callback: Signature callback function that takes the content to sign and the verification method fragment as parameters.
-            callback(content_to_sign: bytes, verification_method_fragment: str) -> str
+            callback(content_to_sign: bytes, verification_method_fragment: str) -> bytes.
+            If ECDSA, return signature in DER format.
             
     Returns:
         str: Value of the Authorization header. Do not include "Authorization:" prefix.
@@ -229,21 +239,15 @@ def generate_auth_header(
     Raises:
         ValueError: If the DID document format is invalid.
     """
-    logger.info("Starting to generate DID authentication header.")
+    logging.info("Starting to generate DID authentication header.")
     
     # Validate DID document
     did = did_document.get('id')
     if not did:
         raise ValueError("DID document is missing the id field.")
-        
-    # Get the fragment of the first verification method
-    verification_methods = did_document.get('verificationMethod', [])
-    if not verification_methods:
-        raise ValueError("DID document is missing verification methods.")
     
-    # Extract fragment from verification method ID
-    method_id = verification_methods[0]['id']
-    verification_method_fragment = method_id.split('#')[-1]
+    # Select authentication method
+    method_dict, verification_method_fragment = _select_authentication_method(did_document)
     
     # Generate a 16-byte random nonce
     nonce = secrets.token_hex(16)
@@ -261,12 +265,15 @@ def generate_auth_header(
     
     # Normalize JSON using JCS
     canonical_json = encode_canonical_json(data_to_sign)
+    logging.debug(f"generate_auth_header Canonical JSON: {canonical_json}")
     
     # Calculate SHA-256 hash
     content_hash = hashlib.sha256(canonical_json).digest()
     
-    # Sign using the callback function
-    signature = sign_callback(content_hash, verification_method_fragment)
+    # Create verifier and encode signature
+    verifier = create_verification_method(method_dict)
+    signature_bytes = sign_callback(content_hash, verification_method_fragment)
+    signature = verifier.encode_signature(signature_bytes)
     
     # Construct the Authorization header
     auth_header = (
@@ -277,8 +284,8 @@ def generate_auth_header(
         f"Signature {signature}"
     )
     
-    logger.info("Successfully generated DID authentication header.")
-    logger.debug(f"Generated Authorization header: {auth_header}")
+    logging.info("Successfully generated DID authentication header.")
+    logging.debug(f"Generated Authorization header: {auth_header}")
     
     return auth_header
 
@@ -313,6 +320,50 @@ def _find_verification_method(did_document: Dict, verification_method_id: str) -
             
     return None
 
+
+def _select_authentication_method(did_document: Dict) -> Tuple[Dict, str]:
+    """
+    Select an authentication method from DID document.
+    
+    Args:
+        did_document: DID document dictionary
+        
+    Returns:
+        Tuple[Dict, str]: A tuple containing:
+            - The verification method dictionary
+            - The verification method fragment
+            
+    Raises:
+        ValueError: If no valid authentication method is found
+    """
+    # Get authentication methods
+    authentication = did_document.get('authentication', [])
+    if not authentication:
+        raise ValueError("DID document is missing authentication methods.")
+    
+    # Get the first authentication method
+    auth_method = authentication[0]
+    
+    # Extract verification method
+    if isinstance(auth_method, str):
+        # If auth_method is a string (reference), find the verification method
+        method_dict = _find_verification_method(did_document, auth_method)
+        if not method_dict:
+            raise ValueError(f"Referenced verification method not found: {auth_method}")
+        verification_method_fragment = auth_method.split('#')[-1]
+    else:
+        # If auth_method is an object (embedded verification method)
+        method_dict = auth_method
+        if 'id' not in method_dict:
+            raise ValueError("Embedded verification method missing 'id' field")
+        verification_method_fragment = method_dict['id'].split('#')[-1]
+    
+    if not method_dict:
+        raise ValueError("Could not find valid verification method")
+        
+    return method_dict, verification_method_fragment
+
+
 def _extract_ec_public_key_from_jwk(jwk: Dict) -> ec.EllipticCurvePublicKey:
     """
     Extract EC public key from JWK format.
@@ -338,11 +389,15 @@ def _extract_ec_public_key_from_jwk(jwk: Dict) -> ec.EllipticCurvePublicKey:
         raise ValueError(f"Unsupported curve: {crv}. Supported curves: {', '.join(CURVE_MAPPING.keys())}")
         
     try:
-        x = int.from_bytes(base64.b64decode(jwk['x'] + '=='), 'big')
-        y = int.from_bytes(base64.b64decode(jwk['y'] + '=='), 'big')
+        # Decode using base64url
+        x = int.from_bytes(base64.urlsafe_b64decode(
+            jwk['x'] + '=' * (-len(jwk['x']) % 4)), 'big')
+        y = int.from_bytes(base64.urlsafe_b64decode(
+            jwk['y'] + '=' * (-len(jwk['y']) % 4)), 'big')
         public_numbers = ec.EllipticCurvePublicNumbers(x, y, curve)
         return public_numbers.public_key()
     except Exception as e:
+        logging.error(f"Invalid JWK parameters: {str(e)}\nStack trace:\n{traceback.format_exc()}")
         raise ValueError(f"Invalid JWK parameters: {str(e)}")
 
 def _extract_ed25519_public_key_from_multibase(multibase: str) -> ed25519.Ed25519PublicKey:
@@ -364,6 +419,7 @@ def _extract_ed25519_public_key_from_multibase(multibase: str) -> ed25519.Ed2551
         key_bytes = base58.b58decode(multibase[1:])
         return ed25519.Ed25519PublicKey.from_public_bytes(key_bytes)
     except Exception as e:
+        logging.error(f"Invalid multibase key: {str(e)}\nStack trace:\n{traceback.format_exc()}")
         raise ValueError(f"Invalid multibase key: {str(e)}")
 
 def _extract_ed25519_public_key_from_base58(base58_key: str) -> ed25519.Ed25519PublicKey:
@@ -383,40 +439,41 @@ def _extract_ed25519_public_key_from_base58(base58_key: str) -> ed25519.Ed25519P
         key_bytes = base58.b58decode(base58_key)
         return ed25519.Ed25519PublicKey.from_public_bytes(key_bytes)
     except Exception as e:
+        logging.error(f"Invalid base58 key: {str(e)}\nStack trace:\n{traceback.format_exc()}")
         raise ValueError(f"Invalid base58 key: {str(e)}")
-
 def _extract_secp256k1_public_key_from_multibase(multibase: str) -> ec.EllipticCurvePublicKey:
     """
-    从multibase格式提取secp256k1公钥
+    Extract secp256k1 public key from multibase format.
     
     Args:
-        multibase: multibase编码的字符串 (z开头的base58btc格式)
+        multibase: Multibase encoded string (base58btc format starting with 'z')
         
     Returns:
-        ec.EllipticCurvePublicKey: secp256k1公钥对象
+        ec.EllipticCurvePublicKey: secp256k1 public key object
         
     Raises:
-        ValueError: 如果multibase格式无效
+        ValueError: If multibase format is invalid
     """
     if not multibase.startswith('z'):
-        raise ValueError("不支持的multibase编码格式，必须以'z'开头(base58btc)")
+        raise ValueError("Unsupported multibase encoding format, must start with 'z' (base58btc)")
     
     try:
-        # 解码base58btc (移除z前缀)
+        # Decode base58btc (remove the 'z' prefix)
         key_bytes = base58.b58decode(multibase[1:])
         
-        # secp256k1压缩格式公钥为33字节:
-        # 1字节前缀(0x02或0x03) + 32字节X坐标
+        # The compressed format public key for secp256k1 is 33 bytes:
+        # 1 byte prefix (0x02 or 0x03) + 32 bytes X coordinate
         if len(key_bytes) != 33:
-            raise ValueError("无效的secp256k1公钥长度")
+            raise ValueError("Invalid secp256k1 public key length")
             
-        # 从压缩格式恢复公钥
+        # Recover public key from compressed format
         return ec.EllipticCurvePublicKey.from_encoded_point(
             ec.SECP256K1(),
             key_bytes
         )
     except Exception as e:
-        raise ValueError(f"无效的multibase密钥: {str(e)}")
+        logging.error(f"Invalid multibase key: {str(e)}\nStack trace:\n{traceback.format_exc()}")
+        raise ValueError(f"Invalid multibase key: {str(e)}")
 
 def _extract_public_key(verification_method: Dict) -> Union[ec.EllipticCurvePublicKey, ed25519.Ed25519PublicKey]:
     """
@@ -488,30 +545,32 @@ def verify_auth_header_signature(
     service_domain: str
 ) -> Tuple[bool, str]:
     """
-    Verify the signature in DID authentication header.
-    Note: This function only verifies the signature. It does not validate timestamp or nonce.
+    Verify the DID authentication header signature.
     
     Args:
-        auth_header: Authorization header value (without "Authorization:" prefix)
-        did_document: DID document
-        service_domain: Server domain
+        auth_header: Authorization header value without "Authorization:" prefix.
+        did_document: DID document dictionary.
+        service_domain: Server domain that should match the one used to generate the signature.
         
     Returns:
-        Tuple[bool, str]: (verification success, reason message)
+        Tuple[bool, str]: A tuple containing:
+            - Boolean indicating if verification was successful
+            - Message describing the verification result or error
+            
+    Raises:
+        ValueError: If the auth header format is invalid.
     """
-    logger.info("Starting DID authentication header verification")
+
+    logging.info("Starting DID authentication header verification")
     
     try:
-        # Convert header to lowercase for case-insensitive matching
-        auth_header = auth_header.lower()
-        
-        # Define required fields and their patterns
+        # Define required fields and their patterns (case-insensitive)
         required_fields = {
-            'did': r'did\s+([\S]+)',
-            'nonce': r'nonce\s+([\S]+)',
-            'timestamp': r'timestamp\s+([\S]+)',
-            'method': r'verificationmethod\s+([\S]+)',
-            'signature': r'signature\s+([\S]+)'
+            'did': r'(?i)did\s+([\S]+)',
+            'nonce': r'(?i)nonce\s+([\S]+)',
+            'timestamp': r'(?i)timestamp\s+([\S]+)',
+            'method': r'(?i)verificationmethod\s+([\S]+)',
+            'signature': r'(?i)signature\s+([\S]+)'
         }
         
         # Extract all fields
@@ -528,8 +587,8 @@ def verify_auth_header_signature(
         verification_method = header_parts['method']
         signature = header_parts['signature']
          
-        # Verify DID
-        if did_document.get('id') != client_did:
+        # Verify DID (case-sensitive)
+        if did_document.get('id').lower() != client_did.lower():
             return False, "DID mismatch"
             
         # Construct data to verify
@@ -540,51 +599,24 @@ def verify_auth_header_signature(
             "did": client_did
         }
         
-        # Normalize JSON using JCS
         canonical_json = encode_canonical_json(data_to_verify)
-        
-        # Calculate SHA-256 hash
         content_hash = hashlib.sha256(canonical_json).digest()
         
-        # Get verification method from DID document
         verification_method_id = f"{client_did}#{verification_method}"
-        
-        # Find verification method
-        method = _find_verification_method(did_document, verification_method_id)
-        if not method:
+        method_dict = _find_verification_method(did_document, verification_method_id)
+        if not method_dict:
             return False, "Verification method not found"
             
-        # Extract public key
         try:
-            public_key = _extract_public_key(method)
-        except ValueError as e:
-            return False, f"Invalid or unsupported key format: {str(e)}"
-        except Exception as e:
-            return False, f"Error extracting public key: {str(e)}"
-            
-        # Decode signature
-        try:
-            signature_bytes = base64.b64decode(signature + '==')
-            r_length = len(signature_bytes) // 2
-            r = int.from_bytes(signature_bytes[:r_length], 'big')
-            s = int.from_bytes(signature_bytes[r_length:], 'big')
-            signature_der = utils.encode_dss_signature(r, s)
-        except Exception as e:
-            return False, f"Invalid signature format: {str(e)}"
-        
-        # Verify signature
-        try:
-            public_key.verify(
-                signature_der,
-                content_hash,
-                ec.ECDSA(hashes.SHA256())
-            )
-            logger.info("DID authentication signature verification successful")
-            return True, "Verification successful"
-        except InvalidSignature:
+            verifier = create_verification_method(method_dict)
+            if verifier.verify_signature(content_hash, signature):
+                return True, "Verification successful"
             return False, "Signature verification failed"
+        except ValueError as e:
+            return False, f"Invalid or unsupported verification method: {str(e)}"
+        except Exception as e:
+            return False, f"Verification error: {str(e)}"
             
     except Exception as e:
-        logger.error(f"Error during verification process: {str(e)}")
+        logging.error(f"Error during verification process: {str(e)}")
         return False, f"Verification process error: {str(e)}"
-
