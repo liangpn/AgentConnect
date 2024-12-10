@@ -172,18 +172,23 @@ async def resolve_did_wba_document(did: str) -> Dict:
         async with aiohttp.ClientSession(timeout=timeout) as session:
             url = f"https://{domain}"
             if path_segments:
-                url += '/' + '/'.join(path_segments)
+                url += '/' + '/'.join(path_segments) + '/did.json'
             else:
                 url += '/.well-known/did.json'
-
+            
             logging.debug(f"Requesting DID document from URL: {url}")
-
+            
+            # TODO: Add DNS-over-HTTPS support
+            # resolver = aiohttp.AsyncResolver(nameservers=['8.8.8.8'])
+            # connector = aiohttp.TCPConnector(resolver=resolver)
+            
             async with session.get(
                 url,
                 headers={
                     'Accept': 'application/json'
                 },
                 ssl=True
+                # connector=connector
             ) as response:
                 response.raise_for_status()
                 did_document = await response.json()
