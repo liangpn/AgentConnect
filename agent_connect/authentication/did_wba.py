@@ -539,6 +539,45 @@ def _extract_public_key(verification_method: Dict) -> Union[ec.EllipticCurvePubl
         f"Unsupported verification method type or missing required key format: {method_type}"
     )
 
+def extract_auth_header_parts(auth_header: str) -> Tuple[str, str, str, str, str]:
+    """
+    Extract authentication information from the authorization header.
+    
+    Args:
+        auth_header: Authorization header value without "Authorization:" prefix.
+        
+    Returns:
+        Tuple[str, str, str, str, str]: A tuple containing:
+            - did: DID string
+            - nonce: Nonce value
+            - timestamp: Timestamp string
+            - method: Verification method fragment
+            - signature: Signature value
+            
+    Raises:
+        ValueError: If any required field is missing in the auth header
+    """
+    logging.debug(f"Extracting auth header parts from: {auth_header}")
+    
+    required_fields = {
+        'did': r'(?i)did\s+([\S]+)',
+        'nonce': r'(?i)nonce\s+([\S]+)',
+        'timestamp': r'(?i)timestamp\s+([\S]+)',
+        'method': r'(?i)verificationmethod\s+([\S]+)',
+        'signature': r'(?i)signature\s+([\S]+)'
+    }
+    
+    parts = {}
+    for field, pattern in required_fields.items():
+        match = re.search(pattern, auth_header)
+        if not match:
+            raise ValueError(f"Missing required field in auth header: {field}")
+        parts[field] = match.group(1)
+    
+    logging.debug(f"Extracted auth header parts: {parts}")
+    return (parts['did'], parts['nonce'], parts['timestamp'], 
+            parts['method'], parts['signature'])
+
 def verify_auth_header_signature(
     auth_header: str,
     did_document: Dict,
@@ -556,36 +595,12 @@ def verify_auth_header_signature(
         Tuple[bool, str]: A tuple containing:
             - Boolean indicating if verification was successful
             - Message describing the verification result or error
-            
-    Raises:
-        ValueError: If the auth header format is invalid.
     """
-
     logging.info("Starting DID authentication header verification")
     
     try:
-        # Define required fields and their patterns (case-insensitive)
-        required_fields = {
-            'did': r'(?i)did\s+([\S]+)',
-            'nonce': r'(?i)nonce\s+([\S]+)',
-            'timestamp': r'(?i)timestamp\s+([\S]+)',
-            'method': r'(?i)verificationmethod\s+([\S]+)',
-            'signature': r'(?i)signature\s+([\S]+)'
-        }
-        
-        # Extract all fields
-        header_parts = {}
-        for field, pattern in required_fields.items():
-            match = re.search(pattern, auth_header)
-            if not match:
-                return False, f"Missing required field: {field}"
-            header_parts[field] = match.group(1)
-        
-        client_did = header_parts['did']
-        nonce = header_parts['nonce']
-        timestamp_str = header_parts['timestamp']
-        verification_method = header_parts['method']
-        signature = header_parts['signature']
+        # Extract auth header parts
+        client_did, nonce, timestamp_str, verification_method, signature = extract_auth_header_parts(auth_header)
          
         # Verify DID (case-sensitive)
         if did_document.get('id').lower() != client_did.lower():
@@ -617,6 +632,9 @@ def verify_auth_header_signature(
         except Exception as e:
             return False, f"Verification error: {str(e)}"
             
+    except ValueError as e:
+        logging.error(f"Error extracting auth header parts: {str(e)}")
+        return False, str(e)
     except Exception as e:
         logging.error(f"Error during verification process: {str(e)}")
         return False, f"Verification process error: {str(e)}"
