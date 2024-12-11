@@ -116,11 +116,7 @@ python negotiation_alice.py
 The logs will show successful connection, protocol negotiation, code generation, and data communication between Alice and Bob.
 
 > Note:
-> Meta-protocol negotiation requires Azure OpenAI API configuration (currently only supports Azure OpenAI). Configure these environment variables in the ".env" file in the project root:
-> AZURE_OPENAI_API_KEY
-> AZURE_OPENAI_ENDPOINT
-> AZURE_OPENAI_DEPLOYMENT
-> AZURE_OPENAI_MODEL_NAME
+> Meta-protocol negotiation requires Azure OpenAI API configuration (currently only supports Azure OpenAI). Configure these environment variables in the ".env" file in the project root: AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_MODEL_NAME
 
 ### Contact Us
 

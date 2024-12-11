@@ -116,11 +116,7 @@ python negotiation_alice.py
 可以通过日志看到，alice和bob成功连接，然后进行协议的协商，协商通过后，Alice和Bob会根据协议生成协议处理代码，然后运行代码完成数据通信。
 
 > 注意:
-> 运行元协议协商需要配置Azure OpenAI（暂时只支持Azure OpenAI）的API Key。请在项目根目录的".env"中配置如下环境变量：
-> AZURE_OPENAI_API_KEY
-> AZURE_OPENAI_ENDPOINT
-> AZURE_OPENAI_DEPLOYMENT
-> AZURE_OPENAI_MODEL_NAME
+> 运行元协议协商需要配置Azure OpenAI（暂时只支持Azure OpenAI）的API Key。请在项目根目录的".env"中配置如下环境变量：AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_MODEL_NAME
 
 
 ### 联系我们
