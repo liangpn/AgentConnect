@@ -87,14 +87,14 @@ Example code path: `examples/did_wba_examples`. Including:
 
 - basic.py: A basic example of DID WBA authentication. Creates a DID document and private key, uploads the DID document to the server, and tests DID authentication.
 - full.py: Builds on basic.py, adding token verification and DID document validation.
-- cli.py: A client example for testing if your server supports DID WBA authentication, using pre-created DID documents and private keys.
+- client.py: A client example for testing if your server supports DID WBA authentication, using pre-created DID documents and private keys.
 
 Run these files directly to experience DID WBA authentication:
 
 ```bash
 python basic.py
 python full.py
-python cli.py
+python client.py
 ```
 
 #### Meta-Protocol Negotiation Example

@@ -87,14 +87,14 @@ git clone https://github.com/chgaowei/AgentConnect.git
 
 - basic.py: 这是一个使用DID WBA身份认证的基础示例。它首先创建一个DID文档和私钥，然后将DID文档上传到服务器，最后生成身份认证头并测试DID身份认证。
 - full.py: 在basic.py的基础之上，增加了对token的验证，以及对上传的DID文档的验证。
-- cli.py: 这是一个客户端示例，用于测试你的服务器是否支持DID WBA身份认证。它使用预先创建的DID文档和私钥来访问你服务器上的测试接口。
+- client.py: 这是一个客户端示例，用于测试你的服务器是否支持DID WBA身份认证。它使用预先创建的DID文档和私钥来访问你服务器上的测试接口。
 
 你可以通过直接运行上面三个文件，来体验DID WBA身份认证。
 
 ```bash
 python basic.py
 python full.py
-python cli.py
+python client.py
 ```
 
 #### 元协议协商示例
