@@ -81,7 +81,9 @@ git clone https://github.com/chgaowei/AgentConnect.git
 
 #### Decentralized Authentication Based on did:wba and HTTP
 
-Our latest version supports decentralized authentication based on did:wba and HTTP. We provide a did:wba server for testing. Server API documentation: [did:wba Server Test API Documentation](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md).
+did:wba is a Web-based Decentralized Identifier. More information: [did:wba, a Web-based Decentralized Identifier](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did%3Awba%2C%20a%20Web-based%20Decentralized%20Identifier.md).
+
+Our latest version supports decentralized authentication based on did:wba and HTTP. We provide a did:wba server for testing. Server API documentation: [did:wba Server Test API Documentation](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/docs/did%3Awba%20server%20test%20interface.md). 
 
 Example code path: `examples/did_wba_examples`. Including:
 

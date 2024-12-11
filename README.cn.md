@@ -81,6 +81,8 @@ git clone https://github.com/chgaowei/AgentConnect.git
 
 #### 基于did:wba和HTTP的去中心化身份认证
 
+did:wba是一个基于Web的去中心化身份标识。更多信息：[did:wba, a Web-based Decentralized Identifier](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did%3Awba-%E5%9F%BA%E4%BA%8Eweb%E7%9A%84%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96%E8%BA%AB%E4%BB%BD%E6%A0%87%E8%AF%86%E7%AC%A6.md)。
+
 我们的最新版本已经支持基于did:wba和HTTP的去中心化身份认证。我们提供了一个did:wba服务端用于你的体验与测试。服务端接口文档：[did:wba服务端接口文档](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md)。
 
 示例代码路径：`examples/did_wba_examples`。其中：
