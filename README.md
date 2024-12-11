@@ -1,90 +1,69 @@
-# AgentConnect
+<div align="center">
+  
+[English](README.md) | [中文](README.cn.md)
 
-[中文版](README.cn.md)
+</div>
 
-## What is AgentConnect
+## AgentConnect
+
+### What is AgentConnect
 
 AgentConnect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol).
 
-## Vision
+The Agent Network Protocol (ANP) aims to become **the HTTP of the Agentic Internet era**.
 
-In this new era of rapid AI development, we are entering a new epoch of agent networks. Imagine the future: your personal assistant agent seamlessly communicates with restaurant agents when ordering meals; your smart home agent collaborates with energy management agents to optimize power usage; your investment advisor agent exchanges real-time information with global market analysis agents... This is the upcoming era of agent networks.
-
-However, as Bill Gates mentioned in [a blog post](https://www.gatesnotes.com/AI-agents), there is currently no standard protocol that allows agents to communicate with each other. This is the problem that the Agent Network Protocol (ANP) aims to solve.
-
-The vision of the Agent Network Protocol (ANP) is to **define how agents connect with each other and build an open, secure, and efficient collaboration network for billions of agents**. Just as the development of Internet standard protocols enabled the information age of the past three decades, we believe that in the near future, billions of agents will build an unprecedented collaboration network through ANP, creating greater value than the existing Internet. Empowered by AI technology and ANP, the agent network will eventually evolve into a **self-organizing, self-negotiating** efficient collaboration network - an incredibly exciting future.
-
-## Challenges
-
-Agent Network Protocol (ANP) aims to address three major challenges in connectivity:
-
-- How agents authenticate each other to allow any two agents to connect
-- How agents establish end-to-end encrypted communication to ensure communication security
-- How agents efficiently exchange data to enhance collaboration efficiencynegotiation between agents
-
-## Protocol Architecture
-
-To address these three challenges, the Agent Network Protocol (ANP) is designed as a three-layer architecture, consisting of (from bottom to top) the Identity and Encrypted Communication Layer, Meta-Protocol Layer, and Application Protocol Layer, as shown below:
+Our vision is to **define how agents connect with each other and build an open, secure, and efficient collaboration network for billions of agents**.
 
 <p align="center">
-  <img src="/images/protocol-layer-design.png" width="50%" alt="Protocol Layer Design"/>
+  <img src="/images/agentic-web.png" width="50%" alt="Agentic Web"/>
 </p>
 
-## AgentConnect Architecture
+While current internet infrastructure is well-established, there's still a lack of optimal communication and connection solutions for the specific needs of agent networks. We are committed to addressing three major challenges faced by agent networks:
 
-The technical architecture of AgentConnect is shown in the figure below:
+- 🌐 **Interconnectivity**: Enable communication between all agents, break down data silos, and allow AI to access complete contextual information.
+- 🖥️ **Native Interfaces**: AI shouldn't have to mimic human internet interactions; it should interact with the digital world through its most proficient methods (APIs or communication protocols).
+- 🤝 **Efficient Collaboration**: Leverage AI for self-organizing and self-negotiating agents to build a more cost-effective and efficient collaboration network than the existing internet.
+
+### AgentConnect Architecture
+
+The technical architecture of AgentConnect is illustrated below:
 
 <p align="center">
   <img src="/images/agent-connect-architecture.png" width="50%" alt="Project Architecture"/>
 </p>
 
-Corresponding to the three-layer architecture of the Agent Network Protocol, AgentConnect mainly includes the following parts:
+Corresponding to the three-layer architecture of the Agent Network Protocol, AgentConnect primarily includes:
 
-1. **Identity Authentication Module and End-to-End Encryption Module**
-   Mainly implements identity authentication and end-to-end encrypted communication based on W3C DID, including the generation, verification, and retrieval of DID documents, as well as the implementation of end-to-end encrypted communication schemes based on DID and ECDHE (Elliptic Curve Diffie-Hellman Ephemeral).
+1. 🔒 **Authentication and End-to-End Encryption Modules**
+   Implements W3C DID-based authentication and end-to-end encrypted communication, including DID document generation, verification, retrieval, and end-to-end encryption based on DID and ECDHE (Elliptic Curve Diffie-Hellman Ephemeral). Currently supports **HTTP-based DID authentication**.
 
-2. **Meta-Protocol Module**
-   The meta-protocol module needs to be implemented based on LLM (Large Language Model) and meta-protocol, mainly including application protocol negotiation, protocol code implementation, protocol debugging, and protocol processing based on the meta-protocol.
+2. 🌍 **Meta-Protocol Module**
+   Built on LLM (Large Language Models) and meta-protocols, this module handles application protocol negotiation, protocol code implementation, protocol debugging, and protocol processing.
 
-3. **Application Layer Protocol Integration Framework**
-   The main purpose is to manage the protocol specification documents and protocol codes for communication with other agents, including application protocol loading, application protocol unloading, application protocol configuration, and application protocol processing. Using this framework, agents can easily and on-demand load the required ready-made protocols, speeding up the agent protocol negotiation process.
+3. 📡 **Application Layer Protocol Integration Framework**
+   Manages protocol specifications and code for communication with other agents, including protocol loading, unloading, configuration, and processing. This framework enables agents to easily load and run required protocols on demand, accelerating protocol negotiation.
 
-In addition to the above functions, AgentConnect will also focus on performance and multi-platform support in the future:
+Beyond these features, AgentConnect will focus on performance and multi-platform support:
 
-- **Performance**: As a basic code library, we hope to provide extreme performance, and the core part of the code will be rewritten in Rust in the future.
-- **Multi-Platform**: Currently supports mac, Linux, and Windows, and will support mobile and browser platforms in the future.
+- **Performance**: As a fundamental codebase, we aim to provide optimal performance and plan to rewrite core components in Rust.
+- **Multi-Platform**: Currently supports Mac, Linux, and Windows, with future support for mobile platforms and browsers.
 
-## Contact Us
+### Documentation
 
-- email: chgaowei@gmail.com
-- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
-- Official Website: [https://www.agent-network-protocol.com/](https://www.agent-network-protocol.com/)  
+- Learn more about AgentNetworkProtocol: [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
+- For our overall design philosophy, check our technical whitepaper: [AgentNetworkProtocol Technical White Paper](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/01-AgentNetworkProtocol%20Technical%20White%20Paper.md)
 
-## Milestones
+### Milestones
 
-Whether it is the protocol or the open-source code implementation, we are advancing step by step in the following order:
+Both protocol and implementation development follow this progression:
 
-- Build the identity authentication and end-to-end encrypted communication protocol and implementation. This is the foundation and core of our entire project, and the current protocol design and code are basically complete.
-- Design and implement the meta-protocol and meta-protocol code. This will help the agent network evolve into a self-organizing, self-negotiating efficient collaborative network, which is what we are currently working on. This will be an exciting feature, and we expect to release the first version soon.
-- Develop the application layer protocol integration framework. This will help the Agent Network Protocol (ANP) provide services for agents in various scenarios.
+- [x] Build authentication and end-to-end encrypted communication protocol and implementation. This foundational core is essentially complete.
+- [x] Meta-protocol design and implementation. Protocol design and code development are basically complete.
+- [ ] Application layer protocol design and development. Currently in progress.
 
-In addition, we will follow the principle of overall first, then details. In the early stages, we will focus on building the overall architecture, constructing an overall outline for each major module, and getting it up and running quickly, rather than building individual exquisite but non-functional modules.
+To establish ANP as an industry standard, we plan to form an ANP Standardization Committee at an appropriate time, working towards recognition by international standardization organizations like W3C.
 
-To promote the Agent Network Protocol (ANP) as an industry standard, we will form the ANP Standardization Committee at an appropriate time, dedicated to promoting ANP as an industry standard recognized by international standardization organizations such as W3C.
-
-Below are the current development features and progress of AgentConnect:
-
-- [x] Initial version development completed, supporting single-node mode and hosted mode
-- [ ] DID authentication supports HTTP protocol, which can be easily integrated into protocols such as MCP
-- [ ] Replace the core connection protocol with a binary format instead of the current JSON format to improve transmission efficiency
-- [ ] Support more data formats: files (images, videos, audio), live streaming, real-time communication (RTC), etc.
-- [ ] Design and implement the meta-protocol and layer0 protocol for collaboration between agents based on the Agent Network Protocol
-- [ ] Compatible with DID web methods, W3C Verifiable Credentials (VC), and support transactions between DIDs
-- [ ] Rewrite AgentConnect in Rust to improve performance and support more platforms: macOS, Linux, iOS, Android
-- [ ] Support more encryption algorithms
-- [ ] Explore a fully blockchain-based solution
-
-## Installation
+### Installation
 
 ```bash
 pip install agent-connect
@@ -92,37 +71,37 @@ pip install agent-connect
 
 ### Running
 
-After installing the agent-connect library, you can run our demo to experience the powerful features of agent-connect. We currently provide two modes: Single Node Mode and Hosted Mode.
+After installing the agent-connect library, you can run our demos to experience its capabilities.
 
-Download the repository code:
+Clone the repository:
 
 ```bash
 git clone https://github.com/chgaowei/AgentConnect.git
 ```
 
-#### Single Node Mode
+#### Decentralized Authentication Based on did:wba and HTTP
 
-In Single Node Mode, you can complete DID authentication and encrypted communication without any third-party services.
+Our latest version supports decentralized authentication based on did:wba and HTTP. We provide a did:wba server for testing. Server API documentation: [did:wba Server Test API Documentation](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md).
 
-You can run the demo code in the examples/simple_node_mode directory. First start Bob's node, then start Alice's node. Alice's node will request Bob's DID document based on Bob's DID, and establish an encrypted connection channel with Bob using the public key and message service address in the DID document to send an encrypted message. When Bob's node receives the message, it will decrypt the message and send an encrypted message back to Alice.
+Example code path: `examples/did_wba_examples`. Including:
 
-1. Start Bob's node
+- basic.py: A basic example of DID WBA authentication. Creates a DID document and private key, uploads the DID document to the server, and tests DID authentication.
+- full.py: Builds on basic.py, adding token verification and DID document validation.
+- cli.py: A client example for testing if your server supports DID WBA authentication, using pre-created DID documents and private keys.
+
+Run these files directly to experience DID WBA authentication:
+
 ```bash
-python simple_node_bob.py
+python basic.py
+python full.py
+python cli.py
 ```
 
-2. Start Alice's node
-```bash
-python simple_node_alice.py
-```
+#### Meta-Protocol Negotiation Example
 
-Through the logs, you can see that Alice and Bob successfully connect and perform end-to-end encrypted communication.
+We support meta-protocol negotiation where Alice and Bob first negotiate a protocol, generate processing code, and then communicate using the protocol code.
 
-#### Meta-Protocol Negotiation Mode
-
-In Meta-Protocol Negotiation Mode, Alice and Bob first negotiate a protocol, then generate processing code based on the protocol, and run the code to complete data communication. Afterwards, Alice and Bob can use the protocol code directly for data communication.
-
-You can run the demo code in the examples/negotiation_mode directory. First start Bob's node, then start Alice's node.
+Run the demo code in examples/negotiation_mode directory. Start Bob's node first, then Alice's node.
 
 1. Start Bob's node
 ```bash
@@ -134,14 +113,30 @@ python negotiation_bob.py
 python negotiation_alice.py
 ```
 
-Through the logs, you can see that Alice and Bob successfully connect and perform end-to-end encrypted communication.
+The logs will show successful connection, protocol negotiation, code generation, and data communication between Alice and Bob.
 
-## Contribution
+> Note:
+> Meta-protocol negotiation requires Azure OpenAI API configuration (currently only supports Azure OpenAI). Configure these environment variables in the ".env" file in the project root:
+> AZURE_OPENAI_API_KEY
+> AZURE_OPENAI_ENDPOINT
+> AZURE_OPENAI_DEPLOYMENT
+> AZURE_OPENAI_MODEL_NAME
 
-Welcome to contribute to this project, detailed information please see [CONTRIBUTING.md](CONTRIBUTING.md).
+### Contact Us
+
+Author: Gaowei Chang  
+Email: chgaowei@gmail.com  
+- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
+- Website: [https://pi-unlimited.com/](https://pi-unlimited.com/)  
+- GitHub: [https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
+- WeChat: flow10240
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
-    
-This project is open-sourced under the MIT license. For more information, please see the [LICENSE](LICENSE) file.
+
+This project is open-sourced under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 

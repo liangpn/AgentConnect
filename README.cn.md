@@ -1,36 +1,30 @@
-# AgentConnect
+<div align="center">
+  
+[English](README.md) | [中文](README.cn.md)
 
-[English Version](README.md)
+</div>
 
-## AgentConnect是什么
+## AgentConnect
+
+### AgentConnect是什么
 
 AgentConnect是[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)的开源实现。
 
-## 愿景
+AgentNetworkProtocol(ANP)的目标是成为**智能体互联网时代的HTTP**。
 
-在人工智能迅猛发展的新时代，我们正迈入智能体网络的崭新纪元。想象未来：你的个人助理智能体在为你订餐时，与餐厅的智能体无缝沟通；你的智能家居智能体与能源管理智能体协同优化用电；你的投资顾问智能体与全球市场分析智能体实时交换信息......这就是即将到来的智能体网络时代。
-
-然而，正如比尔盖茨在[一篇博客](https://www.gatesnotes.com/AI-agents)中所说，目前还没有一个标准协议允许智能体之间相互通信。这就是Agent Network Protocol (ANP)致力于去解决的问题。
-
-Agent Network Protocol(ANP)的愿景是**定义智能体之间的连接方式，为数十亿智能体构建一个开放、安全、高效的协作网络**。就像互联网标准协议的发展成就了近三十年的信息时代，我们相信，在不远的将来，数十亿智能体将通过ANP构建起前所未有的协作网络，创造出比现有互联网更大的价值。在AI技术和ANP加持下，智能体网络最终会演化成一个**自组织、自协商**的高效协作网络，这是一个令人无比兴奋的未来。
-
-## 挑战
-
-Agent Network Protocol(ANP)致力于解决智能体连接中的三大挑战：
-
-- 智能体之间如何进行身份认证，以让任意两个智能体都可以进行连接
-- 智能体之间如何进行端到端加密通信，以确保通信安全
-- 智能体如何进行高效的数据交换，以提升智能体协作的效率
-
-## 协议架构
-
-为了应对上面的三大挑战，Agent Network Protocol(ANP)整体上设计为三层架构，从下到上依次是身份与加密通信层、元协议层、应用协议层，如下图所示：
+我们的愿景是**定义智能体之间的连接方式，为数十亿智能体构建一个开放、安全、高效的协作网络**。
 
 <p align="center">
-  <img src="/images/protocol-layer-design.png" width="50%" alt="协议分层图"/>
+  <img src="/images/agentic-web.png" width="50%" alt="Agentic Web"/>
 </p>
 
-## AgentConnect架构
+当前互联网基础设施虽已相当完善，但针对智能体网络的特殊需求，当下仍缺乏最适合的通信和连接方案。我们致力于解决智能体网络面临的三大挑战：
+
+- 🌐 **互联互通**：让所有的智能体相互之间都能够进行通信，打破数据孤岛，让AI能够获得完整的上下文信息。
+- 🖥️ **原生接口**：AI无需模仿人类访问互联网，AI应该用它最擅长的方式（API或通信协议）与数字世界交互。
+- 🤝 **高效协作**：利用AI，智能体之间可以自组织、自协商，构建比现有互联网更低成本、更高效率的协作网络。
+
+### AgentConnect架构
 
 AgentConnect的技术架构如下图：
 
@@ -40,13 +34,13 @@ AgentConnect的技术架构如下图：
 
 对应Agent Network Protocol的三层架构，AgentConnect主要包括以下几个部分：
 
-1. **身份认证模块与端到端加密模块**
-   主要实现基于W3C DID的身份认证和端到端加密通信，包括DID文档的生成、校验、获取，以及基于DID和ECDHE(Elliptic Curve Diffie-Hellman Ephemeral，椭圆曲线迪菲-赫尔曼临时密钥交换)端到端加密通信方案实现。
+1. 🔒 **身份认证模块与端到端加密模块**
+   主要实现基于W3C DID的身份认证和端到端加密通信，包括DID文档的生成、校验、获取，以及基于DID和ECDHE(Elliptic Curve Diffie-Hellman Ephemeral，椭圆曲线迪菲-赫尔曼临时密钥交换)端到端加密通信方案实现。现在已经支持**基于HTTP的DID身份认证**。
 
-2. **元协议模块**
+2. 🌍 **元协议模块**
    元协议模块需要基于LLM（大语言模型）和元协议实现，主要功能包含基于元协议的应用协议协商、协议代码实现、协议联调、协议处理等。
 
-3. **应用层协议集成框架**
+3. 📡 **应用层协议集成框架**
    主要的目的是管理和其他智能体通信的协议规范文档以及协议代码，包括应用协议加载、应用协议卸载、应用协议配置、应用协议处理。使用这个框架，智能体可以方便的、按需加载运行所需要的现成协议，加快智能体协议协商过程。
 
 除了以上的功能之外，AgentConnect未来也会在性能、多平台支持等特性上发力：
@@ -54,37 +48,22 @@ AgentConnect的技术架构如下图：
 - **性能**：作为一个基础的代码库，我们希望能够提供极致的性能，未来会用Rust来重写核心部分代码。
 - **多平台**：现在支持mac、Linux、windows，未来将会支持移动端、浏览器。
 
-## 联系我们
+### 文档
 
-- email: chgaowei@gmail.com
-- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
-- 官网: [https://www.agent-network-protocol.com/](https://www.agent-network-protocol.com/)  
+- 进一步了解AgnetNetworkProtocol：[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
+- 如果你想了解我们整体的设计思路和理念，可以查看我们的技术白皮书：[AgentNetworkProtocol技术白皮书](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/01-AgentNetworkProtocol%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.md)
 
-## 里程碑
+### 里程碑
 
 无论是协议还是开源代码实现，我们整体式是按照以下的顺序逐步的推进：
 
-- 构建身份认证与端到端加密通信协议与实现。这是我们整个项目的基础与核心，当前协议设计和代码基本完成。
-- 元协议设计与元协议代码实现。这将有助于智能体网络演进为一个自组织、自协商的高效协作网络，是我们当下正在做的事情，这将是一个令人兴奋的功能，预计不久之后我们就会发布第一个版本。
-- 应用层协议集成框架开发。这将有助于Agent Network Protocol(ANP)在各种场景中为智能体提供服务。
-
-除此之外，我们还会遵循先整体，后细节的原则。早期我们会致力于整体架构的搭建，为每一个主要的模块构建一个整体的轮廓，让它快速的运行起来，而不是构建一个个精美但无法运行的模块。
+- [x] 构建身份认证与端到端加密通信协议与实现。这是我们整个项目的基础与核心，当前协议设计和代码基本完成。
+- [x] 元协议设计与元协议代码实现。当前协议设计和代码开发基本完成。
+- [ ] 应用层协议设计与开发。目前正在进行中。
 
 为了推动Agent Network Protocol(ANP)成为行业的标准，我们将会在合适的时间组建ANP标准化委员会，致力于推动ANP成为W3C等国际标准化组织认可的行业标准。
 
-下面是当前AgentConnect的开发功能和进度：
-
-- [x] 初始版本开发完成，支持单节点模式和托管模式
-- [ ] DID身份验证支持HTTP协议，能够方便的集成在类似MCP之类的协议中
-- [ ] 核心的连接协议使用二进制替代当前的json格式，提升传输效率
-- [ ] 支持更多加的数据格式：文件（图片、视频、音频）、直播、实时通信（RTC）等
-- [ ] 基于Agent Network Protocol，设计并实现智能体之间协作的元协议、layer0层协议
-- [ ] 兼容DID web方法，W3C 可验证凭证（Verifiable Credentials, VC），支持DID之间进行资金交易
-- [ ] 使用Rust重写AgentConnect，提升性能，支持更多平台：macOS、Linux、iOS、Android
-- [ ] 支持更多的加密算法
-- [ ] 探索完全基于区块链的方案
-
-## 安装
+### 安装
 
 ```bash
 pip install agent-connect
@@ -92,7 +71,7 @@ pip install agent-connect
 
 ### 运行
 
-在安装完agent-connect库后，可以运行我们的demo，体验agent-connect的强大功能。我们当前提供两种模式：单节点模式和托管模式。
+在安装完agent-connect库后，可以运行我们的demo，体验agent-connect的强大功能。
 
 下载仓库代码：
 
@@ -100,27 +79,27 @@ pip install agent-connect
 git clone https://github.com/chgaowei/AgentConnect.git
 ```
 
-#### 单节点模式
+#### 基于did:wba和HTTP的去中心化身份认证
 
-在单节点模式下，你不需要其他任何三方服务，就可以完成DID的身份验证和加密通信。
+我们的最新版本已经支持基于did:wba和HTTP的去中心化身份认证。我们提供了一个did:wba服务端用于你的体验与测试。服务端接口文档：[did:wba服务端接口文档](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md)。
 
-你可以运行examples/simple_node_mode目录下demo代码。先启动bob的节点，再启动alice的节点，alice节点会根据bob的DID，向bob节点请求bob的DID文档，并且根据DID文档中的公钥和消息服务地址，和bob建立加密连接通道，发送一条加密消息。bob节点收到消息后，会解密消息，并且发送一条加密消息给alice。
+示例代码路径：`examples/did_wba_examples`。其中：
 
-1. 启动bob的节点
+- basic.py: 这是一个使用DID WBA身份认证的基础示例。它首先创建一个DID文档和私钥，然后将DID文档上传到服务器，最后生成身份认证头并测试DID身份认证。
+- full.py: 在basic.py的基础之上，增加了对token的验证，以及对上传的DID文档的验证。
+- cli.py: 这是一个客户端示例，用于测试你的服务器是否支持DID WBA身份认证。它使用预先创建的DID文档和私钥来访问你服务器上的测试接口。
+
+你可以通过直接运行上面三个文件，来体验DID WBA身份认证。
+
 ```bash
-python simple_node_bob.py
-``` 
-
-2. 启动alice的节点
-```bash
-python simple_node_alice.py
+python basic.py
+python full.py
+python cli.py
 ```
 
-可以通过日志看到，alice和bob成功连接，并且进行端到端的加密通信。
+#### 元协议协商示例
 
-#### 元协议协商模式
-
-在元协议协商模式下，alice和bob先协商出一个协议，然后根据协议生成处理代码，然后运行代码完成数据通信。后面alice和bob就可以使用协议代码直接进行数据通信。
+我们目前支持元协议协商。流程如下：alice和bob先协商出一个协议，然后根据协议生成处理代码，然后运行代码完成数据通信。后面alice和bob就可以使用协议代码直接进行数据通信。
 
 你可以运行examples/negotiation_mode目录下demo代码。先启动bob的节点，再启动alice的节点。
 
@@ -134,7 +113,24 @@ python negotiation_bob.py
 python negotiation_alice.py
 ```
 
-可以通过日志看到，alice和bob成功连接，并且进行端到端的加密通信。
+可以通过日志看到，alice和bob成功连接，然后进行协议的协商，协商通过后，Alice和Bob会根据协议生成协议处理代码，然后运行代码完成数据通信。
+
+> 注意:
+> 运行元协议协商需要配置Azure OpenAI（暂时只支持Azure OpenAI）的API Key。请在项目根目录的".env"中配置如下环境变量：
+> AZURE_OPENAI_API_KEY
+> AZURE_OPENAI_ENDPOINT
+> AZURE_OPENAI_DEPLOYMENT
+> AZURE_OPENAI_MODEL_NAME
+
+
+### 联系我们
+
+作者：常高伟  
+邮箱：chgaowei@gmail.com  
+- Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
+- 官网：[https://pi-unlimited.com/](https://pi-unlimited.com/)  
+- GitHub：[https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
+- 微信：flow10240
 
 
 ## 贡献
