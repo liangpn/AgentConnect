@@ -32,9 +32,9 @@ from agent_connect.utils.log_base import set_log_color_level
 _is_local_testing = False
 
 # TODO: Change to your own server domain. 
-# Or use the test domain we provide (currently using pi-unlimited.com, will later change to agent-network-protocol.com)
-# SERVER_DOMAIN = "agent-network-protocol.com"
-SERVER_DOMAIN = "pi-unlimited.com"
+# Or use the test domain we provide (currently using agent-network-protocol.com, will later change to agent-network-protocol.com)
+# SERVER_DOMAIN = "pi-unlimited.com"
+SERVER_DOMAIN = "agent-network-protocol.com"
 
 def convert_url_for_local_testing(url: str) -> str:
     if _is_local_testing:
@@ -54,6 +54,7 @@ async def upload_did_document(url: str, did_document: dict) -> bool:
                 json=did_document,
                 headers={'Content-Type': 'application/json'}
             ) as response:
+                logging.info("Upload DID document response: %s", response)
                 return response.status == 200
     except Exception as e:
         logging.error("Failed to upload DID document: %s", e)

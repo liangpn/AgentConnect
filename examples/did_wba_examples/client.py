@@ -22,42 +22,43 @@ from agent_connect.authentication.did_wba import (
 from agent_connect.utils.log_base import set_log_color_level
 
 # THIS IS A TEST DID DOCUMENT AND PRIVATE KEY
-CLIENT_DID = "did:wba:pi-unlimited.com:wba:user:1b299d9faa38ebaf"
-CLIENT_DID_DOCUMENT = '''{
+CLIENT_DID = "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd"
+CLIENT_DID_DOCUMENT = '''
+{
   "@context": [
     "https://www.w3.org/ns/did/v1",
     "https://w3id.org/security/suites/jws-2020/v1",
     "https://w3id.org/security/suites/secp256k1-2019/v1"
   ],
-  "id": "did:wba:pi-unlimited.com:wba:user:1b299d9faa38ebaf",
+  "id": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd",
   "verificationMethod": [
     {
-      "id": "did:wba:pi-unlimited.com:wba:user:1b299d9faa38ebaf#key-1",
+      "id": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd#key-1",
       "type": "EcdsaSecp256k1VerificationKey2019",
-      "controller": "did:wba:pi-unlimited.com:wba:user:1b299d9faa38ebaf",
+      "controller": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd",
       "publicKeyJwk": {
         "kty": "EC",
         "crv": "secp256k1",
-        "x": "P-vJSQGRoUbI2xnxywhVqblQ_hG0U0X-gja0JlfEWMg",
-        "y": "MRTV4uHKbNvkRRBknkXjqzMfyCMGFtBw5Qlild8aLZI",
-        "kid": "rs-lu83Tv498ETdLT_8wIC1sdFsM4ON6MKR7LQ0pI3I"
+        "x": "rDiSI-FZPwoTRWVl6ABuAphAErjpOHdy8yN9tJGMLdI",
+        "y": "5sGQrDJRJWOZwky_VG1QML_HpuUcgcUbYvcJWGvTqPQ",
+        "kid": "jJ9iDppRoHShKnSXYxLNT3lNYqSTWn9uJFLtXKICIwY"
       }
     }
   ],
   "authentication": [
-    "did:wba:pi-unlimited.com:wba:user:1b299d9faa38ebaf#key-1"
+    "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd#key-1"
   ]
 }'''
 
 CLIENT_PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
-MIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgumb+i8ZYrGBUB1U8HkS5
-Mqe4cyelFE2z7RqYYyEN4o6hRANCAAQ/68lJAZGhRsjbGfHLCFWpuVD+EbRTRf6C
-NrQmV8RYyDEU1eLhymzb5EUQZJ5F46szH8gjBhbQcOUJYpXfGi2S
+MIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgopMqAyzVPtU6yDK4gHmu
+2So23XgnwwTMgoXKTLHNaVGhRANCAASsOJIj4Vk/ChNFZWXoAG4CmEASuOk4d3Lz
+I320kYwt0ubBkKwyUSVjmcJMv1RtUDC/x6blHIHFG2L3CVhr06j0
 -----END PRIVATE KEY-----
 '''
 
 # TODO: Change to your own server domain.
-TEST_DOMAIN = "pi-unlimited.com"
+TEST_DOMAIN = "agent-network-protocol.com"
 
 def load_private_key(private_key_pem: str) -> ec.EllipticCurvePrivateKey:
     """Load private key from PEM string"""

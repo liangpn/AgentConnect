@@ -126,7 +126,7 @@ python negotiation_alice.py
 作者：常高伟  
 邮箱：chgaowei@gmail.com  
 - Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
-- 官网：[https://pi-unlimited.com/](https://pi-unlimited.com/)  
+- 官网：[https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
 - GitHub：[https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
 - 微信：flow10240
 

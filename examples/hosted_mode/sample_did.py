@@ -18,8 +18,8 @@ sys.path.append(current_directory + "/../")
 
 from agent_connect.authentication import DIDAllClient
 
-MESSAGE_WSS_URL = "wss://message.pi-unlimited.com/ws"
-DID_HTTP_URL = 'https://did.pi-unlimited.com'
+MESSAGE_WSS_URL = "wss://message.agent-network-protocol.com/ws"
+DID_HTTP_URL = 'https://did.agent-network-protocol.com'
 # DID_HTTP_URL = 'http://127.0.0.1:9000'
 TEST_API_KEY = '10090.bo9JAoRCAbQV43FD8kzX5SyEgxCs2R9z'   # Test API key, daily limit of 1000 tests
 

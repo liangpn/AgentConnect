@@ -125,7 +125,7 @@ The logs will show successful connection, protocol negotiation, code generation,
 Author: Gaowei Chang  
 Email: chgaowei@gmail.com  
 - Discord: [https://discord.gg/SuXb2pzqGy](https://discord.gg/SuXb2pzqGy)  
-- Website: [https://pi-unlimited.com/](https://pi-unlimited.com/)  
+- Website: [https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
 - GitHub: [https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
 - WeChat: flow10240
 

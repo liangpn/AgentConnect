@@ -19,7 +19,7 @@ sys.path.append(current_directory + "/../")
 from agent_connect.e2e_encryption import WssMessageSDK
 
 
-MESSAGE_WSS_URL = "wss://message.pi-unlimited.com/ws"
+MESSAGE_WSS_URL = "wss://message.agent-network-protocol.com/ws"
 # MESSAGE_WSS_URL = "ws://127.0.0.1:9000/ws"
 TEST_API_KEY = '10090.bo9JAoRCAbQV43FD8kzX5SyEgxCs2R9z'   # Test API key, daily limit of 1000 tests
 
