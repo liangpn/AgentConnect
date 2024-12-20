@@ -99,6 +99,8 @@ python full.py
 python client.py
 ```
 
+你也可以通过我们demo页面来体验DID WBA身份认证：[DID WBA身份认证页面](https://www.agent-network-protocol.com/wba/examples/)。这个页面演示了在一个平台（pi-unlimited.com）上创建DID身份，然后在另外一个平台（agent-network-protocol.com）进行身份验证的过程。
+
 #### 元协议协商示例
 
 我们目前支持元协议协商。流程如下：alice和bob先协商出一个协议，然后根据协议生成处理代码，然后运行代码完成数据通信。后面alice和bob就可以使用协议代码直接进行数据通信。
