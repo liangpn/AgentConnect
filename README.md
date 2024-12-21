@@ -53,6 +53,12 @@ Beyond these features, AgentConnect will focus on performance and multi-platform
 - Learn more about AgentNetworkProtocol: [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
 - For our overall design philosophy, check our technical whitepaper: [AgentNetworkProtocol Technical White Paper](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/01-AgentNetworkProtocol%20Technical%20White%20Paper.md)
 
+Here are some of our blogs:
+
+- A brief introduction to did:wba: [did:wba - Web-Based Decentralized Identifiers](blogs/did:wba,%20a%20Web-based%20Decentralized%20Identifier.md)
+
+- We compared the differences between did:wba and technologies like OpenID Connect and API keys: [Comparison of did:wba with OpenID Connect and API keys](blogs/Comparison%20of%20did:wba%20with%20OpenID%20Connect%20and%20API%20keys.md)
+
 ### Milestones
 
 Both protocol and implementation development follow this progression:

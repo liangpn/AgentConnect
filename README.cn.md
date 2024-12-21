@@ -53,6 +53,12 @@ AgentConnect的技术架构如下图：
 - 进一步了解AgnetNetworkProtocol：[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
 - 如果你想了解我们整体的设计思路和理念，可以查看我们的技术白皮书：[AgentNetworkProtocol技术白皮书](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/01-AgentNetworkProtocol%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.md)
 
+这里有一些我们的blogs：
+
+- 这是一个did:wba的简要介绍：[did:wba-基于web的去中心化身份标识符](blogs/did:wba-基于web的去中心化身份标识符.md)
+
+- 我们对比了did:wba与OpenID Connect、API keys等技术方案的区别：[did:wba对比OpenID Connect、API keys](blogs/cn/did:wba对比OpenID%20Connect、API%20keys.md)
+
 ### 里程碑
 
 无论是协议还是开源代码实现，我们整体式是按照以下的顺序逐步的推进：
