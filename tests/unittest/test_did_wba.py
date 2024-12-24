@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 # Add the project root directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -158,9 +159,10 @@ class TestDIDWBA(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(success)
         
         # Test with tampered signature
-        tampered_header = auth_header.replace(
-            auth_header.split()[-1],
-            "InvalidSignature"
+        tampered_header = re.sub(
+            r'signature="[^"]+"',
+            'signature="InvalidSignature"',
+            auth_header
         )
         success, message = verify_auth_header_signature(
             tampered_header,
@@ -230,9 +232,10 @@ class TestDIDWBA(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(wrong_success, "Verification should fail with wrong domain")
         
         # Test with tampered signature
-        tampered_header = auth_header.replace(
-            auth_header.split()[-1],
-            "InvalidSignature"
+        tampered_header = re.sub(
+            r'signature="[^"]+"',
+            'signature="InvalidSignature"',
+            auth_header
         )
         tampered_success, tampered_message = verify_auth_header_signature(
             tampered_header,
@@ -308,5 +311,3 @@ class TestDIDWBA(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

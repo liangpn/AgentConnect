@@ -282,11 +282,11 @@ def generate_auth_header(
     
     # Construct the Authorization header
     auth_header = (
-        f"DID {did} "
-        f"Nonce {nonce} "
-        f"Timestamp {timestamp} "
-        f"VerificationMethod {verification_method_fragment} "
-        f"Signature {signature}"
+        f'DIDWba did="{did}", '
+        f'nonce="{nonce}", '
+        f'timestamp="{timestamp}", '
+        f'verification_method="{verification_method_fragment}", '
+        f'signature="{signature}"'
     )
     
     logging.info("Successfully generated DID authentication header.")
@@ -565,12 +565,16 @@ def extract_auth_header_parts(auth_header: str) -> Tuple[str, str, str, str, str
     logging.debug(f"Extracting auth header parts from: {auth_header}")
     
     required_fields = {
-        'did': r'(?i)did\s+([\S]+)',
-        'nonce': r'(?i)nonce\s+([\S]+)',
-        'timestamp': r'(?i)timestamp\s+([\S]+)',
-        'method': r'(?i)verificationmethod\s+([\S]+)',
-        'signature': r'(?i)signature\s+([\S]+)'
+        'did': r'(?i)did="([^"]+)"',
+        'nonce': r'(?i)nonce="([^"]+)"',
+        'timestamp': r'(?i)timestamp="([^"]+)"',
+        'verification_method': r'(?i)verification_method="([^"]+)"',
+        'signature': r'(?i)signature="([^"]+)"'
     }
+    
+    # Verify the header starts with DIDWba
+    if not auth_header.strip().startswith('DIDWba'):
+        raise ValueError("Authorization header must start with 'DIDWba'")
     
     parts = {}
     for field, pattern in required_fields.items():
@@ -581,7 +585,7 @@ def extract_auth_header_parts(auth_header: str) -> Tuple[str, str, str, str, str
     
     logging.debug(f"Extracted auth header parts: {parts}")
     return (parts['did'], parts['nonce'], parts['timestamp'], 
-            parts['method'], parts['signature'])
+            parts['verification_method'], parts['signature'])
 
 def verify_auth_header_signature(
     auth_header: str,
