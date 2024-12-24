@@ -556,7 +556,7 @@ def extract_auth_header_parts(auth_header: str) -> Tuple[str, str, str, str, str
             - did: DID string
             - nonce: Nonce value
             - timestamp: Timestamp string
-            - method: Verification method fragment
+            - verification_method: Verification method fragment
             - signature: Signature value
             
     Raises:
