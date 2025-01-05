@@ -53,7 +53,8 @@ def _public_key_to_jwk(public_key: ec.EllipticCurvePublicKey) -> Dict:
 def create_did_wba_document(
     hostname: str,
     port: Optional[int] = None,
-    path_segments: Optional[List[str]] = None
+    path_segments: Optional[List[str]] = None,
+    agent_description_url: Optional[str] = None
 ) -> Tuple[Dict[str, Any], Dict[str, Tuple[bytes, bytes]]]:
     """
     Generate DID document and corresponding private key dictionary
@@ -62,6 +63,7 @@ def create_did_wba_document(
         hostname: Hostname
         port: Optional port number
         path_segments: Optional DID path segments list, e.g. ['user', 'alice']
+        agent_description_url: Optional URL for agent description
     
     Returns:
         Tuple[Dict, Dict]: Returns a tuple containing two dictionaries:
@@ -119,6 +121,13 @@ def create_did_wba_document(
         "verificationMethod": [verification_method],
         "authentication": [verification_method["id"]]
     }
+
+    # Add agent description if URL is provided
+    if agent_description_url is not None:
+        did_document["agentDescription"] = {
+            "id": f"{did}#ad",
+            "url": agent_description_url
+        }
     
     # Build keys dictionary with both private and public keys in PEM format
     keys = {

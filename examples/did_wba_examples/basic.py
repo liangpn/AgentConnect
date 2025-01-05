@@ -142,7 +142,14 @@ def sign_callback(content: bytes, method_fragment: str) -> bytes:
     )
     return signature
 
-async def main(unique_id: str = None):
+async def main(unique_id: str = None, agent_description_url: str = None):
+    """
+    Main function to demonstrate DID WBA authentication
+    
+    Args:
+        unique_id: Optional unique identifier for the user
+        agent_description_url: Optional URL for agent description
+    """
     # 1. Generate unique identifier (8 bytes = 16 hex characters) if not provided
     if unique_id is None:
         unique_id = secrets.token_hex(8)
@@ -156,7 +163,8 @@ async def main(unique_id: str = None):
     logging.info("Creating DID document...")
     did_document, keys = create_did_wba_document(
         hostname=server_domain,
-        path_segments=["wba", "user", unique_id]
+        path_segments=["wba", "user", unique_id],
+        agent_description_url=agent_description_url
     )
     
     # 4. Save private keys, DID document and set path for sign_callback
@@ -193,6 +201,7 @@ async def main(unique_id: str = None):
 
 if __name__ == "__main__":
     set_log_color_level(logging.INFO)
-    # Get unique_id from command line arguments if provided
+    # Get unique_id and agent_description_url from command line arguments if provided
     unique_id = sys.argv[1] if len(sys.argv) > 1 else None
-    asyncio.run(main(unique_id))
+    agent_description_url = sys.argv[2] if len(sys.argv) > 2 else None
+    asyncio.run(main(unique_id, agent_description_url))

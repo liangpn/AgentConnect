@@ -196,7 +196,8 @@ async def main():
     logging.info("Creating DID document...")
     did_document, keys = create_did_wba_document(
         hostname=server_domain,
-        path_segments=["wba", "user", unique_id]
+        path_segments=["wba", "user", unique_id],
+        agent_description_url="https://agent-network-protocol.com/agents/example/ad.json"
     )
     
     # 4. Save private keys, DID document and set path for sign_callback
@@ -248,10 +249,3 @@ async def main():
 if __name__ == "__main__":
     set_log_color_level(logging.INFO)
     asyncio.run(main())
-
-
-
-
-
-
-
