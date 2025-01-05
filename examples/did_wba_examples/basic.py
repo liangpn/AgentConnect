@@ -142,9 +142,10 @@ def sign_callback(content: bytes, method_fragment: str) -> bytes:
     )
     return signature
 
-async def main():
-    # 1. Generate unique identifier (8 bytes = 16 hex characters)
-    unique_id = secrets.token_hex(8)
+async def main(unique_id: str = None):
+    # 1. Generate unique identifier (8 bytes = 16 hex characters) if not provided
+    if unique_id is None:
+        unique_id = secrets.token_hex(8)
     
     # 2. Set server information
     server_domain = SERVER_DOMAIN
@@ -192,11 +193,6 @@ async def main():
 
 if __name__ == "__main__":
     set_log_color_level(logging.INFO)
-    asyncio.run(main())
-
-
-
-
-
-
-
+    # Get unique_id from command line arguments if provided
+    unique_id = sys.argv[1] if len(sys.argv) > 1 else None
+    asyncio.run(main(unique_id))
