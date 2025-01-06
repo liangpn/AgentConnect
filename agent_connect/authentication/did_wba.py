@@ -124,10 +124,11 @@ def create_did_wba_document(
 
     # Add agent description if URL is provided
     if agent_description_url is not None:
-        did_document["agentDescription"] = {
+        did_document["service"] = [{
             "id": f"{did}#ad",
-            "url": agent_description_url
-        }
+            "type": "AgentDescription",
+            "serviceEndpoint": agent_description_url
+        }]
     
     # Build keys dictionary with both private and public keys in PEM format
     keys = {
