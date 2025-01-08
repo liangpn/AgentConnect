@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "agent-connect"
-version = "0.3.1"
+version = "0.3.2"
 description = "An SDK that enables agents to connect with each other, allowing them to perform identity authentication, end-to-end encrypted communication, automatic protocol negotiation based on LLMs, and efficient data exchange."
 authors = ["changshan <chgaowei@gmail.com>"]
 license = "MIT"

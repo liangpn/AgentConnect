@@ -18,7 +18,6 @@ import json
 import secrets
 import hashlib
 from datetime import datetime, timezone, timedelta
-from canonicaljson import encode_canonical_json
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519, utils
 from cryptography.exceptions import InvalidSignature
@@ -28,6 +27,7 @@ from cryptography.hazmat.primitives.serialization import (
 import base58  # Need to add this dependency
 import traceback
 from .verification_methods import create_verification_method, VerificationMethod, CURVE_MAPPING
+import jcs
 
 def _is_ip_address(hostname: str) -> bool:
     """Check if a hostname is an IP address."""
@@ -286,7 +286,7 @@ def generate_auth_header(
     }
     
     # Normalize JSON using JCS
-    canonical_json = encode_canonical_json(data_to_sign)
+    canonical_json = jcs.canonicalize(data_to_sign)
     logging.debug(f"generate_auth_header Canonical JSON: {canonical_json}")
     
     # Calculate SHA-256 hash
@@ -640,7 +640,7 @@ def verify_auth_header_signature(
             "did": client_did
         }
         
-        canonical_json = encode_canonical_json(data_to_verify)
+        canonical_json = jcs.canonicalize(data_to_verify)
         content_hash = hashlib.sha256(canonical_json).digest()
         
         verification_method_id = f"{client_did}#{verification_method}"
