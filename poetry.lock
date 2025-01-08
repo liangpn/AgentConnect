@@ -774,6 +774,17 @@ test = ["jaraco.test (>=5.4)", "pytest (>=6,!=8.1.*)", "zipp (>=3.17)"]
 type = ["pytest-mypy"]
 
 [[package]]
+name = "jcs"
+version = "0.2.1"
+description = "JCS - JSON Canonicalization"
+optional = false
+python-versions = ">=3.6.2"
+files = [
+    {file = "jcs-0.2.1-py3-none-any.whl", hash = "sha256:e23a3e1de60f832d33cd811bb9c3b3be79219cdf95f63b88f0972732c3fa8476"},
+    {file = "jcs-0.2.1.tar.gz", hash = "sha256:9f20360b2f3b0a410d65493b448f96306d80e37fb46283f3f4aa5db2c7c1472b"},
+]
+
+[[package]]
 name = "jiter"
 version = "0.7.0"
 description = "Fast iterable JSON parser."
@@ -1773,4 +1784,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "7fe2a7d92c6c973c6fdc4a5786b9c42f2e5e94ad675c459885129dcef533e0cb"
+content-hash = "4115cec21c1fddfd6918bd4fd839cad22c3c4d0b1cf74a9ef805cde5cca5b79e"

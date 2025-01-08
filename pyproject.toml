@@ -33,6 +33,7 @@ python-dotenv = "^1.0.1"
 jsonschema = "^4.23.0"
 httpx = "^0.28.1"
 canonicaljson = "^2.0.0"
+jcs = "^0.2.1"
 
 
 [build-system]
