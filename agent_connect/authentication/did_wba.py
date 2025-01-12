@@ -664,3 +664,149 @@ def verify_auth_header_signature(
     except Exception as e:
         logging.error(f"Error during verification process: {str(e)}")
         return False, f"Verification process error: {str(e)}"
+
+def generate_auth_json(
+    did_document: Dict,
+    service_domain: str,
+    sign_callback: Callable[[bytes, str], bytes]
+) -> str:
+    """
+    Generate JSON format string for DID authentication.
+    
+    Args:
+        did_document: DID document dictionary
+        service_domain: Server domain
+        sign_callback: Signature callback function that takes content to sign and verification method fragment
+            callback(content_to_sign: bytes, verification_method_fragment: str) -> bytes
+            For ECDSA, return signature in DER format
+            
+    Returns:
+        str: Authentication information in JSON format
+        
+    Raises:
+        ValueError: If DID document format is invalid
+    """
+    logging.info("Starting to generate DID authentication JSON")
+    
+    # Validate DID document
+    did = did_document.get('id')
+    if not did:
+        raise ValueError("DID document missing id field")
+    
+    # Select authentication method
+    method_dict, verification_method_fragment = _select_authentication_method(did_document)
+    
+    # Generate 16-byte random nonce
+    nonce = secrets.token_hex(16)
+    
+    # Generate ISO 8601 formatted UTC timestamp
+    timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    # Construct data to sign
+    data_to_sign = {
+        "nonce": nonce,
+        "timestamp": timestamp,
+        "service": service_domain,
+        "did": did
+    }
+    
+    # Normalize JSON using JCS
+    canonical_json = jcs.canonicalize(data_to_sign)
+    
+    # Calculate SHA-256 hash
+    content_hash = hashlib.sha256(canonical_json).digest()
+    
+    # Create verifier and encode signature
+    verifier = create_verification_method(method_dict)
+    signature_bytes = sign_callback(content_hash, verification_method_fragment)
+    signature = verifier.encode_signature(signature_bytes)
+    
+    # Construct authentication JSON
+    auth_json = {
+        "did": did,
+        "nonce": nonce,
+        "timestamp": timestamp,
+        "verification_method": verification_method_fragment,
+        "signature": signature
+    }
+    
+    logging.info("Successfully generated DID authentication JSON")
+    return json.dumps(auth_json)
+
+def verify_auth_json_signature(
+    auth_json: Union[str, Dict],
+    did_document: Dict,
+    service_domain: str
+) -> Tuple[bool, str]:
+    """
+    Verify the signature of DID authentication JSON.
+    
+    Args:
+        auth_json: Authentication information in JSON string or dictionary format
+        did_document: DID document dictionary
+        service_domain: Server domain, must match the domain used to generate the signature
+        
+    Returns:
+        Tuple[bool, str]: A tuple containing:
+            - Boolean indicating if verification was successful
+            - Message describing the verification result or error
+    """
+    logging.info("Starting DID authentication JSON verification")
+    
+    try:
+        # Parse JSON string (if input is string)
+        if isinstance(auth_json, str):
+            try:
+                auth_data = json.loads(auth_json)
+            except json.JSONDecodeError as e:
+                return False, f"Invalid JSON format: {str(e)}"
+        else:
+            auth_data = auth_json
+            
+        # Extract authentication data
+        client_did = auth_data.get('did')
+        nonce = auth_data.get('nonce')
+        timestamp_str = auth_data.get('timestamp')
+        verification_method = auth_data.get('verification_method')
+        signature = auth_data.get('signature')
+        
+        # Verify all required fields exist
+        if not all([client_did, nonce, timestamp_str, verification_method, signature]):
+            return False, "Authentication JSON missing required fields"
+         
+        # Verify DID (case-sensitive)
+        if did_document.get('id').lower() != client_did.lower():
+            return False, "DID mismatch"
+            
+        # Construct data to verify
+        data_to_verify = {
+            "nonce": nonce,
+            "timestamp": timestamp_str,
+            "service": service_domain,
+            "did": client_did
+        }
+        
+        canonical_json = jcs.canonicalize(data_to_verify)
+        content_hash = hashlib.sha256(canonical_json).digest()
+        
+        verification_method_id = f"{client_did}#{verification_method}"
+        method_dict = _find_verification_method(did_document, verification_method_id)
+        if not method_dict:
+            return False, "Verification method not found"
+            
+        try:
+            verifier = create_verification_method(method_dict)
+            if verifier.verify_signature(content_hash, signature):
+                return True, "Verification successful"
+            return False, "Signature verification failed"
+        except ValueError as e:
+            return False, f"Invalid or unsupported verification method: {str(e)}"
+        except Exception as e:
+            return False, f"Verification error: {str(e)}"
+            
+    except ValueError as e:
+        logging.error(f"Error extracting authentication data: {str(e)}")
+        return False, str(e)
+    except Exception as e:
+        logging.error(f"Error during verification process: {str(e)}")
+        return False, f"Verification process error: {str(e)}"
