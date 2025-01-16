@@ -22,7 +22,9 @@ from agent_connect.authentication.did_wba import (
     resolve_did_wba_document,
     resolve_did_wba_document_sync,
     generate_auth_header,
-    verify_auth_header_signature
+    verify_auth_header_signature,
+    generate_auth_json,
+    verify_auth_json_signature
 )
 import hashlib
 
@@ -308,6 +310,119 @@ class TestDIDWBA(unittest.IsolatedAsyncioTestCase):
         mock_get.side_effect = Exception("Unexpected error")
         resolved_doc = await resolve_did_wba_document(did)
         self.assertIsNone(resolved_doc)
+
+    def test_auth_json_generation_and_verification(self):
+        """Test generation and verification of JSON format authentication"""
+        # Generate a real secp256k1 key pair
+        private_key = ec.generate_private_key(ec.SECP256K1())
+        public_key = private_key.public_key()
+        
+        # Create public key JWK using helper function
+        def _encode_base64url(data: bytes) -> str:
+            return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')
+            
+        def _public_key_to_jwk(public_key):
+            numbers = public_key.public_numbers()
+            x = _encode_base64url(numbers.x.to_bytes((numbers.x.bit_length() + 7) // 8, 'big'))
+            y = _encode_base64url(numbers.y.to_bytes((numbers.y.bit_length() + 7) // 8, 'big'))
+            compressed = public_key.public_bytes(
+                encoding=Encoding.X962,
+                format=PublicFormat.CompressedPoint
+            )
+            kid = _encode_base64url(hashlib.sha256(compressed).digest())
+            return {
+                "kty": "EC",
+                "crv": "secp256k1", 
+                "x": x,
+                "y": y,
+                "kid": kid
+            }
+            
+        # Create a DID document with the real key
+        did_doc = {
+            "@context": [
+                "https://www.w3.org/ns/did/v1",
+                "https://w3id.org/security/suites/jws-2020/v1",
+                "https://w3id.org/security/suites/secp256k1-2019/v1"
+            ],
+            "id": "did:wba:example.com:user:alice",
+            "verificationMethod": [{
+                "id": "did:wba:example.com:user:alice#key-1",
+                "type": "EcdsaSecp256k1VerificationKey2019",
+                "controller": "did:wba:example.com:user:alice",
+                "publicKeyJwk": _public_key_to_jwk(public_key)
+            }],
+            "authentication": ["did:wba:example.com:user:alice#key-1"]
+        }
+        
+        service_domain = "api.example.com"
+        
+        # Create a real signing callback using the private key
+        def real_sign_callback(content: bytes, vm_fragment: str) -> str:
+            return private_key.sign(
+                content,
+                ec.ECDSA(hashes.SHA256())
+            )
+        
+        # Generate authentication JSON
+        auth_json = generate_auth_json(
+            did_doc,
+            service_domain,
+            real_sign_callback
+        )
+        
+        # Verify the generated JSON
+        success, message = verify_auth_json_signature(
+            auth_json,
+            did_doc,
+            service_domain
+        )
+        print(f"verify_auth_json_signature returns: success: {success}, message: {message}")
+        self.assertTrue(success, f"Verification failed: {message}")
+        
+        # Test with invalid service domain
+        wrong_success, wrong_message = verify_auth_json_signature(
+            auth_json,
+            did_doc,
+            "wrong.domain.com"
+        )
+        self.assertFalse(wrong_success, "Verification should fail with wrong domain")
+        
+        # Test with tampered signature
+        auth_data = json.loads(auth_json)
+        auth_data['signature'] = "InvalidSignature"
+        tampered_json = json.dumps(auth_data)
+        
+        tampered_success, tampered_message = verify_auth_json_signature(
+            tampered_json,
+            did_doc,
+            service_domain
+        )
+        self.assertFalse(tampered_success, "Verification should fail with tampered signature")
+        
+        # Test with missing required fields
+        incomplete_data = {
+            "did": "did:wba:example.com:user:alice",
+            "nonce": "abc123",
+            # timestamp is missing
+            "verification_method": "key-1",
+            "signature": "some_signature"
+        }
+        incomplete_success, incomplete_message = verify_auth_json_signature(
+            incomplete_data,
+            did_doc,
+            service_domain
+        )
+        self.assertFalse(incomplete_success, "Verification should fail with missing required fields")
+        
+        # Test with invalid JSON string
+        invalid_json = "{ invalid json string"
+        invalid_success, invalid_message = verify_auth_json_signature(
+            invalid_json,
+            did_doc,
+            service_domain
+        )
+        self.assertFalse(invalid_success, "Verification should fail with invalid JSON string")
 
 if __name__ == '__main__':
     unittest.main()
