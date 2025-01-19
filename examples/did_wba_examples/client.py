@@ -58,7 +58,7 @@ I320kYwt0ubBkKwyUSVjmcJMv1RtUDC/x6blHIHFG2L3CVhr06j0
 '''
 
 # TODO: Change to your own server domain.
-TEST_DOMAIN = "agent-network-protocol.com"
+TEST_DOMAIN = "service.agent-network-protocol.com"
 
 def load_private_key(private_key_pem: str) -> ec.EllipticCurvePrivateKey:
     """Load private key from PEM string"""

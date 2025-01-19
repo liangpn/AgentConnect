@@ -109,7 +109,7 @@ python full.py
 python client.py
 ```
 
-You can also experience DID WBA authentication through our demo page: [DID WBA Authentication Page](https://www.agent-network-protocol.com/wba/examples/). This page demonstrates the process of creating a DID identity on one platform (pi-unlimited.com) and then verifying the identity on another platform (agent-network-protocol.com).
+You can also experience DID WBA authentication through our demo page: [DID WBA Authentication Page](https://www.service.agent-network-protocol.com/wba/examples/). This page demonstrates the process of creating a DID identity on one platform (pi-unlimited.com) and then verifying the identity on another platform (service.agent-network-protocol.com).
 
 #### Meta-Protocol Negotiation Example
 

@@ -109,7 +109,7 @@ python full.py
 python client.py
 ```
 
-你也可以通过我们demo页面来体验DID WBA身份认证：[DID WBA身份认证页面](https://www.agent-network-protocol.com/wba/examples/)。这个页面演示了在一个平台（pi-unlimited.com）上创建DID身份，然后在另外一个平台（agent-network-protocol.com）进行身份验证的过程。
+你也可以通过我们demo页面来体验DID WBA身份认证：[DID WBA身份认证页面](https://www.service.agent-network-protocol.com/wba/examples/)。这个页面演示了在一个平台（pi-unlimited.com）上创建DID身份，然后在另外一个平台（service.agent-network-protocol.com）进行身份验证的过程。
 
 #### 元协议协商示例
 
