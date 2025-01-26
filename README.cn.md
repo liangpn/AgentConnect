@@ -53,15 +53,17 @@ AgentConnect的技术架构如下图：
 - 进一步了解AgnetNetworkProtocol：[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
 - 如果你想了解我们整体的设计思路和理念，可以查看我们的技术白皮书：[AgentNetworkProtocol技术白皮书](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/01-AgentNetworkProtocol%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.md)
 
-这里有一些我们的blogs：
+这里有一些我们的blogs:
 
-- 这是我们对智能体网络的理解：[智能体互联网有什么不同](blogs/cn/智能体互联网有什么不同.md)
+- 这是我们对智能体网络的理解：[智能体互联网有什么不同](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/智能体互联网有什么不同.md)
 
-- 这是一个did:wba的简要介绍：[did:wba-基于web的去中心化身份标识符](blogs/did:wba-基于web的去中心化身份标识符.md)
+- 这是一个did:wba的简要介绍：[did:wba-基于web的去中心化身份标识符](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did:wba-基于web的去中心化身份标识符.md)
 
-- 我们对比了did:wba与OpenID Connect、API keys等技术方案的区别：[did:wba对比OpenID Connect、API keys](blogs/cn/did:wba对比OpenID%20Connect、API%20keys.md)
+- 我们对比了did:wba与OpenID Connect、API keys等技术方案的区别：[did:wba对比OpenID Connect、API keys](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/did:wba对比OpenID%20Connect、API%20keys.md)
 
-- 我们分析了did:wba的安全性原理：[did:wba安全性原理解析](blogs/cn/did:wba安全性原理解析.md)
+- 我们分析了did:wba的安全性原理：[did:wba安全性原理解析](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/did:wba安全性原理解析.md)
+
+- 从OpenAI的Operator，谈AI与互联网交互的三种技术路线：[从OpenAI的Operator，看AI与互联网交互的三种技术路线](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/从OpenAI的Operator，看AI与互联网交互的三种技术路线.md)
 
 ### 里程碑
 
