@@ -152,4 +152,6 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for det
 
 This project is open-sourced under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-
+## Copyright Notice
+Copyright (c) 2024 GaoWei Chang  
+This file is released under the [MIT License](./LICENSE). You are free to use and modify it, but you must retain this copyright notice.
