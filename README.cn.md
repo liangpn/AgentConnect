@@ -8,7 +8,7 @@
 
 ### AgentConnect是什么
 
-AgentConnect是[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)的开源实现。
+AgentConnect是[Agent Network Protocol(ANP)](https://github.com/agent-network-protocol/AgentNetworkProtocol)的开源实现。
 
 AgentNetworkProtocol(ANP)的目标是成为**智能体互联网时代的HTTP**。
 
@@ -50,20 +50,20 @@ AgentConnect的技术架构如下图：
 
 ### 文档
 
-- 进一步了解AgnetNetworkProtocol：[Agent Network Protocol(ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
-- 如果你想了解我们整体的设计思路和理念，可以查看我们的技术白皮书：[AgentNetworkProtocol技术白皮书](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/01-AgentNetworkProtocol%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.md)
+- 进一步了解AgnetNetworkProtocol：[Agent Network Protocol(ANP)](https://github.com/agent-network-protocol/AgentNetworkProtocol)
+- 如果你想了解我们整体的设计思路和理念，可以查看我们的技术白皮书：[AgentNetworkProtocol技术白皮书](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/chinese/01-AgentNetworkProtocol%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.md)
 
 这里有一些我们的blogs:
 
-- 这是我们对智能体网络的理解：[智能体互联网有什么不同](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/智能体互联网有什么不同.md)
+- 这是我们对智能体网络的理解：[智能体互联网有什么不同](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/cn/智能体互联网有什么不同.md)
 
-- 这是一个did:wba的简要介绍：[did:wba-基于web的去中心化身份标识符](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did:wba-基于web的去中心化身份标识符.md)
+- 这是一个did:wba的简要介绍：[did:wba-基于web的去中心化身份标识符](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/did:wba-基于web的去中心化身份标识符.md)
 
-- 我们对比了did:wba与OpenID Connect、API keys等技术方案的区别：[did:wba对比OpenID Connect、API keys](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/did:wba对比OpenID%20Connect、API%20keys.md)
+- 我们对比了did:wba与OpenID Connect、API keys等技术方案的区别：[did:wba对比OpenID Connect、API keys](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/cn/did:wba对比OpenID%20Connect、API%20keys.md)
 
-- 我们分析了did:wba的安全性原理：[did:wba安全性原理解析](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/did:wba安全性原理解析.md)
+- 我们分析了did:wba的安全性原理：[did:wba安全性原理解析](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/cn/did:wba安全性原理解析.md)
 
-- 从OpenAI的Operator，谈AI与互联网交互的三种技术路线：[从OpenAI的Operator，看AI与互联网交互的三种技术路线](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/cn/从OpenAI的Operator，看AI与互联网交互的三种技术路线.md)
+- 从OpenAI的Operator，谈AI与互联网交互的三种技术路线：[从OpenAI的Operator，看AI与互联网交互的三种技术路线](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/cn/从OpenAI的Operator，看AI与互联网交互的三种技术路线.md)
 
 ### 里程碑
 
@@ -88,14 +88,14 @@ pip install agent-connect
 下载仓库代码：
 
 ```bash
-git clone https://github.com/chgaowei/AgentConnect.git
+git clone https://github.com/agent-network-protocol/AgentConnect.git
 ```
 
 #### 基于did:wba和HTTP的去中心化身份认证
 
-did:wba是一个基于Web的去中心化身份标识。更多信息：[did:wba, a Web-based Decentralized Identifier](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did%3Awba-%E5%9F%BA%E4%BA%8Eweb%E7%9A%84%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96%E8%BA%AB%E4%BB%BD%E6%A0%87%E8%AF%86%E7%AC%A6.md)。
+did:wba是一个基于Web的去中心化身份标识。更多信息：[did:wba, a Web-based Decentralized Identifier](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/did%3Awba-%E5%9F%BA%E4%BA%8Eweb%E7%9A%84%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96%E8%BA%AB%E4%BB%BD%E6%A0%87%E8%AF%86%E7%AC%A6.md)。
 
-我们的最新版本已经支持基于did:wba和HTTP的去中心化身份认证。我们提供了一个did:wba服务端用于你的体验与测试。服务端接口文档：[did:wba服务端接口文档](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md)。
+我们的最新版本已经支持基于did:wba和HTTP的去中心化身份认证。我们提供了一个did:wba服务端用于你的体验与测试。服务端接口文档：[did:wba服务端接口文档](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/chinese/docs/did%3Awba%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%8B%E8%AF%95%E6%8E%A5%E5%8F%A3.md)。
 
 示例代码路径：`examples/did_wba_examples`。其中：
 
@@ -141,7 +141,7 @@ python negotiation_alice.py
 邮箱：chgaowei@gmail.com  
 - Discord: [https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)  
 - 官网：[https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
-- GitHub：[https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
+- GitHub：[https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)
 - 微信：flow10240
 
 

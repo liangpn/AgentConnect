@@ -8,7 +8,7 @@
 
 ### What is AgentConnect
 
-AgentConnect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol).
+AgentConnect is an open-source implementation of the [Agent Network Protocol (ANP)](https://github.com/agent-network-protocol/AgentNetworkProtocol).
 
 The Agent Network Protocol (ANP) aims to become **the HTTP of the Agentic Internet era**.
 
@@ -50,20 +50,20 @@ Beyond these features, AgentConnect will focus on performance and multi-platform
 
 ### Documentation
 
-- Learn more about AgentNetworkProtocol: [Agent Network Protocol (ANP)](https://github.com/chgaowei/AgentNetworkProtocol)
-- For our overall design philosophy, check our technical whitepaper: [AgentNetworkProtocol Technical White Paper](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/01-AgentNetworkProtocol%20Technical%20White%20Paper.md)
+- Learn more about AgentNetworkProtocol: [Agent Network Protocol (ANP)](https://github.com/agent-network-protocol/AgentNetworkProtocol)
+- For our overall design philosophy, check our technical whitepaper: [AgentNetworkProtocol Technical White Paper](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/01-AgentNetworkProtocol%20Technical%20White%20Paper.md)
 
 Here are some of our blogs:
 
-- This is our understanding of the agent network: [What's Different About the Agentic Web](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/What-Makes-Agentic-Web-Different.md)
+- This is our understanding of the agent network: [What's Different About the Agentic Web](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/What-Makes-Agentic-Web-Different.md)
 
-- A brief introduction to did:wba: [did:wba - Web-Based Decentralized Identifiers](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did:wba,%20a%20Web-based%20Decentralized%20Identifier.md)
+- A brief introduction to did:wba: [did:wba - Web-Based Decentralized Identifiers](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/did:wba,%20a%20Web-based%20Decentralized%20Identifier.md)
 
-- We compared the differences between did:wba and technologies like OpenID Connect and API keys: [Comparison of did:wba with OpenID Connect and API keys](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/Comparison%20of%20did:wba%20with%20OpenID%20Connect%20and%20API%20keys.md)
+- We compared the differences between did:wba and technologies like OpenID Connect and API keys: [Comparison of did:wba with OpenID Connect and API keys](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/Comparison%20of%20did:wba%20with%20OpenID%20Connect%20and%20API%20keys.md)
 
-- We analyzed the security principles of did:wba: [Security Principles of did:wba](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did%3Awba-security-principles.md)
+- We analyzed the security principles of did:wba: [Security Principles of did:wba](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/did%3Awba-security-principles.md)
 
-- Three Technical Approaches to AI-Internet Interaction: [Three Technical Approaches to AI-Internet Interaction](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/Three_Technical_Approaches_to_AI_Internet_Interaction.md)
+- Three Technical Approaches to AI-Internet Interaction: [Three Technical Approaches to AI-Internet Interaction](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/Three_Technical_Approaches_to_AI_Internet_Interaction.md)
 
 
 ### Milestones
@@ -89,14 +89,14 @@ After installing the agent-connect library, you can run our demos to experience 
 Clone the repository:
 
 ```bash
-git clone https://github.com/chgaowei/AgentConnect.git
+git clone https://github.com/agent-network-protocol/AgentConnect.git
 ```
 
 #### Decentralized Authentication Based on did:wba and HTTP
 
-did:wba is a Web-based Decentralized Identifier. More information: [did:wba, a Web-based Decentralized Identifier](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/blogs/did%3Awba%2C%20a%20Web-based%20Decentralized%20Identifier.md).
+did:wba is a Web-based Decentralized Identifier. More information: [did:wba, a Web-based Decentralized Identifier](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/blogs/did%3Awba%2C%20a%20Web-based%20Decentralized%20Identifier.md).
 
-Our latest version supports decentralized authentication based on did:wba and HTTP. We provide a did:wba server for testing. Server API documentation: [did:wba Server Test API Documentation](https://github.com/chgaowei/AgentNetworkProtocol/blob/main/docs/did%3Awba%20server%20test%20interface.md). 
+Our latest version supports decentralized authentication based on did:wba and HTTP. We provide a did:wba server for testing. Server API documentation: [did:wba Server Test API Documentation](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/docs/did%3Awba%20server%20test%20interface.md). 
 
 Example code path: `examples/did_wba_examples`. Including:
 
@@ -141,7 +141,7 @@ Author: Gaowei Chang
 Email: chgaowei@gmail.com  
 - Discord: [https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)  
 - Website: [https://agent-network-protocol.com/](https://agent-network-protocol.com/)  
-- GitHub: [https://github.com/chgaowei/AgentNetworkProtocol](https://github.com/chgaowei/AgentNetworkProtocol)
+- GitHub: [https://github.com/agent-network-protocol/AgentNetworkProtocol](https://github.com/agent-network-protocol/AgentNetworkProtocol)
 - WeChat: flow10240
 
 ## Contributing

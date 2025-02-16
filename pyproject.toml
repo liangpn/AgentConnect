@@ -6,9 +6,9 @@ authors = ["changshan <chgaowei@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "agent_connect"}]
-repository = "https://github.com/chgaowei/AgentConnect"
+repository = "https://github.com/agent-network-protocol/AgentConnect"
 homepage = "https://agent-network-protocol.com/"
-documentation = "https://github.com/chgaowei/AgentNetworkProtocol"
+documentation = "https://github.com/agent-network-protocol/AgentNetworkProtocol"
 
 classifiers = [
     "Programming Language :: Python :: 3",

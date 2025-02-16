@@ -1,5 +1,5 @@
 import logging
-# AgentConnect: https://github.com/chgaowei/AgentConnect
+# AgentConnect: https://github.com/agent-network-protocol/AgentConnect
 # Author: GaoWei Chang
 # Email: chgaowei@gmail.com
 # Website: https://agent-network-protocol.com/

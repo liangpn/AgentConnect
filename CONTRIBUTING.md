@@ -32,7 +32,7 @@ Before you start writing code, we recommend that you:
 ## Contact Us
 
 If you have any questions, please contact us through the following ways:
-- GitHub Issues: [https://github.com/chgaowei/AgentConnect/issues](https://github.com/chgaowei/AgentConnect/issues)
+- GitHub Issues: [https://github.com/agent-network-protocol/AgentConnect/issues](https://github.com/agent-network-protocol/AgentConnect/issues)
 - Discord Community: [https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)  
 
 Thank you again for your attention and support to the project!

@@ -32,7 +32,7 @@
 ## 联系我们
 
 如果您有任何问题，欢迎通过以下方式联系：
-- GitHub Issues：[https://github.com/chgaowei/AgentConnect/issues](https://github.com/chgaowei/AgentConnect/issues)
+- GitHub Issues：[https://github.com/agent-network-protocol/AgentConnect/issues](https://github.com/agent-network-protocol/AgentConnect/issues)
 - Discord 社区：[https://discord.gg/sFjBKTY7sB](https://discord.gg/sFjBKTY7sB)  
 
 再次感谢您对项目的关注与支持！
