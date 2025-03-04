@@ -134,6 +134,15 @@ python negotiation_alice.py
 > 注意:
 > 运行元协议协商需要配置Azure OpenAI（暂时只支持Azure OpenAI）的API Key。请在项目根目录的".env"中配置如下环境变量：AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_MODEL_NAME
 
+### 工具
+
+我们提供了一个DID文档生成工具，你可以通过直接运行`python generate_did_doc.py`来生成DID文档。
+
+```bash
+python generate_did_doc.py <did> [--agent-description-url URL] [--verbose]
+```
+
+详细用法参考文档：[README_did_generater_cn.md](tools/did_generater/README_did_generater_cn.md)。
 
 ### 联系我们
 

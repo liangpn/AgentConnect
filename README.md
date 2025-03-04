@@ -135,6 +135,18 @@ The logs will show successful connection, protocol negotiation, code generation,
 > Note:
 > Meta-protocol negotiation requires Azure OpenAI API configuration (currently only supports Azure OpenAI). Configure these environment variables in the ".env" file in the project root: AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_MODEL_NAME
 
+
+### Tools
+
+We provide a DID document generation tool, which you can run by executing `python generate_did_doc.py` to generate a DID document.
+
+```bash
+python generate_did_doc.py <did> [--agent-description-url URL] [--verbose]
+```
+
+For detailed usage, refer to the documentation: [README_did_generater_cn.md](tools/did_generater/README_did_generater_cn.md).
+
+
 ### Contact Us
 
 Author: Gaowei Chang  
