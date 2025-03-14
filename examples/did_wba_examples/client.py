@@ -13,103 +13,75 @@ import asyncio
 import json
 import logging
 import aiohttp
-from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric import ec
-from agent_connect.authentication.did_wba import (
-    resolve_did_wba_document,
-    generate_auth_header
-)
+import os
+from pathlib import Path
+from agent_connect.authentication import DIDWbaAuthHeader
 from agent_connect.utils.log_base import set_log_color_level
-
-# THIS IS A TEST DID DOCUMENT AND PRIVATE KEY
-CLIENT_DID = "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd"
-CLIENT_DID_DOCUMENT = '''
-{
-  "@context": [
-    "https://www.w3.org/ns/did/v1",
-    "https://w3id.org/security/suites/jws-2020/v1",
-    "https://w3id.org/security/suites/secp256k1-2019/v1"
-  ],
-  "id": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd",
-  "verificationMethod": [
-    {
-      "id": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd#key-1",
-      "type": "EcdsaSecp256k1VerificationKey2019",
-      "controller": "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd",
-      "publicKeyJwk": {
-        "kty": "EC",
-        "crv": "secp256k1",
-        "x": "rDiSI-FZPwoTRWVl6ABuAphAErjpOHdy8yN9tJGMLdI",
-        "y": "5sGQrDJRJWOZwky_VG1QML_HpuUcgcUbYvcJWGvTqPQ",
-        "kid": "jJ9iDppRoHShKnSXYxLNT3lNYqSTWn9uJFLtXKICIwY"
-      }
-    }
-  ],
-  "authentication": [
-    "did:wba:agent-network-protocol.com:wba:user:2a6e7861bb3277cd#key-1"
-  ]
-}'''
-
-CLIENT_PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
-MIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgopMqAyzVPtU6yDK4gHmu
-2So23XgnwwTMgoXKTLHNaVGhRANCAASsOJIj4Vk/ChNFZWXoAG4CmEASuOk4d3Lz
-I320kYwt0ubBkKwyUSVjmcJMv1RtUDC/x6blHIHFG2L3CVhr06j0
------END PRIVATE KEY-----
-'''
 
 # TODO: Change to your own server domain.
 TEST_DOMAIN = "service.agent-network-protocol.com"
 
-def load_private_key(private_key_pem: str) -> ec.EllipticCurvePrivateKey:
-    """Load private key from PEM string"""
-    return serialization.load_pem_private_key(
-        private_key_pem.encode(),
-        password=None
-    )
-
-def sign_callback(content: bytes, method_fragment: str) -> bytes:
-    """Sign content using private key"""
-    private_key = load_private_key(CLIENT_PRIVATE_KEY)
-    signature = private_key.sign(
-        content,
-        ec.ECDSA(hashes.SHA256())
-    )
-    return signature
-
-async def test_did_auth(url: str, auth_header: str) -> tuple[bool, str]:
+async def test_did_auth(url: str, auth_client: DIDWbaAuthHeader) -> tuple[bool, str]:
     """Test DID authentication and get token"""
     try:
+        # Get authentication header
+        auth_headers = auth_client.get_auth_header(url)
+        
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url,
-                headers={'Authorization': auth_header}
+                headers=auth_headers
             ) as response:
-                token = response.headers.get('Authorization', '')
-                if token.startswith('Bearer '):
-                    token = token[7:]  # Remove 'Bearer ' prefix
-                return response.status == 200, token
+                # Update token
+                token = auth_client.update_token(url, dict(response.headers))
+                print(f"Response status: {response.status}")
+                return response.status == 200, token or ''
     except Exception as e:
         logging.error("DID authentication test failed: %s", e)
         return False, ''
 
 async def main():
-    # 1. Generate authentication header
-    logging.info("Generating authentication header...")
-    did_document = json.loads(CLIENT_DID_DOCUMENT)
-    auth_header = generate_auth_header(
-        did_document,
-        TEST_DOMAIN,
-        sign_callback
+    # Get project root directory
+    current_dir = Path(__file__).parent.absolute()
+    project_root = current_dir.parent.parent
+    
+    # Set DID document and private key paths
+    did_document_path = project_root / "examples" / "use_did_test_public" / "did.json"
+    private_key_path = project_root / "examples" / "use_did_test_public" / "key-1_private.pem"
+    
+    # Check if files exist
+    if not did_document_path.exists():
+        logging.error(f"DID document does not exist: {did_document_path}")
+        return
+    
+    if not private_key_path.exists():
+        logging.error(f"Private key file does not exist: {private_key_path}")
+        return
+    
+    # Read DID document to get DID
+    with open(did_document_path, 'r') as f:
+        did_document = json.load(f)
+        client_did = did_document.get('id')
+        logging.info(f"Using DID: {client_did}")
+    
+    # Create DIDWbaAuthHeader instance
+    logging.info("Creating DIDWbaAuthHeader instance...")
+    auth_client = DIDWbaAuthHeader(
+        did_document_path=str(did_document_path),
+        private_key_path=str(private_key_path)
     )
     
-    # 2. Test DID authentication
+    # Test DID authentication
     test_url = f"https://{TEST_DOMAIN}/wba/test"
-    logging.info("Testing DID authentication at %s", test_url)
-    auth_success, token = await test_did_auth(test_url, auth_header)
+    logging.info(f"Testing DID authentication at: {test_url}")
+    auth_success, token = await test_did_auth(test_url, auth_client)
     
     if auth_success:
         logging.info("DID authentication test successful!")
-        logging.info(f"Received token: {token}")
+        if token:
+            logging.info(f"Received token: {token}")
+        else:
+            logging.info("No token received from server")
     else:
         logging.error("DID authentication test failed")
 

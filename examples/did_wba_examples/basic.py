@@ -22,10 +22,10 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from canonicaljson import encode_canonical_json
 
-from agent_connect.authentication.did_wba import (
+from agent_connect.authentication import (
     create_did_wba_document,
     resolve_did_wba_document,
-    generate_auth_header
+    DIDWbaAuthHeader
 )
 from agent_connect.utils.log_base import set_log_color_level
 
@@ -76,21 +76,23 @@ async def download_did_document(url: str) -> dict:
         logging.error("Failed to download DID document: %s", e)
         return None
 
-async def test_did_auth(url: str, auth_header: str) -> tuple[bool, str]:
+async def test_did_auth(url: str, auth_client: DIDWbaAuthHeader) -> tuple[bool, str]:
     """Test DID authentication and get token"""
     try:
         local_url = convert_url_for_local_testing(url)
         logging.info("Converting URL from %s to %s", url, local_url)
         
+        # 获取认证头
+        auth_headers = auth_client.get_auth_header(local_url)
+        
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 local_url,
-                headers={'Authorization': auth_header}
+                headers=auth_headers
             ) as response:
-                token = response.headers.get('Authorization', '')
-                if token.startswith('Bearer '):
-                    token = token[7:]  # Remove 'Bearer ' prefix
-                return response.status == 200, token
+                # 更新令牌
+                token = auth_client.update_token(local_url, dict(response.headers))
+                return response.status == 200, token or ''
     except Exception as e:
         logging.error("DID authentication test failed: %s", e)
         return False, ''
@@ -117,31 +119,6 @@ def save_private_key(unique_id: str, keys: dict, did_document: dict) -> str:
     
     return str(user_dir)
 
-def load_private_key(private_key_dir: str, method_fragment: str) -> ec.EllipticCurvePrivateKey:
-    """Load private key from file"""
-    key_dir = Path(private_key_dir)
-    key_path = key_dir / f"{method_fragment}_private.pem"
-    
-    logging.info("Loading private key from %s", key_path)
-    with open(key_path, 'rb') as f:
-        private_key_bytes = f.read()
-    return serialization.load_pem_private_key(
-        private_key_bytes,
-        password=None
-    )
-
-def sign_callback(content: bytes, method_fragment: str) -> bytes:
-    """Sign content using private key"""
-    # Load private key using the global variable
-    private_key = load_private_key(sign_callback.private_key_dir, method_fragment)
-    
-    # Sign the content
-    signature = private_key.sign(
-        content,
-        ec.ECDSA(hashes.SHA256())
-    )
-    return signature
-
 async def main(unique_id: str = None, agent_description_url: str = None):
     """
     Main function to demonstrate DID WBA authentication
@@ -167,9 +144,10 @@ async def main(unique_id: str = None, agent_description_url: str = None):
         agent_description_url=agent_description_url
     )
     
-    # 4. Save private keys, DID document and set path for sign_callback
+    # 4. Save private keys and DID document
     user_dir = save_private_key(unique_id, keys, did_document)
-    sign_callback.private_key_dir = user_dir
+    did_document_path = str(Path(user_dir) / "did.json")
+    private_key_path = str(Path(user_dir) / "key-1_private.pem")
     
     # 5. Upload DID document (This should be stored on your server)
     document_url = f"https://{server_domain}{did_path}"
@@ -180,24 +158,28 @@ async def main(unique_id: str = None, agent_description_url: str = None):
         return
     logging.info("DID document uploaded successfully")
     
-    # 7. Generate authentication header
-    logging.info("Generating authentication header...")
-    auth_header = generate_auth_header(
-        did_document,
-        server_domain,
-        sign_callback
+    # 6. 创建 DIDWbaAuthHeader 实例
+    logging.info("Creating DIDWbaAuthHeader instance...")
+    auth_client = DIDWbaAuthHeader(
+        did_document_path=did_document_path,
+        private_key_path=private_key_path
     )
     
-    # 8. Test DID authentication and get token
+    # 7. Test DID authentication and get token
     test_url = f"https://{server_domain}/wba/test"
     logging.info("Testing DID authentication at %s", test_url)
-    auth_success, token = await test_did_auth(test_url, auth_header)
+    auth_success, token = await test_did_auth(test_url, auth_client)
     
-    if not auth_success or not token:
-        logging.error(f"DID authentication test failed. auth_success: {auth_success}, token: {token}")
+    if not auth_success:
+        logging.error("DID authentication test failed")
         return
         
     logging.info("DID authentication test successful")
+    
+    if token:
+        logging.info(f"Received token: {token}")
+    else:
+        logging.info("No token received from server")
 
 if __name__ == "__main__":
     set_log_color_level(logging.INFO)
