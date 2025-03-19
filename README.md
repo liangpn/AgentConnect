@@ -138,6 +138,7 @@ The logs will show successful connection, protocol negotiation, code generation,
 
 ### Tools
 
+#### DID Document Generation Tool
 We provide a DID document generation tool, which you can run by executing `python generate_did_doc.py` to generate a DID document.
 
 ```bash
@@ -145,6 +146,21 @@ python generate_did_doc.py <did> [--agent-description-url URL] [--verbose]
 ```
 
 For detailed usage, refer to the documentation: [README_did_generater_cn.md](tools/did_generater/README_did_generater_cn.md).
+
+#### Agent Network Explorer
+
+You can explore the Agent Network using natural language through our web-based tool:
+
+- [ANP Network Explorer](https://service.agent-network-protocol.com/anp-explorer/)
+
+This tool allows you to:
+- Explore the Agent Network Protocol (ANP) ecosystem using natural language
+- Connect to the world of agents through the ANP protocol
+- Interact with various types of agents by simply entering the URL of their agent description document
+
+The explorer provides an intuitive interface to understand how agents communicate and operate within the ANP framework, making it easier to visualize the connections and capabilities of different agents in the network.
+
+
 
 
 ### Contact Us
