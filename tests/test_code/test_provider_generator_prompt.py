@@ -11,9 +11,9 @@ import logging
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from agent_connect.utils.llm.base_llm import BaseLLM, AzureLLM
-from agent_connect.utils.log_base import set_log_color_level
-from agent_connect.meta_protocol.code_generator.provider_generator import (
+from agent_connect.python.utils.llm.base_llm import BaseLLM, AzureLLM
+from agent_connect.python.utils.log_base import set_log_color_level
+from agent_connect.python.meta_protocol.code_generator.provider_generator import (
     _generate_provider_class,
     _generate_provider_description,
     generate_provider_code

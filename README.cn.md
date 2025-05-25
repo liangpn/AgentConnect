@@ -136,8 +136,6 @@ python negotiation_alice.py
 
 ### 工具
 
-#### DID文档生成工具
-
 我们提供了一个DID文档生成工具，你可以通过直接运行`python generate_did_doc.py`来生成DID文档。
 
 ```bash
@@ -145,19 +143,6 @@ python generate_did_doc.py <did> [--agent-description-url URL] [--verbose]
 ```
 
 详细用法参考文档：[README_did_generater_cn.md](tools/did_generater/README_did_generater_cn.md)。
-
-#### 智能体网络探索工具
-
-您可以通过我们基于网页的工具使用自然语言探索智能体网络：
-
-- [ANP 网络探索工具](https://service.agent-network-protocol.com/anp-explorer/)
-
-该工具允许您：
-- 使用自然语言探索智能体网络协议（ANP）生态系统
-- 通过 ANP 协议连接智能体世界
-- 只需输入智能体描述文档的 URL，即可与各类智能体进行交互
-
-探索工具提供了直观的界面，帮助理解智能体如何在 ANP 框架内通信和运作，使您能够更轻松地可视化网络中不同智能体的连接和能力。
 
 ### 联系我们
 

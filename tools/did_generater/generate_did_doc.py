@@ -13,8 +13,8 @@ from typing import Tuple, Dict, Any, List, Optional
 from urllib.parse import urlparse
 from datetime import datetime
 
-from agent_connect.authentication.did_wba import create_did_wba_document
-from agent_connect.utils.log_base import set_log_color_level
+from agent_connect.python.authentication.did_wba import create_did_wba_document
+from agent_connect.python.utils.log_base import set_log_color_level
 
 def parse_did(did: str) -> Tuple[str, List[str], str]:
     """

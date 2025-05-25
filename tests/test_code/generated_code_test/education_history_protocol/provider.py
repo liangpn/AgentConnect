@@ -3,7 +3,7 @@ import logging
 import traceback
 from typing import Any, Dict, Optional, Awaitable, Callable
 
-from agent_connect.app_protocols.protocol_base.provider_base import ProviderBase
+from agent_connect.python.app_protocols.protocol_base.provider_base import ProviderBase
 
 class EducationHistoryProvider(ProviderBase):
     """A class managing the retrieval of user education history through protocol interactions."""

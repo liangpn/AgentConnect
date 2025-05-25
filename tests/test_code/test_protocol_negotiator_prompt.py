@@ -14,13 +14,13 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from openai import AsyncOpenAI, AsyncAzureOpenAI
 
-from agent_connect.meta_protocol.protocol_negotiator import (
+from agent_connect.python.meta_protocol.protocol_negotiator import (
     ProtocolNegotiator, 
     NegotiationStatus,
     NegotiationResult
 )
-from agent_connect.utils.llm.base_llm import BaseLLM, AzureLLM
-from agent_connect.utils.log_base import set_log_color_level
+from agent_connect.python.utils.llm.base_llm import BaseLLM, AzureLLM
+from agent_connect.python.utils.log_base import set_log_color_level
 from tests.test_code.config import (
     AZURE_OPENAI_API_KEY,
     AZURE_OPENAI_ENDPOINT,

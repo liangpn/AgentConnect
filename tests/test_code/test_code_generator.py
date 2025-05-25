@@ -13,9 +13,9 @@ import shutil
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from agent_connect.utils.llm.base_llm import BaseLLM, AzureLLM
-from agent_connect.utils.log_base import set_log_color_level
-from agent_connect.meta_protocol.code_generator.code_generator import ProtocolCodeGenerator
+from agent_connect.python.utils.llm.base_llm import BaseLLM, AzureLLM
+from agent_connect.python.utils.log_base import set_log_color_level
+from agent_connect.python.meta_protocol.code_generator.code_generator import ProtocolCodeGenerator
 from tests.test_code.config import (
     AZURE_OPENAI_API_KEY,
     AZURE_OPENAI_ENDPOINT,

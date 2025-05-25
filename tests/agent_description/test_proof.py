@@ -11,7 +11,7 @@ import json
 import base64
 from datetime import datetime, timezone
 from ecdsa import SigningKey, VerifyingKey, NIST256p
-from agent_connect.agent_description.proof import generate_proof, verify_proof
+from agent_connect.python.agent_description.proof import generate_proof, verify_proof
 
 class TestProof(unittest.TestCase):
     def setUp(self):
