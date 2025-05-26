@@ -11,14 +11,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import json
 import logging
 
-from agent_connect.meta_protocol.protocol_negotiator import (
+from agent_connect.python.meta_protocol.protocol_negotiator import (
     ProtocolNegotiator,
     NegotiationStatus,
     NegotiationResult,
     NegotiatorRole,
     NegotiationHistoryEntry
 )
-from agent_connect.utils.llm.base_llm import BaseLLM
+from agent_connect.python.utils.llm.base_llm import BaseLLM
 
 class TestProtocolNegotiator(unittest.TestCase):
     def setUp(self):

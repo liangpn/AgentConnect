@@ -7,9 +7,9 @@ __pycache__/
 examples/*.json
 *.egg-info/
 build/
-examples/negotiation_mode/workflow_code/
-examples/negotiation_mode/protocol_code/
+examples/python/negotiation_mode/workflow_code/
+examples/python/negotiation_mode/protocol_code/
 examples/negotiation_mode/*.json
 examples/simple_node_mode/*.json
-examples/did_wba_examples/did_keys/user_*/
-
+examples/python/did_wba_examples/did_keys/user_*/
+.idea

@@ -1,4 +1,4 @@
-from agent_connect.app_protocols.protocol_base.requester_base import RequesterBase
+from agent_connect.python.app_protocols.protocol_base.requester_base import RequesterBase
 import logging
 import json
 import asyncio

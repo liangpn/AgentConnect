@@ -21,8 +21,8 @@ sys.path.append(current_directory)
 sys.path.append(current_directory + "/../")
 sys.path.append(current_directory + "/../../")
 
-from agent_connect.short_term_key_generater import ShortTermKeyGenerater
-from agent_connect.utils.did_generate import did_generate
+from agent_connect.python.short_term_key_generater import ShortTermKeyGenerater
+from agent_connect.python.utils.did_generate import did_generate
 
 class TestShortTermKeyGeneration(unittest.TestCase):
     def setUp(self):

@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding, PublicFormat, PrivateFormat, NoEncryption
 )
 import aiohttp
-from agent_connect.authentication.did_wba import (
+from agent_connect.python.authentication.did_wba import (
     create_did_wba_document,
     resolve_did_wba_document,
     resolve_did_wba_document_sync,

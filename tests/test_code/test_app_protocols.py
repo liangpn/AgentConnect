@@ -12,8 +12,8 @@ import asyncio
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from agent_connect.app_protocols.app_protocols import AppProtocols
-from agent_connect.utils.log_base import set_log_color_level
+from agent_connect.python.app_protocols.app_protocols import AppProtocols
+from agent_connect.python.utils.log_base import set_log_color_level
 
 async def test_app_protocols():
     """Test AppProtocols functionality"""

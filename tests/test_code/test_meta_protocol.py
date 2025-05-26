@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from agent_connect.meta_protocol.meta_protocol import MetaProtocol, ProtocolType
-from agent_connect.meta_protocol.protocol_negotiator import NegotiationStatus
-from agent_connect.utils.log_base import set_log_color_level
-from agent_connect.utils.llm.base_llm import AzureLLM
+from agent_connect.python.meta_protocol.meta_protocol import MetaProtocol, ProtocolType
+from agent_connect.python.meta_protocol.protocol_negotiator import NegotiationStatus
+from agent_connect.python.utils.log_base import set_log_color_level
+from agent_connect.python.utils.llm.base_llm import AzureLLM
 from openai import AsyncAzureOpenAI
 from tests.test_code.config import (
     AZURE_OPENAI_API_KEY,
