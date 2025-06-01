@@ -175,14 +175,14 @@ public class CryptoTool {
             ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
             
             // Get the encoded point
-            ECNamedCurveParameterSpec params = ECNamedCurveTable.getParameterSpec(curveName);
-            ECPoint q = params.getCurve().decodePoint(publicKey.getEncoded());
-            String publicKeyHex = "04" + bytesToHex(q.getEncoded(false)).substring(2);
+            // ECNamedCurveParameterSpec params = ECNamedCurveTable.getParameterSpec(curveName);
+            // ECPoint q = params.getCurve().decodePoint(publicKey.getEncoded());
+            // String publicKeyHex = "04" + bytesToHex(q.getEncoded(false)).substring(2);
             
             Map<String, Object> result = new HashMap<>();
             result.put("privateKey", privateKey);
             result.put("publicKey", publicKey);
-            result.put("publicKeyHex", publicKeyHex);
+            // result.put("publicKeyHex", publicKeyHex);
             
             return result;
         } catch (Exception e) {

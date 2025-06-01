@@ -2,22 +2,16 @@ package com.agentconnect.authentication;
 
 import com.agentconnect.utils.CryptoTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClient;
-import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.interfaces.ECPrivateKey;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Simplified DID authentication client providing HTTP authentication headers.
@@ -138,7 +132,7 @@ public class DIDWbaAuthHeader {
      * @param domain Domain to authenticate with
      * @return Authentication header
      */
-    private String generateAuthHeader(String domain) {
+    public String generateAuthHeader(String domain) {
         try {
             Map<String, Object> didDocument = loadDidDocument();
             
@@ -146,7 +140,7 @@ public class DIDWbaAuthHeader {
             DIDWBA.SignCallback callback = this::signCallback;
             
             String authHeader = DIDWBA.generateAuthHeader(didDocument, domain, callback);
-            
+
             logger.info("Generated authentication header for domain {}: {}...", domain, 
                     authHeader.substring(0, Math.min(30, authHeader.length())));
             return authHeader;
@@ -205,7 +199,7 @@ public class DIDWbaAuthHeader {
      */
     public String updateToken(String serverUrl, Map<String, String> headers) {
         String domain = getDomain(serverUrl);
-        String authHeader = headers.get("Authorization");
+        String authHeader = headers.get("authorization");
         
         if (authHeader != null && authHeader.toLowerCase().startsWith("bearer ")) {
             String token = authHeader.substring(7); // Remove "Bearer " prefix

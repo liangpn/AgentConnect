@@ -43,7 +43,7 @@ public class DidWbaTest {
 
             // Prepare the request with headers
             CompletableFuture<Response> future = asyncHttpClient
-                    .prepareGet(serverUrl + "/agents/travel/hotel/ad/ph/12345/ad.json")
+                    .prepareGet(serverUrl + "/wba/test")
                     .setHeader("Authorization", headers.get("Authorization"))
                     .execute()
                     .toCompletableFuture();
