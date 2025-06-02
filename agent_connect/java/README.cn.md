@@ -8,6 +8,8 @@
 
 - `com.agentconnect.authentication`: 包含DID身份验证相关的类
 - `com.agentconnect.utils`: 包含加密操作和其他辅助功能的工具类
+- `test`目录中主要提供了单元测试类DIDWBAUnitTest，验证主要的几个功能方法的正确性
+- `test/java/com.agentconnect.test.example`:主要提供了一个DidWbaFullExample类，包含了一个完整的DID身份验证示例，包括did文档生成，密钥保存，AuthHeader生成，签名验签过程，token的验证和生成，是一个学习anp4java入门的不错的示例。
 
 ## 构建项目
 
