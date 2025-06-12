@@ -15,3 +15,5 @@ examples/python/did_wba_examples/did_keys/user_*/
 agent_connect/java/src/test/resources/*
 agent_connect/java/*
 .idea
+examples/did_wba_examples/did_keys/*
+examples/negotiation_mode/*
